@@ -1,203 +1,1088 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>MusicVerse</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Money Kingdom</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
+
 <body>
-  <div id="setupOverlay" class="overlay hidden">
-    <div class="setup-card panel">
-      <span class="eyebrow">WELCOME TO</span>
-      <h1>MusicVerse</h1>
-      <p>Create your musician and enter the world.</p>
-      <div class="setup-grid">
-        <div class="setup-preview">
-          <div id="avatarPreviewCharacter" class="avatar-preview-character">
-            <div id="previewHair" class="preview-hair"></div>
-            <div id="previewHead" class="preview-head"><i></i><i></i></div>
-            <div id="previewBody" class="preview-body"></div>
-            <div class="preview-arm left"></div><div class="preview-arm right"></div>
-            <div class="preview-leg left"></div><div class="preview-leg right"></div>
-          </div>
-        </div>
-        <div class="setup-fields">
-          <label>Name<input id="playerNameInput" maxlength="18" placeholder="Your stage name"></label>
-          <label>Preset<select id="avatarPresetSelect"></select></label>
-          <label>Skin<select id="skinSelect"></select></label>
-          <label>Hair<select id="hairSelect"></select></label>
-          <label>Outfit<select id="outfitSelect"></select></label>
-          <button id="startBtn" class="btn gold">Enter MusicVerse</button>
-          <div id="setupError" class="error-text"></div>
-        </div>
-      </div>
+
+<!-- =========================================================
+     TOP HUD
+========================================================= -->
+
+<header class="topbar">
+
+  <div class="brand">
+    <div class="brand-icon">👑</div>
+
+    <div>
+      <h1>Money Kingdom</h1>
+      <small>Sweeter Habits • Brighter Futures</small>
     </div>
   </div>
 
-  <header class="topbar">
-    <a class="brand" href="#home">MUSIC<span>VERSE</span></a>
-    <nav>
-      <a href="#adventure">Adventure</a>
-      <a href="#dailyRewards">Daily Rewards</a>
-      <a href="#instruments">Instruments</a>
-      <a href="#battle">Battle</a>
-      <a href="#multiplayer">Team Battle</a>
-      <a href="#games">Games</a>
-      <a href="#gacha">Gacha</a>
-      <a href="#musiccraft">MusicCraft</a>
-      <a href="#leaderboard">Top 100</a>
-      <a href="#quiz">Quiz</a>
-    </nav>
-    <div class="top-actions">
-      <button id="soundToggle" class="icon-btn" title="Sound">🔊</button>
-      <span>🪙 <b id="coinTop">0</b></span>
-      <span>✨ <b id="levelTop">1</b></span>
+
+  <div class="resources">
+
+    <div class="resource">
+      🪙
+      <span id="coinsText">0</span>
     </div>
-  </header>
 
-  <main>
-    <section id="home" class="hero section">
-      <div class="hero-copy">
-        <span id="heroBadge" class="eyebrow">MUSICVERSE PLAYER</span>
-        <h1>Play. Battle. Perform. <em>Level up everywhere.</em></h1>
-        <p>One avatar, one EXP system, one connected music universe.</p>
-        <div class="hero-buttons"><a class="btn gold" href="#games">Play Games</a><a class="btn ghost" href="#multiplayer">Team Battle</a></div>
-      </div>
-      <div class="profile-card panel">
-        <div class="mini-avatar"><div class="mini-hair"></div><div class="mini-head"></div><div class="mini-body"></div></div>
-        <div><span class="eyebrow">PROFILE</span><h2 id="heroName">Player</h2><p>Level <b id="heroLevel">1</b></p></div>
-        <div class="xp-wrap"><div><span>EXP</span><b id="xpText">0 / 100</b></div><div class="xpbar"><i id="xpFill"></i></div></div>
-        <div class="profile-stats"><div><b id="heroCoins">0</b><span>Coins</span></div><div><b id="heroDust">0</b><span>Dust</span></div><div><b id="heroLifetime">0</b><span>Total EXP</span></div></div>
-      </div>
-    </section>
+    <div class="resource">
+      🪵
+      <span id="woodText">0</span>
+    </div>
 
-    <section id="dailyRewards" class="section">
-      <div class="section-head"><div><span class="eyebrow">LOGIN BONUS</span><h2>Daily Rewards</h2></div><div class="daily-streak">🔥 <strong id="dailyStreakLabel">0</strong> Day Streak</div></div>
-      <div class="panel daily-rewards-panel">
-        <div id="dailyRewardGrid" class="daily-reward-grid"></div>
-        <button id="claimDailyBtn" class="btn gold daily-claim-btn">CLAIM TODAY'S REWARD</button>
-      </div>
-    </section>
+    <div class="resource">
+      🪨
+      <span id="stoneText">0</span>
+    </div>
 
-    <section id="adventure" class="section">
-      <div class="section-head"><div><span class="eyebrow">MAIN RPG</span><h2>MusicVerse Adventure</h2></div><div class="shared-progress">Story • Quests • Gear • Pets • Evolution</div></div>
-      <div class="adventure-layout">
-        <div class="panel adventure-main">
-          <div class="rpg-toolbar">
-            <span class="game-stat">Zone <b id="rpgZoneName">Melody Village</b></span>
-            <span class="game-stat">HP <b id="rpgHpText">100 / 100</b></span>
-            <span class="game-stat">Story <b id="rpgStoryText">1 / 10</b></span>
-          </div>
-          <div id="rpgMap" class="rpg-map" tabindex="0"></div>
-          <p id="rpgMessage" class="muted">Use WASD or arrow keys to explore. Walk into enemies to battle them.</p>
-          <div id="rpgBattlePanel" class="rpg-battle-panel hidden"></div>
-          <div class="rpg-controls"><button id="rpgUp" class="btn ghost">↑</button><div><button id="rpgLeft" class="btn ghost">←</button><button id="rpgDown" class="btn ghost">↓</button><button id="rpgRight" class="btn ghost">→</button></div></div>
+    <div class="resource">
+      💎
+      <span id="gemsText">0</span>
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     LEFT NAV
+========================================================= -->
+
+<nav class="side-nav">
+
+  <button
+    class="nav-btn active"
+    data-screen="kingdomScreen"
+  >
+    <span>🏰</span>
+    Kingdom
+  </button>
+
+  <button
+    class="nav-btn"
+    data-screen="storyScreen"
+  >
+    <span>🗺️</span>
+    Story
+  </button>
+
+  <button
+    class="nav-btn"
+    data-screen="cookiesScreen"
+  >
+    <span>🍪</span>
+    Cookies
+  </button>
+
+</nav>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<main class="game">
+
+<!-- =========================================================
+     KINGDOM SCREEN
+========================================================= -->
+
+<section
+  id="kingdomScreen"
+  class="screen active-screen"
+>
+
+  <div class="screen-heading">
+
+    <div>
+      <p class="eyebrow">
+        PROSPERA
+      </p>
+
+      <h2>
+        Your Kingdom
+      </h2>
+
+      <p>
+        Build, produce resources and restore the kingdom.
+      </p>
+    </div>
+
+
+    <div class="kingdom-level-card">
+
+      <span>
+        Fortune Castle
+      </span>
+
+      <strong>
+        Lv.
+        <span id="castleLevelText">
+          1
+        </span>
+      </strong>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- KINGDOM -->
+
+  <div class="kingdom-world">
+
+    <div class="sky-cloud cloud-one">
+      ☁️
+    </div>
+
+    <div class="sky-cloud cloud-two">
+      ☁️
+    </div>
+
+
+    <div class="kingdom-map">
+
+      <!-- CASTLE -->
+
+      <button
+        id="castleBuilding"
+        class="building castle-building"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="castleBadgeLevel">
+            1
+          </span>
         </div>
-        <div class="adventure-side">
-          <div class="panel adventure-card"><h3>📜 Active Quests</h3><div id="questList" class="quest-list"></div></div>
-          <div class="panel adventure-card"><h3>🎒 Equipment</h3><div id="equipmentList" class="equipment-list"></div></div>
-          <div class="panel adventure-card"><h3>🐾 Pets</h3><div id="petList" class="pet-list"></div></div>
-          <div class="panel adventure-card"><h3>🔨 Instrument Evolution</h3><div id="evolutionPanel"></div></div>
-          <div class="panel adventure-card skill-tree-card">
-            <div class="skill-tree-head">
-              <div><h3>🌳 Skill Tree</h3><p>Spend skill points earned every 2 player levels.</p></div>
-              <div class="skill-points-badge"><b id="skillPointsAvailable">0</b><span>Skill Points</span></div>
-            </div>
-            <div id="skillTree" class="skill-tree"></div>
-          </div>
+
+        <div
+          id="castleEmoji"
+          class="building-art castle-art"
+        >
+          🏚️
+        </div>
+
+        <span>
+          Fortune Castle
+        </span>
+
+      </button>
+
+
+
+      <!-- FARM -->
+
+      <button
+        class="building"
+        data-building="farm"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="farmLevel">
+            1
+          </span>
+        </div>
+
+        <div class="building-art">
+          🌾
+        </div>
+
+        <span>
+          Fortune Farm
+        </span>
+
+        <div
+          id="farmBubble"
+          class="production-bubble"
+        >
+          🪙 Collect
+        </div>
+
+      </button>
+
+
+
+      <!-- LUMBER MILL -->
+
+      <button
+        class="building"
+        data-building="lumber"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="lumberLevel">
+            1
+          </span>
+        </div>
+
+        <div class="building-art">
+          🪵
+        </div>
+
+        <span>
+          Lumber Mill
+        </span>
+
+        <div
+          id="lumberBubble"
+          class="production-bubble"
+        >
+          🪵 Collect
+        </div>
+
+      </button>
+
+
+
+      <!-- QUARRY -->
+
+      <button
+        id="quarryBuilding"
+        class="building locked-building"
+        data-building="quarry"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="quarryLevel">
+            1
+          </span>
+        </div>
+
+        <div class="building-art">
+          ⛏️
+        </div>
+
+        <span>
+          Stone Quarry
+        </span>
+
+        <div
+          id="quarryLock"
+          class="building-lock"
+        >
+          🔒 Castle Lv. 2
+        </div>
+
+        <div
+          id="quarryBubble"
+          class="production-bubble hidden"
+        >
+          🪨 Collect
+        </div>
+
+      </button>
+
+
+
+      <!-- BAKERY -->
+
+      <button
+        id="bakeryBuilding"
+        class="building locked-building"
+        data-building="bakery"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="bakeryLevel">
+            1
+          </span>
+        </div>
+
+        <div class="building-art">
+          🥐
+        </div>
+
+        <span>
+          Golden Bakery
+        </span>
+
+        <div
+          id="bakeryLock"
+          class="building-lock"
+        >
+          🔒 Castle Lv. 3
+        </div>
+
+        <div
+          id="bakeryBubble"
+          class="production-bubble hidden"
+        >
+          🪙 Collect
+        </div>
+
+      </button>
+
+
+
+      <!-- BANK -->
+
+      <button
+        id="bankBuilding"
+        class="building locked-building"
+        data-building="bank"
+      >
+
+        <div class="building-level">
+          Lv.
+          <span id="bankLevel">
+            1
+          </span>
+        </div>
+
+        <div class="building-art">
+          🏦
+        </div>
+
+        <span>
+          Golden Bank
+        </span>
+
+        <div
+          id="bankLock"
+          class="building-lock"
+        >
+          🔒 Castle Lv. 5
+        </div>
+
+        <div
+          id="bankBubble"
+          class="production-bubble hidden"
+        >
+          🪙 Collect
+        </div>
+
+      </button>
+
+
+
+      <!-- TREE -->
+
+      <button
+        id="treeBuilding"
+        class="building tree-building locked-building"
+      >
+
+        <div class="building-art">
+          🌳
+        </div>
+
+        <span>
+          Tree of Fortune
+        </span>
+
+        <div
+          id="treeLock"
+          class="building-lock"
+        >
+          🔒 Castle Lv. 4
+        </div>
+
+      </button>
+
+    </div>
+
+
+
+    <!-- COOKIE WALKERS -->
+
+    <div
+      id="kingdomWalkers"
+      class="kingdom-walkers"
+    ></div>
+
+  </div>
+
+
+
+  <!-- CASTLE PROGRESS -->
+
+  <div class="kingdom-bottom-grid">
+
+    <div class="panel">
+
+      <div class="panel-title-row">
+
+        <div>
+          <p class="eyebrow">
+            KINGDOM PROGRESSION
+          </p>
+
+          <h3>
+            Upgrade Fortune Castle
+          </h3>
+        </div>
+
+        <div class="castle-mini">
+          🏰
+        </div>
+
+      </div>
+
+
+      <div
+        id="castleRequirements"
+        class="requirement-list"
+      ></div>
+
+
+      <button
+        id="upgradeCastleBtn"
+        class="gold-button large-button"
+      >
+        Upgrade Castle
+      </button>
+
+    </div>
+
+
+
+    <div class="panel">
+
+      <p class="eyebrow">
+        NEXT GOAL
+      </p>
+
+      <h3 id="nextUnlockTitle">
+        Unlock Stone Quarry
+      </h3>
+
+      <p
+        id="nextUnlockDescription"
+        class="muted"
+      >
+        Upgrade Fortune Castle to level 2.
+      </p>
+
+
+      <div class="progress-track">
+
+        <div
+          id="kingdomProgressBar"
+          class="progress-fill"
+        ></div>
+
+      </div>
+
+
+      <div
+        id="kingdomProgressText"
+        class="progress-text"
+      >
+        Castle Lv. 1 / 50
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     STORY SCREEN
+========================================================= -->
+
+<section
+  id="storyScreen"
+  class="screen"
+>
+
+  <div class="screen-heading">
+
+    <div>
+      <p class="eyebrow">
+        STORY MODE
+      </p>
+
+      <h2>
+        World 1 • Empty Village
+      </h2>
+
+      <p>
+        Fight through the story to earn EXP Candies
+        and rebuild Prospera.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="story-layout">
+
+    <div class="story-map">
+
+      <div class="story-path"></div>
+
+      <div
+        id="storyStageList"
+        class="stage-list"
+      ></div>
+
+    </div>
+
+
+
+    <aside class="story-info panel">
+
+      <p class="eyebrow">
+        STORY REWARDS
+      </p>
+
+      <h3>
+        EXP Candies
+      </h3>
+
+      <p class="muted">
+        EXP Candies are mainly earned by completing
+        Story Mode stages.
+      </p>
+
+
+      <div class="candy-guide">
+
+        <div>
+          <span>🍬</span>
+          <strong>XS</strong>
+          <small>100 EXP</small>
+        </div>
+
+        <div>
+          <span>🍬</span>
+          <strong>S</strong>
+          <small>150 EXP</small>
+        </div>
+
+        <div>
+          <span>🍬</span>
+          <strong>M</strong>
+          <small>200 EXP</small>
+        </div>
+
+        <div>
+          <span>🍬</span>
+          <strong>L</strong>
+          <small>300 EXP</small>
+        </div>
+
+        <div>
+          <span>🍬</span>
+          <strong>XL</strong>
+          <small>400 EXP</small>
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     COOKIES SCREEN
+========================================================= -->
+
+<section
+  id="cookiesScreen"
+  class="screen"
+>
+
+  <div class="screen-heading">
+
+    <div>
+
+      <p class="eyebrow">
+        KINGDOM HEROES
+      </p>
+
+      <h2>
+        Cookies
+      </h2>
+
+      <p>
+        Level up your Cookies using EXP Candies earned
+        from Story Mode.
+      </p>
+
+    </div>
+
+
+    <div class="collection-counter">
+
+      <span>
+        Collection
+      </span>
+
+      <strong id="collectionCount">
+        0 / 0
+      </strong>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- CANDY INVENTORY -->
+
+  <div class="candy-inventory">
+
+    <div class="inventory-title">
+      EXP Candy
+    </div>
+
+
+    <div
+      class="inventory-candy"
+      data-candy-display="XS"
+    >
+      <span class="candy candy-xs">
+        🍬
+      </span>
+
+      <div>
+        <strong>XS</strong>
+        <small>100 EXP</small>
+      </div>
+
+      <b id="candyXSCount">
+        ×0
+      </b>
+    </div>
+
+
+    <div
+      class="inventory-candy"
+      data-candy-display="S"
+    >
+      <span class="candy candy-s">
+        🍬
+      </span>
+
+      <div>
+        <strong>S</strong>
+        <small>150 EXP</small>
+      </div>
+
+      <b id="candySCount">
+        ×0
+      </b>
+    </div>
+
+
+    <div
+      class="inventory-candy"
+      data-candy-display="M"
+    >
+      <span class="candy candy-m">
+        🍬
+      </span>
+
+      <div>
+        <strong>M</strong>
+        <small>200 EXP</small>
+      </div>
+
+      <b id="candyMCount">
+        ×0
+      </b>
+    </div>
+
+
+    <div
+      class="inventory-candy"
+      data-candy-display="L"
+    >
+      <span class="candy candy-l">
+        🍬
+      </span>
+
+      <div>
+        <strong>L</strong>
+        <small>300 EXP</small>
+      </div>
+
+      <b id="candyLCount">
+        ×0
+      </b>
+    </div>
+
+
+    <div
+      class="inventory-candy"
+      data-candy-display="XL"
+    >
+      <span class="candy candy-xl">
+        🍬
+      </span>
+
+      <div>
+        <strong>XL</strong>
+        <small>400 EXP</small>
+      </div>
+
+      <b id="candyXLCount">
+        ×0
+      </b>
+    </div>
+
+  </div>
+
+
+
+  <!-- FILTERS -->
+
+  <div class="cookie-filters">
+
+    <button
+      class="filter-btn active"
+      data-filter="ALL"
+    >
+      All
+    </button>
+
+    <button
+      class="filter-btn"
+      data-filter="EPIC"
+    >
+      Epic
+    </button>
+
+    <button
+      class="filter-btn"
+      data-filter="LEGENDARY"
+    >
+      Legendary
+    </button>
+
+    <button
+      class="filter-btn"
+      data-filter="ANCIENT"
+    >
+      Ancient
+    </button>
+
+    <button
+      class="filter-btn"
+      data-filter="BEAST"
+    >
+      Beast
+    </button>
+
+  </div>
+
+
+
+  <div
+    id="cookieGrid"
+    class="cookie-grid"
+  ></div>
+
+</section>
+
+</main>
+
+
+
+<!-- =========================================================
+     COOKIE UPGRADE MODAL
+========================================================= -->
+
+<div
+  id="cookieModal"
+  class="modal hidden"
+>
+
+  <div class="modal-card cookie-upgrade-modal">
+
+    <button
+      id="closeCookieModal"
+      class="close-btn"
+    >
+      ✕
+    </button>
+
+
+    <div class="cookie-profile-top">
+
+      <div
+        id="profileGlow"
+        class="profile-character"
+      >
+        <div
+          id="profileCookieIcon"
+          class="profile-cookie-icon"
+        >
+          🍪
         </div>
       </div>
-    </section>
 
-    <section id="instruments" class="section">
-      <div class="section-head"><div><span class="eyebrow">COLLECT & MASTER</span><h2>Instrument Library</h2></div><input id="instrumentSearch" class="search" placeholder="Search instruments..."></div>
-      <div id="familyTabs" class="tabs"></div>
-      <div id="instrumentGrid" class="instrument-grid"></div>
-    </section>
 
-    <section id="battle" class="section battle-section">
-      <div class="section-head"><div><span class="eyebrow">SOLO ARENA</span><h2>Battle Arena</h2></div><select id="battleInstrumentSelect"></select></div>
-      <div class="battle-board panel">
-        <div class="fighter player-fighter">
-          <div id="soloPlayerAvatar" class="cool-avatar blue-avatar"></div>
-          <h3 id="playerBattleName">Player</h3><small id="playerInstrumentLabel">Guitar</small>
-          <div class="hpbar"><i id="playerHpFill"></i></div><b id="playerHpText">100 / 100</b>
+      <div class="profile-main-info">
+
+        <span
+          id="profileRarity"
+          class="profile-rarity"
+        >
+          EPIC
+        </span>
+
+        <h2 id="profileCookieName">
+          Dollar Cookie
+        </h2>
+
+        <p id="profileCookieTitle">
+          The Bright Earner
+        </p>
+
+
+        <div class="cookie-position">
+          <span id="profileRole">
+            Attacker
+          </span>
+
+          •
+
+          <span id="profilePosition">
+            Middle
+          </span>
         </div>
-        <div class="battle-center"><span class="versus">VS</span><div id="battleStatus">Choose a move.</div><div id="energyPips" class="energy-pips"></div><div id="moveButtons" class="move-grid"></div></div>
-        <div class="fighter enemy-fighter">
-          <div id="soloEnemyAvatar" class="cool-avatar red-avatar"></div>
-          <h3 id="cpuBattleName">CPU</h3><small id="cpuInstrumentLabel">Piano</small>
-          <div class="hpbar red"><i id="cpuHpFill"></i></div><b id="cpuHpText">100 / 100</b>
-        </div>
+
       </div>
-      <div class="battle-footer"><button id="newOpponentBtn" class="btn ghost">New Opponent</button><div id="battleLog" class="battle-log"></div></div>
-    </section>
 
-    <section id="multiplayer" class="section">
-      <div class="section-head"><div><span class="eyebrow">GRAND CONCERT HALL</span><h2>Team Battle</h2></div><div class="team-size-buttons"><button class="mp-start" data-team="1">1v1</button><button class="mp-start" data-team="3">3v3</button><button class="mp-start" data-team="5">5v5</button><button class="mp-start active" data-team="10">10v10</button></div></div>
-      <div id="teamLobby" class="panel team-lobby">
-        <div class="team-hp-section">
-          <div class="team-hp-side"><div class="team-hp-label blue"><span>🔵 TEAM BLUE</span><strong id="blueTeamHPText">10,000 / 10,000 HP</strong></div><div class="team-hp-bar"><i id="blueTeamHPFill" class="blue"></i></div></div>
-          <div class="team-hp-side"><div class="team-hp-label red"><span>TEAM RED 🔴</span><strong id="redTeamHPText">10,000 / 10,000 HP</strong></div><div class="team-hp-bar"><i id="redTeamHPFill" class="red"></i></div></div>
-        </div>
-        <div class="concert-shell">
-          <div class="concert-lights"><i></i><i></i><i></i></div>
-          <div class="concert-title"><b>THE MUSICVERSE GRAND HALL</b><span id="concertRoundLabel">LOBBY</span></div>
-          <div class="stage-curtain left"></div><div class="stage-curtain right"></div>
-          <div id="concertStage" class="concert-stage"><div id="blueConcertPlayers" class="concert-team-side blue-side"></div><div class="stage-center-mark">♫</div><div id="redConcertPlayers" class="concert-team-side red-side"></div></div>
-          <div class="audience"></div>
-        </div>
-        <div id="multiplayerBattleMessage" class="multiplayer-battle-message"><strong>Choose a team size and start the concert battle.</strong><span>Every team shares 10,000 HP.</span></div>
-        <div id="teamMovePanel" class="team-move-panel hidden"><div class="team-turn-header"><div><span class="eyebrow">YOUR TURN</span><h3 id="teamTurnTitle">Choose your move</h3></div><div class="team-energy-box">Energy: <strong id="teamEnergyLabel">0 / 3</strong></div></div><div id="teamMoveButtons" class="move-grid"></div></div>
-        <button id="startTeamBattleBtn" class="btn gold wide">Start Concert Battle</button>
+    </div>
+
+
+
+    <!-- LOCKED MESSAGE -->
+
+    <div
+      id="lockedCookieArea"
+      class="locked-cookie-area hidden"
+    >
+
+      <div class="locked-big">
+        🔒
       </div>
-    </section>
 
-    <section id="games" class="section">
-      <div class="section-head"><div><span class="eyebrow">ARCADE</span><h2>MusicVerse Games</h2></div><div class="shared-progress">All games earn <b>Universal EXP</b></div></div>
-      <div id="gameCards" class="game-grid"></div>
-      <div id="gameStage" class="game-stage panel hidden"><div class="game-stage-head"><div><span id="gameEyebrow" class="eyebrow">GAME</span><h2 id="gameTitle">Game</h2></div><button id="closeGameBtn" class="btn ghost small">Close</button></div><div id="gameBody"></div></div>
-    </section>
+      <h3>
+        Cookie Not Obtained
+      </h3>
 
-    <section id="gacha" class="section">
-      <div class="section-head"><div><span class="eyebrow">COLLECT COSMETICS</span><h2>Gacha Studio</h2></div><div>🪙 <b id="gachaCoins">0</b> &nbsp; ✦ <b id="gachaDust">0</b></div></div>
-      <div class="tabs"><button class="gacha-tab active" data-gacha="accessory">Accessory</button><button class="gacha-tab" data-gacha="pet">Pet</button><button class="gacha-tab" data-gacha="aura">Aura</button><button class="gacha-tab" data-gacha="skin">Skin</button></div>
-      <div class="gacha-layout"><div class="gacha-orb panel"><div id="gachaOrb" class="orb">♫</div><h3 id="gachaTitle">Accessory Capsule</h3><p id="gachaSubtitle">Roll for cosmetics.</p><div class="gacha-buttons"><button id="rollOneBtn" class="btn gold">Roll x1</button><button id="rollTenBtn" class="btn ghost">Roll x10</button></div><div id="gachaReveal" class="gacha-reveal"></div></div><div class="panel inventory-panel"><h3>Inventory</h3><div id="inventoryGrid" class="inventory-grid"></div></div></div>
-    </section>
+      <p>
+        Continue through the story and explore Prospera
+        to discover this Cookie.
+      </p>
 
-    <section id="musiccraft" class="section">
-      <div class="section-head"><div><span class="eyebrow">BUILD & MINE</span><h2>MusicCraft</h2></div><button id="newWorldBtn" class="btn ghost small">New World</button></div>
-      <div class="craft-layout">
-        <canvas id="craftCanvas" width="800" height="480"></canvas>
-        <div class="panel craft-panel">
-          <h3>Mining Mission</h3>
-          <p id="missionText">Mine 12 blocks.</p>
-          <div class="craft-depth-card"><div class="craft-depth-row"><span>Current Zone</span><strong id="craftDepthName">Surface</strong></div><div class="craft-depth-row"><span>Layer</span><strong id="craftLayerLabel">1 / 15</strong></div><div class="depth-progress"><i id="craftDepthFill"></i></div></div>
-          <div id="craftInventory" class="craft-inventory"></div>
-          <h3>🥚 Pet Eggs</h3><div id="craftEggInventory" class="craft-egg-inventory"></div>
-          <button id="missionBtn" class="btn gold">Claim Mission</button>
-          <p class="muted">Mine downward. Each layer has exclusive ores and a unique pet egg.</p>
+    </div>
+
+
+
+    <!-- OWNED UPGRADE -->
+
+    <div id="ownedCookieArea">
+
+      <div class="level-row">
+
+        <div>
+          <small>
+            LEVEL
+          </small>
+
+          <strong id="profileLevel">
+            1
+          </strong>
         </div>
+
+        <div>
+          <small>
+            POWER
+          </small>
+
+          <strong id="profilePower">
+            0
+          </strong>
+        </div>
+
       </div>
-    </section>
 
-    <section id="leaderboard" class="section">
-      <div class="section-head"><div><span class="eyebrow">LOCAL DEMO</span><h2>Top 100 Musicians</h2></div><div>Your Rank: <b id="yourRank">#--</b></div></div>
-      <div id="podium" class="podium"></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Player</th><th>Level</th><th>Total EXP</th></tr></thead><tbody id="leaderboardBody"></tbody></table></div>
-    </section>
 
-    <section id="quiz" class="section">
-      <div class="section-head"><div><span class="eyebrow">MUSIC KNOWLEDGE</span><h2>Quick Quiz</h2></div><div>Score: <b id="quizScore">0</b></div></div>
-      <div id="quizCard" class="quiz-card panel"></div>
-    </section>
-  </main>
 
-  <div id="toast" class="toast"></div>
-  <footer>MusicVerse • Play music. Build mastery. Grow one profile across every game.</footer>
-  <script src="script.js"></script>
+      <div class="exp-header">
+
+        <strong>
+          EXP
+        </strong>
+
+        <span id="profileExpText">
+          0 / 1000
+        </span>
+
+      </div>
+
+
+      <div class="exp-track">
+
+        <div
+          id="profileExpBar"
+          class="exp-fill"
+        ></div>
+
+      </div>
+
+
+
+      <div class="stats-grid">
+
+        <div>
+          ❤️
+          <small>HP</small>
+          <strong id="profileHP">
+            0
+          </strong>
+        </div>
+
+        <div>
+          ⚔️
+          <small>ATK</small>
+          <strong id="profileATK">
+            0
+          </strong>
+        </div>
+
+        <div>
+          🛡️
+          <small>DEF</small>
+          <strong id="profileDEF">
+            0
+          </strong>
+        </div>
+
+      </div>
+
+
+
+      <h3 class="upgrade-title">
+        Give EXP Candy
+      </h3>
+
+
+      <div
+        id="upgradeCandyList"
+        class="upgrade-candy-list"
+      ></div>
+
+
+      <div class="candy-help">
+        Every Cookie level requires
+        <strong>1,000 EXP</strong>.
+        Extra EXP carries into the next level.
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     STORY BATTLE MODAL
+========================================================= -->
+
+<div
+  id="battleModal"
+  class="modal hidden"
+>
+
+  <div class="modal-card battle-modal-card">
+
+    <div id="battleContent"></div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     LEVEL-UP EFFECT
+========================================================= -->
+
+<div
+  id="levelUpOverlay"
+  class="level-up-overlay hidden"
+>
+
+  <div class="level-rays"></div>
+
+  <div class="level-up-content">
+
+    <div
+      id="levelUpCookieIcon"
+      class="level-up-cookie"
+    >
+      🍪
+    </div>
+
+    <p>
+      LEVEL UP!
+    </p>
+
+    <h2 id="levelUpCookieName">
+      Dollar Cookie
+    </h2>
+
+    <strong id="levelUpNumbers">
+      1 → 2
+    </strong>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+
+<script src="script.js"></script>
+
 </body>
 </html>
