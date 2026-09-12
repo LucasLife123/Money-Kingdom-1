@@ -6757,3 +6757,1862 @@ function setupRpg(){
   );
 
 }
+/* ============================ GAME HUB ============================ */
+const games=[['rhythm','🎵','Rhythm Rush','Hit falling notes with D F J K.'],['guess','🎼','Guess the Song','Hear a melody and identify it.'],['tiles','🎹','Piano Tiles','Hit the correct tiles before they fall.'],['pitch','👂','Perfect Pitch','Listen to a note and identify it.'],['memory','🧠','Melody Memory','Repeat an increasingly long melody.'],['dash','🏃','Music Dash','Jump obstacles and collect music coins.'],['hero','🎸','Instrument Hero','Score combos with your equipped instrument.'],['beat','🎧','Beat Battle','Time your hits to defeat a music boss.'],['dungeon','🏰','Music Dungeon','Explore rooms and fight musical monsters.']];
+
+function renderGameCards(){
+  $('#gameCards').innerHTML=games.map(g=>`
+    <article class="game-card" data-game="${g[0]}">
+      <div class="game-icon">${g[1]}</div>
+      <h3>${g[2]}</h3>
+      <p>${g[3]}</p>
+      <b>EARNS UNIVERSAL EXP</b>
+    </article>
+  `).join('');
+
+  $$('[data-game]').forEach(c=>c.onclick=()=>openGame(c.dataset.game));
+}
+
+function openGame(id){
+  stopActiveGame();
+
+  const g=games.find(x=>x[0]===id);
+
+  $('#gameStage').classList.remove('hidden');
+  $('#gameEyebrow').textContent='MUSICVERSE ARCADE';
+  $('#gameTitle').textContent=g[2];
+  $('#gameBody').innerHTML='';
+
+  $('#gameStage').scrollIntoView({
+    behavior:'smooth',
+    block:'start'
+  });
+
+  ({
+    rhythm:startRhythm,
+    guess:startGuessSong,
+    tiles:startPianoTiles,
+    pitch:startPitch,
+    memory:startMemory,
+    dash:startDash,
+    hero:startInstrumentHero,
+    beat:startBeatBattle,
+    dungeon:startDungeon
+  }[id])();
+}
+
+$('#closeGameBtn').onclick=()=>{
+  stopActiveGame();
+  $('#gameStage').classList.add('hidden');
+};
+
+let activeIntervals=[];
+let activeKeyHandler=null;
+
+function every(fn,ms){
+  const id=setInterval(fn,ms);
+  activeIntervals.push(id);
+  return id;
+}
+
+function stopActiveGame(){
+  activeIntervals.forEach(clearInterval);
+  activeIntervals=[];
+
+  if(activeKeyHandler){
+    document.removeEventListener('keydown',activeKeyHandler);
+    activeKeyHandler=null;
+  }
+}
+
+
+/* ============================ RHYTHM RUSH ============================ */
+
+function startRhythm(){
+
+  $('#gameBody').innerHTML=`
+    <div class="game-panel">
+
+      <div class="game-toolbar">
+        <span class="game-stat">
+          Score <b id="rrScore">0</b>
+        </span>
+
+        <span class="game-stat">
+          Combo <b id="rrCombo">0</b>
+        </span>
+
+        <span class="game-stat">
+          Time <b id="rrTime">20</b>s
+        </span>
+      </div>
+
+      <div id="rrBoard" class="lane-board">
+        ${
+          ['D','F','J','K']
+          .map((k,i)=>`
+            <div class="lane" data-lane="${i}">
+              <div class="lane-key">${k}</div>
+            </div>
+          `)
+          .join('')
+        }
+      </div>
+
+      <p id="rrResult">
+        Press D F J K when notes reach the bottom.
+      </p>
+
+    </div>
+  `;
+
+  let score=0;
+  let combo=0;
+  let time=20;
+  let notes=[];
+
+  function spawn(){
+
+    const lane=rand(0,3);
+
+    const el=document.createElement('div');
+
+    el.className='fall-note';
+    el.style.top='-30px';
+    el.dataset.y='-30';
+    el.dataset.lane=lane;
+
+    $('#rrBoard')
+      .children[lane]
+      .appendChild(el);
+
+    notes.push(el);
+  }
+
+  every(spawn,650);
+
+  every(()=>{
+
+    notes=[...notes].filter(n=>{
+
+      let y=+n.dataset.y+8;
+
+      n.dataset.y=y;
+      n.style.top=y+'px';
+
+      if(y>330){
+
+        n.remove();
+
+        combo=0;
+
+        $('#rrCombo').textContent=combo;
+
+        S.miss();
+
+        return false;
+      }
+
+      return true;
+    });
+
+  },35);
+
+  every(()=>{
+
+    time--;
+
+    $('#rrTime').textContent=time;
+
+    if(time<=0){
+
+      stopActiveGame();
+
+      $('#rrResult').textContent=
+        `Finished! Score ${score}.`;
+
+      const xp=
+        20+
+        Math.round(score/300);
+
+      reward(
+        xp,
+        Math.round(xp*.6),
+        'Rhythm Rush complete!'
+      );
+
+      addMastery(
+        profile.equipped,
+        Math.round(score/500)
+      );
+    }
+
+  },1000);
+
+  activeKeyHandler=e=>{
+
+    const map={
+      d:0,
+      f:1,
+      j:2,
+      k:3
+    };
+
+    const lane=
+      map[e.key.toLowerCase()];
+
+    if(lane===undefined)
+      return;
+
+    const candidates=
+      notes
+      .filter(n=>+n.dataset.lane===lane)
+      .sort(
+        (a,b)=>
+          +b.dataset.y-
+          +a.dataset.y
+      );
+
+    const n=
+      candidates[0];
+
+    if(!n){
+
+      combo=0;
+
+      S.miss();
+
+      return;
+    }
+
+    const y=
+      +n.dataset.y;
+
+    const dist=
+      Math.abs(306-y);
+
+    if(dist<32){
+
+      score+=
+        dist<12
+          ?150
+          :100;
+
+      combo++;
+
+      dist<12
+        ?S.perfect()
+        :S.great();
+
+      n.remove();
+
+      notes=
+        notes.filter(x=>x!==n);
+    }
+
+    else{
+
+      combo=0;
+
+      S.miss();
+    }
+
+    $('#rrScore').textContent=score;
+    $('#rrCombo').textContent=combo;
+  };
+
+  document.addEventListener(
+    'keydown',
+    activeKeyHandler
+  );
+}
+
+
+/* ============================ GUESS THE SONG ============================ */
+
+const melodies=[
+  {
+    name:'Twinkle Twinkle Little Star',
+    notes:[
+      261.6,
+      261.6,
+      392,
+      392,
+      440,
+      440,
+      392
+    ]
+  },
+
+  {
+    name:'Ode to Joy',
+    notes:[
+      329.6,
+      329.6,
+      349.2,
+      392,
+      392,
+      349.2,
+      329.6,
+      293.7
+    ]
+  },
+
+  {
+    name:'Mary Had a Little Lamb',
+    notes:[
+      329.6,
+      293.7,
+      261.6,
+      293.7,
+      329.6,
+      329.6,
+      329.6
+    ]
+  }
+];
+
+function playMelody(m){
+
+  m.notes.forEach(
+    (n,i)=>
+      SoundEngine.tone(
+        n,
+        .26,
+        'sine',
+        .09,
+        i*.24
+      )
+  );
+}
+
+function startGuessSong(){
+
+  let score=0;
+  let round=0;
+  let current;
+
+  const render=()=>{
+
+    current=
+      pick(melodies);
+
+    const opts=[
+      current.name,
+      ...melodies
+        .filter(x=>x!==current)
+        .map(x=>x.name)
+    ]
+    .sort(
+      ()=>Math.random()-.5
+    );
+
+    $('#gameBody').innerHTML=`
+      <div class="game-panel">
+
+        <div class="game-toolbar">
+
+          <span class="game-stat">
+            Round ${round+1}/5
+          </span>
+
+          <span class="game-stat">
+            Score ${score}
+          </span>
+
+        </div>
+
+        <button
+          id="playSongBtn"
+          class="btn gold"
+        >
+          ▶ Play Melody
+        </button>
+
+        <div
+          class="choice-grid"
+          style="margin-top:16px"
+        >
+          ${
+            opts
+            .map(o=>`
+              <button data-song="${o}">
+                ${o}
+              </button>
+            `)
+            .join('')
+          }
+        </div>
+
+        <p>
+          Listen carefully, then choose the melody.
+        </p>
+
+      </div>
+    `;
+
+    $('#playSongBtn').onclick=
+      ()=>playMelody(current);
+
+    $$('[data-song]')
+      .forEach(b=>b.onclick=()=>{
+
+        const ok=
+          b.dataset.song===
+          current.name;
+
+        ok
+          ?(
+            score++,
+            S.correct()
+          )
+          :S.wrong();
+
+        round++;
+
+        if(round>=5){
+
+          const xp=
+            score*10+
+            10;
+
+          reward(
+            xp,
+            score*8,
+            'Guess the Song complete!'
+          );
+
+          $('#gameBody').innerHTML=`
+            <div class="game-panel">
+
+              <h3>
+                ${score}/5 correct
+              </h3>
+
+              <button
+                id="againGuess"
+                class="btn gold"
+              >
+                Play Again
+              </button>
+
+            </div>
+          `;
+
+          $('#againGuess').onclick=
+            startGuessSong;
+        }
+
+        else{
+
+          render();
+        }
+
+      });
+  };
+
+  render();
+}
+
+
+/* ============================ PIANO TILES ============================ */
+
+function startPianoTiles(){
+
+  $('#gameBody').innerHTML=`
+    <div class="game-panel">
+
+      <div class="game-toolbar">
+
+        <span class="game-stat">
+          Score <b id="ptScore">0</b>
+        </span>
+
+        <span class="game-stat">
+          Time <b id="ptTime">20</b>s
+        </span>
+
+      </div>
+
+      <div id="ptBoard" class="lane-board">
+
+        ${
+          ['D','F','J','K']
+          .map((k,i)=>`
+            <div
+              class="lane"
+              data-lane="${i}"
+            >
+
+              <div class="lane-key">
+                ${k}
+              </div>
+
+            </div>
+          `)
+          .join('')
+        }
+
+      </div>
+
+    </div>
+  `;
+
+  let score=0;
+  let time=20;
+  let notes=[];
+
+  every(()=>{
+
+    const lane=
+      rand(0,3);
+
+    const el=
+      document.createElement('div');
+
+    el.className=
+      'fall-note';
+
+    el.style.background=
+      '#f7f5ef';
+
+    el.dataset.y=
+      '-30';
+
+    el.dataset.lane=
+      lane;
+
+    $('#ptBoard')
+      .children[lane]
+      .appendChild(el);
+
+    notes.push(el);
+
+  },480);
+
+  every(()=>{
+
+    notes=[...notes].filter(n=>{
+
+      const y=
+        +n.dataset.y+
+        10;
+
+      n.dataset.y=y;
+      n.style.top=y+'px';
+
+      if(y>330){
+
+        n.remove();
+
+        S.miss();
+
+        return false;
+      }
+
+      return true;
+
+    });
+
+  },35);
+
+  every(()=>{
+
+    time--;
+
+    $('#ptTime').textContent=
+      time;
+
+    if(time<=0){
+
+      stopActiveGame();
+
+      const xp=
+        15+
+        Math.round(score/250);
+
+      reward(
+        xp,
+        Math.round(xp*.5),
+        'Piano Tiles complete!'
+      );
+    }
+
+  },1000);
+
+  activeKeyHandler=e=>{
+
+    const lane={
+      d:0,
+      f:1,
+      j:2,
+      k:3
+    }[
+      e.key.toLowerCase()
+    ];
+
+    if(lane===undefined)
+      return;
+
+    const n=
+      notes
+      .filter(
+        x=>
+          +x.dataset.lane===
+          lane
+      )
+      .sort(
+        (a,b)=>
+          +b.dataset.y-
+          +a.dataset.y
+      )[0];
+
+    if(
+      n &&
+      +n.dataset.y>250
+    ){
+
+      score+=100;
+
+      S.perfect();
+
+      playInstrument(
+        'Piano',
+        261.6*
+        Math.pow(
+          2,
+          lane/12
+        )
+      );
+
+      n.remove();
+
+      notes=
+        notes.filter(
+          x=>x!==n
+        );
+
+      $('#ptScore').textContent=
+        score;
+    }
+
+    else{
+
+      S.miss();
+    }
+
+  };
+
+  document.addEventListener(
+    'keydown',
+    activeKeyHandler
+  );
+}
+
+
+/* ============================ PERFECT PITCH ============================ */
+
+function startPitch(){
+
+  const notes=[
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'A',
+    'B'
+  ];
+
+  const freq=[
+    261.6,
+    293.7,
+    329.6,
+    349.2,
+    392,
+    440,
+    493.9
+  ];
+
+  let score=0;
+  let round=0;
+  let target=0;
+
+  const render=()=>{
+
+    target=
+      rand(0,6);
+
+    $('#gameBody').innerHTML=`
+      <div class="game-panel">
+
+        <div class="game-toolbar">
+
+          <span class="game-stat">
+            Round ${round+1}/10
+          </span>
+
+          <span class="game-stat">
+            Score ${score}
+          </span>
+
+        </div>
+
+        <button
+          id="hearPitch"
+          class="btn gold"
+        >
+          🔊 Hear Note
+        </button>
+
+        <div
+          class="pitch-buttons"
+          style="margin-top:16px"
+        >
+
+          ${
+            notes
+            .map((n,i)=>`
+              <button
+                data-pitch="${i}"
+              >
+                ${n}
+              </button>
+            `)
+            .join('')
+          }
+
+        </div>
+
+      </div>
+    `;
+
+    $('#hearPitch').onclick=
+      ()=>
+        SoundEngine.tone(
+          freq[target],
+          .55,
+          'sine',
+          .15
+        );
+
+    $$('[data-pitch]')
+      .forEach(
+        b=>
+          b.onclick=
+            ()=>{
+
+              const ok=
+                +b.dataset.pitch===
+                target;
+
+              ok
+                ?(
+                  score++,
+                  S.correct()
+                )
+                :S.wrong();
+
+              round++;
+
+              if(round>=10){
+
+                reward(
+                  score*6+10,
+                  score*4,
+                  'Perfect Pitch complete!'
+                );
+
+                $('#gameBody').innerHTML=`
+                  <div class="game-panel">
+
+                    <h3>
+                      ${score}/10 correct
+                    </h3>
+
+                    <button
+                      id="pitchAgain"
+                      class="btn gold"
+                    >
+                      Play Again
+                    </button>
+
+                  </div>
+                `;
+
+                $('#pitchAgain').onclick=
+                  startPitch;
+              }
+
+              else{
+
+                render();
+              }
+
+            }
+      );
+  };
+
+  render();
+}
+
+
+/* ============================ MELODY MEMORY ============================ */
+
+function startMemory(){
+
+  const notes=[
+    261.6,
+    293.7,
+    329.6,
+    392,
+    440
+  ];
+
+  const labels=[
+    'C',
+    'D',
+    'E',
+    'G',
+    'A'
+  ];
+
+  let seq=[];
+  let input=[];
+  let round=0;
+
+  const render=()=>{
+
+    $('#gameBody').innerHTML=`
+      <div class="game-panel">
+
+        <h3>
+          Round <span id="memRound">${round+1}</span>
+        </h3>
+
+        <p id="memText">
+          Watch and listen.
+        </p>
+
+        <div class="memory-buttons">
+
+          ${
+            labels
+            .map((n,i)=>`
+              <button data-mem="${i}">
+                ${n}
+              </button>
+            `)
+            .join('')
+          }
+
+        </div>
+
+      </div>
+    `;
+
+    $$('[data-mem]')
+      .forEach(
+        b=>
+          b.onclick=
+            ()=>{
+
+              const i=
+                +b.dataset.mem;
+
+              SoundEngine.tone(
+                notes[i],
+                .2,
+                'sine',
+                .12
+              );
+
+              input.push(i);
+
+              if(
+                input[
+                  input.length-1
+                ]
+                !==
+                seq[
+                  input.length-1
+                ]
+              ){
+
+                S.wrong();
+
+                reward(
+                  8+
+                  round*5,
+
+                  round*4,
+
+                  'Melody Memory finished!'
+                );
+
+                $('#memText').textContent=
+                  `Wrong note! You reached round ${round}.`;
+
+                $$('[data-mem]')
+                  .forEach(
+                    x=>
+                      x.disabled=true
+                  );
+
+                return;
+              }
+
+              if(
+                input.length===
+                seq.length
+              ){
+
+                round++;
+
+                S.correct();
+
+                setTimeout(
+                  nextRound,
+                  600
+                );
+              }
+
+            }
+      );
+  };
+
+  async function nextRound(){
+
+    seq.push(
+      rand(0,4)
+    );
+
+    input=[];
+
+    render();
+
+    for(
+      const i of seq
+    ){
+
+      await wait(280);
+
+      SoundEngine.tone(
+        notes[i],
+        .22,
+        'sine',
+        .12
+      );
+
+      const b=
+        $(`[data-mem="${i}"]`);
+
+      b.classList.add(
+        'flash'
+      );
+
+      setTimeout(
+        ()=>
+          b.classList.remove(
+            'flash'
+          ),
+        180
+      );
+
+      await wait(180);
+    }
+  }
+
+  nextRound();
+}
+
+
+/* ============================ MUSIC DASH ============================ */
+
+function startDash(){
+
+  $('#gameBody').innerHTML=`
+    <div class="game-panel">
+
+      <div class="game-toolbar">
+
+        <span class="game-stat">
+          Score <b id="dashScore">0</b>
+        </span>
+
+        <span class="game-stat">
+          Shift = Jump
+        </span>
+
+      </div>
+
+      <canvas
+        id="dashCanvas"
+        class="dash-canvas"
+        width="760"
+        height="260"
+      ></canvas>
+
+      <p id="dashMsg">
+        Run for 25 seconds and collect notes.
+      </p>
+
+    </div>
+  `;
+
+  const c=
+    $('#dashCanvas');
+
+  const x=
+    c.getContext('2d');
+
+  let y=195;
+  let vy=0;
+  let ground=195;
+  let score=0;
+  let time=25;
+  let obs=[];
+  let coins=[];
+
+  activeKeyHandler=e=>{
+
+    if(
+      (
+        e.key==='Shift'
+        ||
+        e.code==='ShiftLeft'
+        ||
+        e.code==='ShiftRight'
+      )
+      &&
+      y>=ground
+    ){
+
+      vy=-12;
+
+      S.jump();
+    }
+  };
+
+  document.addEventListener(
+    'keydown',
+    activeKeyHandler
+  );
+
+  every(()=>{
+
+    if(
+      Math.random()<.45
+    ){
+
+      obs.push({
+
+        x:760,
+
+        w:25,
+
+        h:rand(
+          25,
+          60
+        )
+
+      });
+    }
+
+    if(
+      Math.random()<.65
+    ){
+
+      coins.push({
+
+        x:760,
+
+        y:rand(
+          120,
+          190
+        )
+
+      });
+    }
+
+  },700);
+
+  every(()=>{
+
+    vy+=.8;
+
+    y+=vy;
+
+    if(y>ground){
+
+      y=ground;
+
+      vy=0;
+    }
+
+    obs.forEach(
+      o=>
+        o.x-=7
+    );
+
+    coins.forEach(
+      o=>
+        o.x-=7
+    );
+
+    obs=
+      obs.filter(
+        o=>{
+
+          if(
+            o.x<95
+            &&
+            o.x+o.w>60
+            &&
+            y+35>
+            225-o.h
+          ){
+
+            $('#dashMsg').textContent=
+              'You hit an obstacle! -100 score';
+
+            score=
+              Math.max(
+                0,
+                score-100
+              );
+
+            S.wrong();
+
+            return false;
+          }
+
+          return o.x>-40;
+
+        }
+      );
+
+    coins=
+      coins.filter(
+        o=>{
+
+          if(
+            Math.abs(
+              o.x-75
+            )<28
+            &&
+            Math.abs(
+              o.y-y
+            )<35
+          ){
+
+            score+=50;
+
+            S.coin();
+
+            return false;
+          }
+
+          return o.x>-20;
+
+        }
+      );
+
+    x.clearRect(
+      0,
+      0,
+      760,
+      260
+    );
+
+    x.fillStyle=
+      '#07111d';
+
+    x.fillRect(
+      0,
+      0,
+      760,
+      260
+    );
+
+    x.fillStyle=
+      '#19334d';
+
+    x.fillRect(
+      0,
+      230,
+      760,
+      30
+    );
+
+    x.fillStyle=
+      '#64c8ff';
+
+    x.fillRect(
+      55,
+      y,
+      40,
+      40
+    );
+
+    x.fillStyle=
+      '#ff748a';
+
+    obs.forEach(
+      o=>
+        x.fillRect(
+          o.x,
+          230-o.h,
+          o.w,
+          o.h
+        )
+    );
+
+    x.fillStyle=
+      '#ffe08a';
+
+    x.font=
+      '24px sans-serif';
+
+    coins.forEach(
+      o=>
+        x.fillText(
+          '♪',
+          o.x,
+          o.y
+        )
+    );
+
+    $('#dashScore').textContent=
+      score;
+
+  },33);
+
+  every(()=>{
+
+    time--;
+
+    if(time<=0){
+
+      stopActiveGame();
+
+      reward(
+        20+
+        Math.round(score/100),
+
+        Math.round(score/25),
+
+        'Music Dash complete!'
+      );
+    }
+
+  },1000);
+}
+
+
+/* ============================ INSTRUMENT HERO ============================ */
+
+function startInstrumentHero(){
+
+  const inst=
+    getInstrument(
+      profile.equipped
+    );
+
+  $('#gameBody').innerHTML=`
+    <div class="game-panel">
+
+      <h3>
+        ${inst.icon} ${inst.name} Hero
+      </h3>
+
+      <p>
+        Hit A S D F in sequence. Faster streaks give more points.
+      </p>
+
+      <div class="game-toolbar">
+
+        <span class="game-stat">
+          Target <b id="ihTarget">A</b>
+        </span>
+
+        <span class="game-stat">
+          Score <b id="ihScore">0</b>
+        </span>
+
+        <span class="game-stat">
+          Time <b id="ihTime">20</b>s
+        </span>
+
+      </div>
+
+    </div>
+  `;
+
+  const keys=[
+    'a',
+    's',
+    'd',
+    'f'
+  ];
+
+  let target=
+    pick(keys);
+
+  let score=0;
+  let time=20;
+
+  $('#ihTarget').textContent=
+    target.toUpperCase();
+
+  activeKeyHandler=e=>{
+
+    if(
+      !keys.includes(
+        e.key.toLowerCase()
+      )
+    )
+      return;
+
+    if(
+      e.key.toLowerCase()===
+      target
+    ){
+
+      score+=100;
+
+      S.perfect();
+
+      playInstrument(
+        inst.name,
+        440+
+        score%300
+      );
+
+      target=
+        pick(keys);
+
+      $('#ihTarget').textContent=
+        target.toUpperCase();
+
+      $('#ihScore').textContent=
+        score;
+    }
+
+    else{
+
+      score=
+        Math.max(
+          0,
+          score-25
+        );
+
+      S.miss();
+    }
+  };
+
+  document.addEventListener(
+    'keydown',
+    activeKeyHandler
+  );
+
+  every(()=>{
+
+    time--;
+
+    $('#ihTime').textContent=
+      time;
+
+    if(time<=0){
+
+      stopActiveGame();
+
+      const xp=
+        25+
+        Math.round(score/250);
+
+      reward(
+        xp,
+        Math.round(xp*.7),
+        'Instrument Hero complete!'
+      );
+
+      addMastery(
+        inst.name,
+        Math.round(score/400)
+      );
+    }
+
+  },1000);
+}
+
+
+/* ============================ BEAT BATTLE ============================ */
+
+function startBeatBattle(){
+
+  $('#gameBody').innerHTML=`
+    <div class="game-panel">
+
+      <h3>
+        🎧 Bass Golem
+      </h3>
+
+      <div
+        class="hpbar red"
+        style="
+          max-width:520px;
+          margin:10px auto
+        "
+      >
+        <i id="bbBossHp"></i>
+      </div>
+
+      <b id="bbBossText">
+        3000 / 3000
+      </b>
+
+      <p>
+        Press SHIFT when the marker is inside the gold zone.
+      </p>
+
+      <div
+        style="
+          height:28px;
+          max-width:520px;
+          margin:18px auto;
+          background:#13263a;
+          border-radius:999px;
+          position:relative
+        "
+      >
+
+        <div
+          style="
+            position:absolute;
+            left:44%;
+            width:12%;
+            top:0;
+            bottom:0;
+            background:#b79143
+          "
+        ></div>
+
+        <i
+          id="bbMarker"
+          style="
+            position:absolute;
+            width:8px;
+            top:-4px;
+            bottom:-4px;
+            background:#fff;
+            border-radius:6px
+          "
+        ></i>
+
+      </div>
+
+      <p id="bbText">
+        Ready...
+      </p>
+
+    </div>
+  `;
+
+  let hp=3000;
+  let pos=0;
+  let dir=1;
+  let ended=false;
+
+  every(()=>{
+
+    pos+=dir*2.5;
+
+    if(
+      pos>=100
+      ||
+      pos<=0
+    ){
+
+      dir*=-1;
+    }
+
+    $('#bbMarker').style.left=
+      `calc(${pos}% - 4px)`;
+
+  },20);
+
+  activeKeyHandler=e=>{
+
+    if(
+      !(
+        e.key==='Shift'
+        ||
+        e.code==='ShiftLeft'
+        ||
+        e.code==='ShiftRight'
+      )
+      ||
+      ended
+    )
+      return;
+
+    const dist=
+      Math.abs(
+        pos-50
+      );
+
+    let dmg;
+
+    if(
+      dist<=6
+    ){
+
+      dmg=420;
+
+      S.perfect();
+    }
+
+    else if(
+      dist<=14
+    ){
+
+      dmg=260;
+
+      S.great();
+    }
+
+    else{
+
+      dmg=90;
+
+      S.miss();
+    }
+
+    hp=
+      Math.max(
+        0,
+        hp-dmg
+      );
+
+    $('#bbBossHp').style.width=
+      `${hp/30}%`;
+
+    $('#bbBossText').textContent=
+      `${hp} / 3000`;
+
+    $('#bbText').textContent=
+      `${dmg} damage!`;
+
+    playInstrument(
+      profile.equipped,
+      520
+    );
+
+    if(hp<=0){
+
+      ended=true;
+
+      stopActiveGame();
+
+      S.victory();
+
+      reward(
+        45,
+        35,
+        'Bass Golem defeated!'
+      );
+
+      addInstrumentXP(
+        profile.equipped,
+        10
+      );
+
+      addMastery(
+        profile.equipped,
+        20
+      );
+    }
+  };
+
+  document.addEventListener(
+    'keydown',
+    activeKeyHandler
+  );
+}
+
+
+/* ============================ MUSIC DUNGEON ============================ */
+
+function startDungeon(){
+
+  let room=1;
+  let hp=100;
+
+  let boss=
+    room%4===0;
+
+  let enemyHp=
+    boss
+      ?1200
+      :420;
+
+  const render=()=>{
+
+    $('#gameBody').innerHTML=`
+      <div class="game-panel">
+
+        <h3>
+          Room ${room}
+          ${
+            boss
+              ?'👹 BOSS CHAMBER'
+              :'🎵 Echo Chamber'
+          }
+        </h3>
+
+        <p>
+          Your HP:
+          <b>${hp}</b>
+
+          • Enemy HP:
+          <b>${enemyHp}</b>
+        </p>
+
+        <div class="dungeon-actions">
+
+          <button
+            id="dAtk"
+            class="btn gold"
+          >
+            ⚔️ Perform Attack
+          </button>
+
+          <button
+            id="dHeal"
+            class="btn ghost"
+          >
+            💚 Heal
+          </button>
+
+          <button
+            id="dChest"
+            class="btn ghost"
+          >
+            🎁 Search Room
+          </button>
+
+        </div>
+
+        <p id="dMsg">
+          Choose an action.
+        </p>
+
+      </div>
+    `;
+
+    $('#dAtk').onclick=
+      ()=>{
+
+        const inst=
+          getUpgradedInstrument(
+            profile.equipped
+          );
+
+        const dmg=
+          Math.round(
+            inst.attack*2.8
+            +
+            rand(
+              30,
+              80
+            )
+          );
+
+        enemyHp=
+          Math.max(
+            0,
+            enemyHp-dmg
+          );
+
+        playInstrument(
+          inst.name,
+          440
+        );
+
+        S.attack();
+
+        if(
+          enemyHp<=0
+        ){
+
+          const xp=
+            boss
+              ?50
+              :8;
+
+          const coins=
+            boss
+              ?35
+              :5;
+
+          reward(
+            xp,
+            coins,
+            boss
+              ?'Dungeon boss defeated!'
+              :'Room cleared!'
+          );
+
+          addMastery(
+            inst.name,
+            boss
+              ?15
+              :4
+          );
+
+          room++;
+
+          boss=
+            room%4===0;
+
+          enemyHp=
+            boss
+              ?1200
+              :420;
+
+          hp=
+            Math.min(
+              100,
+              hp+15
+            );
+
+          render();
+
+          return;
+        }
+
+        const hurt=
+          rand(
+            8,
+            boss
+              ?24
+              :16
+          );
+
+        hp=
+          Math.max(
+            0,
+            hp-hurt
+          );
+
+        if(
+          hp<=0
+        ){
+
+          S.defeat();
+
+          addXP(
+            10
+          );
+
+          $('#gameBody').innerHTML=`
+            <div class="game-panel">
+
+              <h3>
+                Dungeon Run Ended
+              </h3>
+
+              <p>
+                You reached room ${room}. +10 EXP
+              </p>
+
+              <button
+                id="dAgain"
+                class="btn gold"
+              >
+                Try Again
+              </button>
+
+            </div>
+          `;
+
+          $('#dAgain').onclick=
+            startDungeon;
+        }
+
+        else{
+
+          render();
+        }
+
+      };
+
+    $('#dHeal').onclick=
+      ()=>{
+
+        hp=
+          Math.min(
+            100,
+            hp+
+            rand(
+              15,
+              25
+            )
+          );
+
+        S.heal();
+
+        render();
+      };
+
+    $('#dChest').onclick=
+      ()=>{
+
+        if(
+          Math.random()<.55
+        ){
+
+          profile.coins+=
+            rand(
+              2,
+              8
+            );
+
+          persist();
+
+          updateProfileUI();
+
+          S.treasure();
+
+          toast(
+            'Treasure found!'
+          );
+        }
+
+        else{
+
+          hp=
+            Math.max(
+              1,
+              hp-
+              rand(
+                4,
+                10
+              )
+            );
+
+          S.wrong();
+
+          toast(
+            'A trap!'
+          );
+        }
+
+        render();
+      };
+
+  };
+
+  render();
+}
