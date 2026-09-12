@@ -1111,3 +1111,5649 @@ $('#startBtn').click();
 );
 
 }
+/* ============================ INSTRUMENTS ============================ */
+let activeFamily='All';
+
+function renderFamilies(){
+  const fam=[
+    'All',
+    ...new Set(
+      instruments.map(
+        i=>i.family
+      )
+    )
+  ];
+
+  $('#familyTabs').innerHTML=
+    fam
+      .map(
+        f=>
+          `
+          <button
+            class="${f===activeFamily?'active':''}"
+            data-family="${f}"
+          >
+            ${f}
+          </button>
+          `
+      )
+      .join('');
+
+  $$('[data-family]')
+    .forEach(
+      b=>
+        b.onclick=
+          ()=>{
+            activeFamily=
+              b.dataset.family;
+
+            renderFamilies();
+
+            renderInstruments();
+          }
+    );
+}
+
+
+function renderInstruments(){
+
+  const q=
+    $('#instrumentSearch')
+      .value
+      .toLowerCase();
+
+
+  const list=
+    instruments
+      .filter(
+        i=>
+          (
+            activeFamily==='All' ||
+            i.family===activeFamily
+          )
+          &&
+          i.name
+            .toLowerCase()
+            .includes(q)
+      );
+
+
+  $('#instrumentGrid').innerHTML=
+    list
+      .map(
+        i=>{
+
+          const owned=
+            profile.owned.includes(
+              i.name
+            );
+
+
+          const eq=
+            profile.equipped===
+            i.name;
+
+
+          const u=
+            getInstrumentUpgradeData(
+              i.name
+            );
+
+
+          const need=
+            getInstrumentXPNeeded(
+              i.name
+            );
+
+
+          const up=
+            getUpgradedInstrument(
+              i.name
+            );
+
+
+          const evo=
+            profile.instrumentEvolutions[
+              i.name
+            ];
+
+
+          return `
+
+            <article
+              class="
+                instrument-card
+                ${eq?'equipped':''}
+              "
+            >
+
+              <div class="instrument-icon">
+                ${i.icon}
+              </div>
+
+
+              <h3>
+                ${
+                  evo
+                    ?evo.name
+                    :i.name
+                }
+              </h3>
+
+
+              <p>
+
+                ${i.family}
+
+                • Mastery
+
+                ${
+                  profile.mastery[
+                    i.name
+                  ]||0
+                }
+
+                ${
+                  evo
+                    ?' • EVOLVED'
+                    :''
+                }
+
+              </p>
+
+
+              ${
+                owned
+
+                ?`
+                <div class="instrument-level-row">
+
+                  <strong>
+                    Level ${u.level}
+                  </strong>
+
+                  <span>
+
+                    ${
+                      u.level>=20
+
+                        ?'MAX'
+
+                        :`${u.xp} / ${need} EXP`
+                    }
+
+                  </span>
+
+                </div>
+
+
+                <div class="instrument-xp-bar">
+
+                  <i
+                    style="
+                      width:${
+                        u.level>=20
+
+                          ?100
+
+                          :Math.min(
+                            100,
+                            u.xp/
+                            need*
+                            100
+                          )
+                      }%
+                    "
+                  ></i>
+
+                </div>
+                `
+
+                :''
+              }
+
+
+              <div class="stat-line">
+
+                <span>
+                  ATK ${up.attack}
+                </span>
+
+                <span>
+                  DEF ${up.defense}
+                </span>
+
+                <span>
+                  MEL ${up.melody}
+                </span>
+
+                <span>
+                  RHY ${up.rhythm}
+                </span>
+
+              </div>
+
+
+              <div class="instrument-actions">
+
+                ${
+                  owned
+
+                  ?`
+
+                  <button
+                    class="
+                      btn
+                      ${eq?'gold':'ghost'}
+                    "
+                    data-equip="${i.name}"
+                  >
+
+                    ${
+                      eq
+                        ?'Equipped'
+                        :'Equip'
+                    }
+
+                  </button>
+
+
+                  <button
+                    class="
+                      btn
+                      ${
+                        u.xp>=need &&
+                        u.level<20
+
+                          ?'gold'
+                          :'ghost'
+                      }
+                    "
+                    data-upgrade-instrument="${i.name}"
+
+                    ${
+                      u.xp<need ||
+                      u.level>=20
+
+                        ?'disabled'
+                        :''
+                    }
+                  >
+
+                    ${
+                      u.level>=20
+                        ?'MAX'
+                        :'Upgrade'
+                    }
+
+                  </button>
+
+                  `
+
+                  :`
+
+                  <button
+                    class="btn gold"
+                    data-buy="${i.name}"
+                  >
+
+                    🪙 ${i.price}
+
+                  </button>
+
+                  `
+                }
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join('');
+
+
+  $$('[data-buy]')
+    .forEach(
+      b=>
+        b.onclick=
+          ()=>{
+
+            const i=
+              getInstrument(
+                b.dataset.buy
+              );
+
+
+            if(
+              profile.coins<
+              i.price
+            ){
+
+              return toast(
+                'Not enough coins.'
+              );
+
+            }
+
+
+            profile.coins-=
+              i.price;
+
+
+            profile.owned.push(
+              i.name
+            );
+
+
+            profile.equipped=
+              i.name;
+
+
+            persist();
+
+            updateProfileUI();
+
+            renderInstruments();
+
+            refreshBattle(
+              true
+            );
+
+            S.coin();
+
+          }
+    );
+
+
+  $$('[data-equip]')
+    .forEach(
+      b=>
+        b.onclick=
+          ()=>{
+
+            profile.equipped=
+              b.dataset.equip;
+
+
+            persist();
+
+            renderInstruments();
+
+            refreshBattle(
+              true
+            );
+
+            renderEvolutionPanel();
+
+            S.click();
+
+          }
+    );
+
+
+  $$(
+    '[data-upgrade-instrument]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>
+          upgradeInstrument(
+            b.dataset.upgradeInstrument
+          )
+  );
+
+
+  renderBattleInstrumentSelect();
+
+}
+
+
+$('#instrumentSearch').oninput=
+  renderInstruments;
+
+
+function renderBattleInstrumentSelect(){
+
+  const old=
+    $('#battleInstrumentSelect')
+      .value;
+
+
+  $('#battleInstrumentSelect')
+    .innerHTML=
+
+      profile.owned
+        .map(
+          n=>
+            `
+            <option
+              ${
+                n===profile.equipped
+                  ?'selected'
+                  :''
+              }
+            >
+              ${n}
+            </option>
+            `
+        )
+        .join('');
+
+
+  if(
+    profile.owned.includes(
+      old
+    )
+  ){
+
+    $('#battleInstrumentSelect')
+      .value=
+        old;
+
+  }
+
+}
+
+
+$('#battleInstrumentSelect')
+  .onchange=
+    ()=>{
+
+      profile.equipped=
+        $('#battleInstrumentSelect')
+          .value;
+
+
+      persist();
+
+      renderInstruments();
+
+      refreshBattle(
+        true
+      );
+
+    };
+
+
+/* ============================ SOLO BATTLE ============================ */
+
+let battle={};
+
+
+const botNames=[
+  'BeatKnight',
+  'PianoNova',
+  'RhythmFox',
+  'StringStorm',
+  'TempoAce',
+  'ChordKing',
+  'MelodyMint',
+  'BassOrbit',
+  'JazzPixel'
+];
+
+
+function refreshBattle(
+  newEnemy=false
+){
+
+  const pi=
+    getInstrument(
+      profile.equipped
+    );
+
+
+  if(
+    newEnemy ||
+    !battle.enemy
+  ){
+
+    const ei=
+      pick(
+        instruments
+      );
+
+
+    battle={
+
+      playerHp:
+        Math.round(
+          100+
+          pi.defense*.4
+        ),
+
+      playerMax:
+        Math.round(
+          100+
+          pi.defense*.4
+        ),
+
+      enemyHp:
+        Math.round(
+          100+
+          ei.defense*.4
+        ),
+
+      enemyMax:
+        Math.round(
+          100+
+          ei.defense*.4
+        ),
+
+      enemy:{
+        name:
+          pick(
+            botNames
+          ),
+
+        instrument:
+          ei.name
+      },
+
+      energy:0,
+
+      shield:false,
+
+      busy:false
+
+    };
+
+  }
+
+
+  $('#playerBattleName')
+    .textContent=
+      profile.name||
+      'Player';
+
+
+  $('#playerInstrumentLabel')
+    .textContent=
+      profile.equipped;
+
+
+  $('#cpuBattleName')
+    .textContent=
+      battle.enemy.name;
+
+
+  $('#cpuInstrumentLabel')
+    .textContent=
+      battle.enemy.instrument;
+
+
+  renderSoloBattle();
+
+}
+
+
+function renderSoloBattle(){
+
+  const pi=
+    getInstrument(
+      profile.equipped
+    );
+
+
+  const moves=
+    moveSets[
+      pi.play
+    ]||
+    moveSets.strum;
+
+
+  $('#playerHpFill')
+    .style.width=
+      `${
+        100*
+        battle.playerHp/
+        battle.playerMax
+      }%`;
+
+
+  $('#cpuHpFill')
+    .style.width=
+      `${
+        100*
+        battle.enemyHp/
+        battle.enemyMax
+      }%`;
+
+
+  $('#playerHpText')
+    .textContent=
+      `${battle.playerHp} / ${battle.playerMax}`;
+
+
+  $('#cpuHpText')
+    .textContent=
+      `${battle.enemyHp} / ${battle.enemyMax}`;
+
+
+  $('#energyPips')
+    .innerHTML=
+
+      [0,1,2]
+        .map(
+          i=>
+            `
+            <i
+              class="
+                ${
+                  i<battle.energy
+                    ?'on'
+                    :''
+                }
+              "
+            ></i>
+            `
+        )
+        .join('');
+
+
+  $('#moveButtons')
+    .innerHTML=
+
+      moves
+        .map(
+          (
+            m,
+            i
+          )=>
+            `
+            <button
+              class="
+                move-btn
+                ${i===3?'ultimate':''}
+              "
+              data-solo-move="${i}"
+
+              ${
+                battle.busy ||
+                (
+                  i===3 &&
+                  battle.energy<3
+                )
+
+                  ?'disabled'
+                  :''
+              }
+            >
+
+              <strong>
+                ${m[0]}
+              </strong>
+
+              <span>
+
+                ${
+                  i===3
+
+                    ?'ULTIMATE • 3 ENERGY'
+
+                    :m[1]
+                      .toUpperCase()
+                }
+
+              </span>
+
+              <small>
+
+                ${
+                  m[1]==='heal'
+
+                    ?'Restore HP'
+
+                    :m[1]==='shield'
+
+                    ?'Block next hit'
+
+                    :'Deal musical damage'
+                }
+
+              </small>
+
+            </button>
+            `
+        )
+        .join('');
+
+
+  $$(
+    '[data-solo-move]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>
+          soloMove(
+            +b.dataset.soloMove
+          )
+  );
+
+}
+
+
+async function soloMove(
+  idx
+){
+
+  if(
+    battle.busy
+  )
+    return;
+
+
+  battle.busy=
+    true;
+
+
+  const inst=
+    getUpgradedInstrument(
+      profile.equipped
+    );
+
+
+  const move=
+    (
+      moveSets[
+        inst.play
+      ]||
+      moveSets.strum
+    )[
+      idx
+    ];
+
+
+  let text='';
+
+
+  playInstrument(
+    inst.name,
+    idx===3
+      ?660
+      :440
+  );
+
+
+  if(
+    move[1]==='heal'
+  ){
+
+    const h=
+      Math.round(
+        inst.melody*.25+
+        12
+      );
+
+
+    battle.playerHp=
+      clamp(
+        battle.playerHp+h,
+        0,
+        battle.playerMax
+      );
+
+
+    battle.energy=
+      clamp(
+        battle.energy+1,
+        0,
+        3
+      );
+
+
+    text=
+      `${move[0]} restored ${h} HP.`;
+
+
+    S.heal();
+
+  }
+
+
+  else if(
+    move[1]==='shield'
+  ){
+
+    battle.shield=
+      true;
+
+
+    battle.energy=
+      clamp(
+        battle.energy+1,
+        0,
+        3
+      );
+
+
+    text=
+      `${move[0]} created a musical shield.`;
+
+
+    S.shield();
+
+  }
+
+
+  else{
+
+    let mult=
+      move[2];
+
+
+    if(
+      idx===3
+    ){
+
+      battle.energy=
+        0;
+
+
+      S.ultimate();
+
+    }
+
+    else{
+
+      battle.energy=
+        clamp(
+          battle.energy+1,
+          0,
+          3
+        );
+
+    }
+
+
+    let dmg=
+      Math.max(
+        6,
+
+        Math.round(
+
+          (
+            inst.attack*.32
+            +
+            inst.rhythm*.12
+            +
+            rand(
+              -3,
+              7
+            )
+          )
+
+          *
+          mult
+
+          -
+
+          getInstrument(
+            battle.enemy.instrument
+          ).defense
+          *
+          .06
+
+        )
+      );
+
+
+    const crit=
+      Math.random()
+      <
+      .08+
+      inst.melody/
+      1200;
+
+
+    if(
+      crit
+    ){
+
+      dmg=
+        Math.round(
+          dmg*
+          1.5
+        );
+
+
+      S.critical();
+
+    }
+
+    else{
+
+      S.attack();
+
+    }
+
+
+    battle.enemyHp=
+      clamp(
+        battle.enemyHp-dmg,
+        0,
+        battle.enemyMax
+      );
+
+
+    text=
+      `${move[0]} dealt ${dmg}${crit?' CRITICAL':''} damage.`;
+
+
+    addMastery(
+      inst.name,
+      2
+    );
+
+  }
+
+
+  $('#battleStatus')
+    .textContent=
+      text;
+
+
+  $('#battleLog')
+    .textContent=
+      text;
+
+
+  renderSoloBattle();
+
+
+  if(
+    battle.enemyHp<=0
+  ){
+
+    battle.busy=
+      false;
+
+
+    profile.wins++;
+
+
+    progressQuest(
+      'battle',
+      1
+    );
+
+
+    reward(
+      24,
+      18,
+      'Battle won!'
+    );
+
+
+    addInstrumentXP(
+      profile.equipped,
+      6
+    );
+
+
+    S.victory();
+
+
+    setTimeout(
+      ()=>
+        refreshBattle(
+          true
+        ),
+      1000
+    );
+
+
+    return;
+
+  }
+
+
+  await wait(
+    700
+  );
+
+
+  const ei=
+    getInstrument(
+      battle.enemy.instrument
+    );
+
+
+  let edmg=
+    Math.max(
+      5,
+
+      Math.round(
+
+        ei.attack*.28
+        +
+        rand(
+          -3,
+          5
+        )
+        -
+        inst.defense*.05
+
+      )
+    );
+
+
+  if(
+    battle.shield
+  ){
+
+    edmg=
+      Math.round(
+        edmg*
+        .5
+      );
+
+
+    battle.shield=
+      false;
+
+  }
+
+
+  battle.playerHp=
+    clamp(
+      battle.playerHp-edmg,
+      0,
+      battle.playerMax
+    );
+
+
+  playInstrument(
+    ei.name,
+    330
+  );
+
+
+  S.attack();
+
+
+  $('#battleStatus')
+    .textContent=
+      `${battle.enemy.name} dealt ${edmg} damage.`;
+
+
+  $('#battleLog')
+    .textContent=
+      `${text} • Enemy hit for ${edmg}.`;
+
+
+  battle.busy=
+    false;
+
+
+  renderSoloBattle();
+
+
+  if(
+    battle.playerHp<=0
+  ){
+
+    profile.losses++;
+
+
+    addXP(
+      4
+    );
+
+
+    S.defeat();
+
+
+    toast(
+      'Defeat. +4 EXP'
+    );
+
+
+    setTimeout(
+      ()=>
+        refreshBattle(
+          true
+        ),
+      1000
+    );
+
+  }
+
+}
+
+
+$('#newOpponentBtn')
+  .onclick=
+    ()=>
+      refreshBattle(
+        true
+      );
+
+
+/* ============================ TEAM BATTLE ============================ */
+
+let multiplayerState={
+  size:10,
+  blue:[],
+  red:[],
+  playing:false,
+  round:0,
+  playerEnergy:0,
+  waiting:false,
+  resolve:null,
+  blueHP:10000,
+  redHP:10000,
+  maxTeamHP:10000
+};
+
+
+function makeTeamPlayer(
+  team,
+  index
+){
+
+  const human=
+    team==='blue' &&
+    index===0;
+
+
+  const inst=
+    human
+
+      ?getInstrument(
+        profile.equipped
+      )
+
+      :pick(
+        instruments
+      );
+
+
+  return{
+
+    id:
+      `${team}-${index}-${Math.random()}`,
+
+    team,
+
+    human,
+
+    name:
+      human
+
+        ?(
+          profile.name||
+          'Player'
+        )
+
+        :pick(
+          botNames
+        )
+        +
+        rand(
+          1,
+          99
+        ),
+
+    instrument:
+      inst.name,
+
+    icon:
+      inst.icon,
+
+    attack:
+      inst.attack,
+
+    defense:
+      inst.defense,
+
+    melody:
+      inst.melody,
+
+    rhythm:
+      inst.rhythm
+
+  };
+
+}
+
+
+function openLobby(
+  size
+){
+
+  if(
+    multiplayerState.playing
+  )
+    return;
+
+
+  multiplayerState.size=
+    size;
+
+
+  multiplayerState.blue=
+    Array.from(
+      {
+        length:size
+      },
+      (
+        _,
+        i
+      )=>
+        makeTeamPlayer(
+          'blue',
+          i
+        )
+    );
+
+
+  multiplayerState.red=
+    Array.from(
+      {
+        length:size
+      },
+      (
+        _,
+        i
+      )=>
+        makeTeamPlayer(
+          'red',
+          i
+        )
+    );
+
+
+  multiplayerState.blueHP=
+    multiplayerState.redHP=
+      multiplayerState.maxTeamHP=
+        10000;
+
+
+  multiplayerState.playerEnergy=
+    0;
+
+
+  multiplayerState.round=
+    0;
+
+
+  $('#concertRoundLabel')
+    .textContent=
+      'LOBBY';
+
+
+  $('#startTeamBattleBtn')
+    .disabled=
+      false;
+
+
+  $('#startTeamBattleBtn')
+    .textContent=
+      'Start Concert Battle';
+
+
+  $('#teamMovePanel')
+    .classList
+    .add(
+      'hidden'
+    );
+
+
+  renderConcertTeams();
+
+  updateTeamHPBars();
+
+
+  setMP(
+    `<strong>${size}v${size} Concert Battle ready.</strong><span>Both teams share 10,000 HP.</span>`
+  );
+
+
+  $$(
+    '.mp-start'
+  )
+  .forEach(
+    b=>
+      b.classList.toggle(
+        'active',
+        +b.dataset.team===
+        size
+      )
+  );
+
+}
+
+
+function renderConcertTeams(
+  activeId=''
+){
+
+  const render=
+    (
+      arr,
+      team
+    )=>
+
+      arr
+        .map(
+          p=>
+            `
+            <div
+              class="
+                concert-player
+                ${team}
+                ${
+                  p.id===activeId
+                    ?'active'
+                    :''
+                }
+              "
+            >
+
+              <div
+                class="body"
+                data-icon="${p.icon}"
+              ></div>
+
+              <div class="name">
+                ${p.name}
+              </div>
+
+            </div>
+            `
+        )
+        .join('');
+
+
+  $('#blueConcertPlayers')
+    .innerHTML=
+      render(
+        multiplayerState.blue,
+        'blue'
+      );
+
+
+  $('#redConcertPlayers')
+    .innerHTML=
+      render(
+        multiplayerState.red,
+        'red'
+      );
+
+}
+
+
+function updateTeamHPBars(){
+
+  const m=
+    multiplayerState.maxTeamHP;
+
+
+  const b=
+    clamp(
+      multiplayerState.blueHP/
+      m*
+      100,
+      0,
+      100
+    );
+
+
+  const r=
+    clamp(
+      multiplayerState.redHP/
+      m*
+      100,
+      0,
+      100
+    );
+
+
+  $('#blueTeamHPFill')
+    .style.width=
+      b+'%';
+
+
+  $('#redTeamHPFill')
+    .style.width=
+      r+'%';
+
+
+  $('#blueTeamHPText')
+    .textContent=
+      `${Math.round(
+        multiplayerState.blueHP
+      ).toLocaleString()} / ${m.toLocaleString()} HP`;
+
+
+  $('#redTeamHPText')
+    .textContent=
+      `${Math.round(
+        multiplayerState.redHP
+      ).toLocaleString()} / ${m.toLocaleString()} HP`;
+
+}
+
+
+function setMP(
+  html
+){
+
+  $('#multiplayerBattleMessage')
+    .innerHTML=
+      html;
+
+}
+
+
+function teamDamage(
+  attacker,
+  mult=1
+){
+
+  const targetTeam=
+    attacker.team==='blue'
+      ?'red'
+      :'blue';
+
+
+  let dmg=
+    Math.max(
+      120,
+
+      Math.round(
+
+        (
+          attacker.attack*
+          4.2
+
+          +
+
+          attacker.rhythm*
+          1.7
+
+          +
+
+          rand(
+            -40,
+            70
+          )
+        )
+
+        *
+        mult
+
+      )
+    );
+
+
+  const critical=
+    Math.random()
+    <
+    .05+
+    attacker.melody/
+    1000;
+
+
+  if(
+    critical
+  ){
+
+    dmg=
+      Math.round(
+        dmg*
+        1.5
+      );
+
+  }
+
+
+  multiplayerState[
+    targetTeam+
+    'HP'
+  ]=
+
+    Math.max(
+      0,
+
+      multiplayerState[
+        targetTeam+
+        'HP'
+      ]
+      -
+      dmg
+    );
+
+
+  updateTeamHPBars();
+
+
+  return{
+    dmg,
+    critical
+  };
+
+}
+
+
+function waitHumanMove(){
+
+  return new Promise(
+    resolve=>{
+
+      multiplayerState.resolve=
+        resolve;
+
+
+      showTeamMoves();
+
+    }
+  );
+
+}
+
+
+function showTeamMoves(){
+
+  const p=
+    multiplayerState.blue[
+      0
+    ];
+
+
+  const inst=
+    getInstrument(
+      p.instrument
+    );
+
+
+  const moves=
+    moveSets[
+      inst.play
+    ]||
+    moveSets.strum;
+
+
+  multiplayerState.waiting=
+    true;
+
+
+  $('#teamMovePanel')
+    .classList
+    .remove(
+      'hidden'
+    );
+
+
+  $('#teamTurnTitle')
+    .textContent=
+      `${p.name}, choose your move`;
+
+
+  $('#teamEnergyLabel')
+    .textContent=
+      `${multiplayerState.playerEnergy} / 3`;
+
+
+  $('#teamMoveButtons')
+    .innerHTML=
+
+      moves
+        .map(
+          (
+            m,
+            i
+          )=>
+            `
+            <button
+              class="
+                move-btn
+                ${i===3?'ultimate':''}
+              "
+              data-team-move="${i}"
+
+              ${
+                i===3 &&
+                multiplayerState.playerEnergy<3
+
+                  ?'disabled'
+                  :''
+              }
+            >
+
+              <strong>
+                ${m[0]}
+              </strong>
+
+              <span>
+
+                ${
+                  i===3
+
+                    ?'ULTIMATE • 3 ENERGY'
+
+                    :m[1]
+                      .toUpperCase()
+                }
+
+              </span>
+
+              <small>
+
+                ${
+                  m[1]==='heal'
+
+                    ?'Restore team HP'
+
+                    :m[1]==='shield'
+
+                    ?'Reduce next enemy hit'
+
+                    :'Damage Team Red'
+                }
+
+              </small>
+
+            </button>
+            `
+        )
+        .join('');
+
+
+  $$(
+    '[data-team-move]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>{
+
+          if(
+            !multiplayerState.waiting
+          )
+            return;
+
+
+          multiplayerState.waiting=
+            false;
+
+
+          $('#teamMovePanel')
+            .classList
+            .add(
+              'hidden'
+            );
+
+
+          const r=
+            multiplayerState.resolve;
+
+
+          multiplayerState.resolve=
+            null;
+
+
+          r(
+            +b.dataset.teamMove
+          );
+
+        }
+  );
+
+}
+
+
+async function executeTeamMove(
+  idx
+){
+
+  const p=
+    multiplayerState.blue[
+      0
+    ];
+
+
+  const inst=
+    getInstrument(
+      p.instrument
+    );
+
+
+  const move=
+    (
+      moveSets[
+        inst.play
+      ]||
+      moveSets.strum
+    )[
+      idx
+    ];
+
+
+  renderConcertTeams(
+    p.id
+  );
+
+
+  playInstrument(
+    inst.name,
+    idx===3
+      ?659
+      :440
+  );
+
+
+  if(
+    move[1]==='heal'
+  ){
+
+    const h=
+      Math.round(
+        inst.melody*
+        7
+        +
+        220
+      );
+
+
+    multiplayerState.blueHP=
+      clamp(
+        multiplayerState.blueHP+h,
+        0,
+        10000
+      );
+
+
+    multiplayerState.playerEnergy=
+      clamp(
+        multiplayerState.playerEnergy+1,
+        0,
+        3
+      );
+
+
+    S.heal();
+
+
+    setMP(
+      `<strong>💚 ${move[0]}</strong><span>Team Blue restored ${h} HP.</span>`
+    );
+
+  }
+
+
+  else if(
+    move[1]==='shield'
+  ){
+
+    multiplayerState.teamShield=
+      true;
+
+
+    multiplayerState.playerEnergy=
+      clamp(
+        multiplayerState.playerEnergy+1,
+        0,
+        3
+      );
+
+
+    S.shield();
+
+
+    setMP(
+      `<strong>🛡️ ${move[0]}</strong><span>Team Blue is shielded against the next attack.</span>`
+    );
+
+  }
+
+
+  else{
+
+    let mult=
+      move[2];
+
+
+    if(
+      idx===3
+    ){
+
+      mult*=
+        1.5;
+
+
+      multiplayerState.playerEnergy=
+        0;
+
+
+      S.ultimate();
+
+      crowd(
+        1
+      );
+
+    }
+
+    else{
+
+      multiplayerState.playerEnergy=
+        clamp(
+          multiplayerState.playerEnergy+1,
+          0,
+          3
+        );
+
+
+      S.attack();
+
+    }
+
+
+    const hit=
+      teamDamage(
+        p,
+        mult
+      );
+
+
+    if(
+      hit.critical
+    ){
+
+      S.critical();
+
+      crowd(
+        .8
+      );
+
+    }
+
+
+    setMP(
+      `<strong>🔵 ${p.name} used ${move[0]}!</strong><span>${hit.dmg} damage${hit.critical?' • CRITICAL PERFORMANCE!':''}</span>`
+    );
+
+
+    addMastery(
+      inst.name,
+      3
+    );
+
+  }
+
+
+  updateTeamHPBars();
+
+
+  await wait(
+    500
+  );
+
+
+  renderConcertTeams();
+
+}
+
+
+async function aiTeamTurn(
+  p
+){
+
+  renderConcertTeams(
+    p.id
+  );
+
+
+  playInstrument(
+    p.instrument,
+    p.team==='blue'
+      ?420
+      :320
+  );
+
+
+  S.attack();
+
+
+  let hit=
+    teamDamage(
+      p,
+      .8
+    );
+
+
+  if(
+    p.team==='red' &&
+    multiplayerState.teamShield
+  ){
+
+    const restore=
+      Math.round(
+        hit.dmg*
+        .45
+      );
+
+
+    multiplayerState.blueHP=
+      Math.min(
+        10000,
+        multiplayerState.blueHP+
+        restore
+      );
+
+
+    hit.dmg-=
+      restore;
+
+
+    multiplayerState.teamShield=
+      false;
+
+
+    S.shield();
+
+
+    updateTeamHPBars();
+
+  }
+
+
+  if(
+    hit.critical
+  ){
+
+    S.critical();
+
+  }
+
+
+  setMP(
+    `<strong>${p.team==='blue'?'🔵':'🔴'} ${p.name} performs!</strong><span>${p.instrument} deals ${hit.dmg} team damage${hit.critical?' • CRITICAL!':''}</span>`
+  );
+
+
+  await wait(
+    multiplayerState.size>=10
+      ?150
+      :350
+  );
+
+}
+
+
+async function startTeamBattle(){
+
+  if(
+    multiplayerState.playing
+  )
+    return;
+
+
+  multiplayerState.playing=
+    true;
+
+
+  $('#startTeamBattleBtn')
+    .disabled=
+      true;
+
+
+  $('#startTeamBattleBtn')
+    .textContent=
+      'Concert in Progress...';
+
+
+  let round=
+    1;
+
+
+  while(
+    multiplayerState.blueHP>0 &&
+    multiplayerState.redHP>0 &&
+    round<=50
+  ){
+
+    multiplayerState.round=
+      round;
+
+
+    $('#concertRoundLabel')
+      .textContent=
+        `ROUND ${round}`;
+
+
+    setMP(
+      `<strong>🎵 Round ${round}: Your turn!</strong><span>Choose one of your instrument moves.</span>`
+    );
+
+
+    const move=
+      await waitHumanMove();
+
+
+    await executeTeamMove(
+      move
+    );
+
+
+    if(
+      multiplayerState.redHP<=0
+    )
+      break;
+
+
+    for(
+      const p of
+      multiplayerState.blue.slice(
+        1
+      )
+    ){
+
+      await aiTeamTurn(
+        p
+      );
+
+
+      if(
+        multiplayerState.redHP<=0
+      )
+        break;
+
+    }
+
+
+    if(
+      multiplayerState.redHP<=0
+    )
+      break;
+
+
+    for(
+      const p of
+      multiplayerState.red
+    ){
+
+      await aiTeamTurn(
+        p
+      );
+
+
+      if(
+        multiplayerState.blueHP<=0
+      )
+        break;
+
+    }
+
+
+    round++;
+
+  }
+
+
+  multiplayerState.playing=
+    false;
+
+
+  $('#teamMovePanel')
+    .classList
+    .add(
+      'hidden'
+    );
+
+
+  const won=
+    multiplayerState.blueHP>
+    multiplayerState.redHP;
+
+
+  $('#concertRoundLabel')
+    .textContent=
+      won
+        ?'VICTORY'
+        :'DEFEAT';
+
+
+  if(
+    won
+  ){
+
+    crowd(
+      1
+    );
+
+
+    S.victory();
+
+
+    progressQuest(
+      'battle',
+      1
+    );
+
+
+    reward(
+
+      24+
+      multiplayerState.size*
+      2,
+
+      18+
+      multiplayerState.size*
+      2,
+
+      'Concert victory!'
+
+    );
+
+
+    addInstrumentXP(
+      profile.equipped,
+      10
+    );
+
+
+    setMP(
+      `<strong>🏆 TEAM BLUE WINS!</strong><span>${Math.round(multiplayerState.blueHP).toLocaleString()} HP remaining.</span>`
+    );
+
+  }
+
+  else{
+
+    S.defeat();
+
+
+    addXP(
+      6
+    );
+
+
+    setMP(
+      `<strong>Team Red wins the concert.</strong><span>+18 EXP for performing.</span>`
+    );
+
+  }
+
+
+  $('#startTeamBattleBtn')
+    .disabled=
+      false;
+
+
+  $('#startTeamBattleBtn')
+    .textContent=
+      'Play Again';
+
+}
+
+
+$$(
+  '.mp-start'
+)
+.forEach(
+  b=>
+    b.onclick=
+      ()=>
+        openLobby(
+          +b.dataset.team
+        )
+);
+
+
+$('#startTeamBattleBtn')
+  .onclick=
+    startTeamBattle;
+/* ============================ DAILY REWARDS ============================ */
+
+const dailyRewardTable=[
+  {
+    day:1,
+    label:'15 Coins',
+    icon:'🪙',
+    coins:15
+  },
+  {
+    day:2,
+    label:'10 EXP',
+    icon:'⭐',
+    xp:10
+  },
+  {
+    day:3,
+    label:'8 Instrument EXP',
+    icon:'🎵',
+    instrumentXP:8
+  },
+  {
+    day:4,
+    label:'25 Coins + 10 EXP',
+    icon:'🎁',
+    coins:25,
+    xp:10
+  },
+  {
+    day:5,
+    label:'15 Star Dust',
+    icon:'💫',
+    dust:15
+  },
+  {
+    day:6,
+    label:'Pet Egg',
+    icon:'🥚',
+    petEgg:true
+  },
+  {
+    day:7,
+    label:'Weekly Chest',
+    icon:'👑',
+    coins:50,
+    xp:30,
+    instrumentXP:15,
+    weeklyChest:true
+  }
+];
+
+
+function getLocalDateKey(
+  date=new Date()
+){
+
+  const y=
+    date.getFullYear();
+
+  const m=
+    String(
+      date.getMonth()+1
+    )
+    .padStart(
+      2,
+      '0'
+    );
+
+  const d=
+    String(
+      date.getDate()
+    )
+    .padStart(
+      2,
+      '0'
+    );
+
+  return `${y}-${m}-${d}`;
+
+}
+
+
+function getYesterdayDateKey(){
+
+  const d=
+    new Date();
+
+  d.setDate(
+    d.getDate()-1
+  );
+
+  return getLocalDateKey(
+    d
+  );
+
+}
+
+
+function canClaimDailyReward(){
+
+  return (
+    profile.dailyRewards.lastClaim !==
+    getLocalDateKey()
+  );
+
+}
+
+
+function getNextDailyRewardDay(){
+
+  const today=
+    getLocalDateKey();
+
+  const y=
+    getYesterdayDateKey();
+
+
+  if(
+    profile.dailyRewards.lastClaim===today
+  ){
+
+    return (
+      profile.dailyRewards.streak||
+      1
+    );
+
+  }
+
+
+  if(
+    profile.dailyRewards.lastClaim===y
+  ){
+
+    return (
+      profile.dailyRewards.streak%7
+    )+1;
+
+  }
+
+
+  return 1;
+
+}
+
+
+function giveDailyPetEgg(){
+
+  const eggs=[
+
+    {
+      egg:'Meadow Egg',
+      icon:'🌱',
+      pet:'Music Bunny',
+      layer:'Daily Reward'
+    },
+
+    {
+      egg:'Cave Egg',
+      icon:'🪨',
+      pet:'Mole Beat',
+      layer:'Daily Reward'
+    },
+
+    {
+      egg:'Stone Egg',
+      icon:'🐾',
+      pet:'Rock Pup',
+      layer:'Daily Reward'
+    },
+
+    {
+      egg:'Golden Egg',
+      icon:'🪙',
+      pet:'Gold Chick',
+      layer:'Daily Reward'
+    },
+
+    {
+      egg:'Crystal Egg',
+      icon:'💎',
+      pet:'Crystal Fox',
+      layer:'Daily Reward'
+    }
+
+  ];
+
+
+  const egg=
+    pick(
+      Math.random()<.08
+        ?eggs.slice(3)
+        :eggs.slice(0,3)
+    );
+
+
+  profile.petEggs.push({
+
+    id:
+      `daily-${Date.now()}-${Math.random()}`,
+
+    ...egg,
+
+    hatched:false
+
+  });
+
+
+  toast(
+    `${egg.icon} You received a ${egg.egg}!`
+  );
+
+}
+
+
+function rollWeeklyChestBonus(){
+
+  const r=
+    Math.random();
+
+
+  if(
+    r<.03
+  ){
+
+    profile.petEggs.push({
+
+      id:
+        `weekly-${Date.now()}-${Math.random()}`,
+
+      egg:
+        'Celestial Egg',
+
+      icon:
+        '✨',
+
+      pet:
+        'Star Phoenix',
+
+      layer:
+        'Weekly Chest',
+
+      hatched:false
+
+    });
+
+
+    toast(
+      '✨ JACKPOT! Celestial Egg!'
+    );
+
+  }
+
+  else if(
+    r<.15
+  ){
+
+    profile.dust+=25;
+
+
+    toast(
+      '💫 Weekly Chest bonus: +25 Star Dust!'
+    );
+
+  }
+
+}
+
+
+function claimDailyReward(){
+
+  if(
+    !canClaimDailyReward()
+  ){
+
+    return toast(
+      "You already claimed today's reward!"
+    );
+
+  }
+
+
+  profile.dailyRewards.streak=
+    profile.dailyRewards.lastClaim===
+    getYesterdayDateKey()
+
+      ?(
+        profile.dailyRewards.streak%7
+      )+1
+
+      :1;
+
+
+  const r=
+    dailyRewardTable[
+      profile.dailyRewards.streak-1
+    ];
+
+
+  if(
+    r.coins
+  ){
+
+    profile.coins+=
+      r.coins;
+
+  }
+
+
+  if(
+    r.xp
+  ){
+
+    addXP(
+      r.xp
+    );
+
+  }
+
+
+  if(
+    r.dust
+  ){
+
+    profile.dust+=
+      r.dust;
+
+  }
+
+
+  if(
+    r.instrumentXP
+  ){
+
+    addInstrumentXP(
+      profile.equipped,
+      r.instrumentXP
+    );
+
+  }
+
+
+  if(
+    r.petEgg
+  ){
+
+    giveDailyPetEgg();
+
+  }
+
+
+  if(
+    r.weeklyChest
+  ){
+
+    rollWeeklyChestBonus();
+
+  }
+
+
+  profile.dailyRewards.lastClaim=
+    getLocalDateKey();
+
+
+  persist();
+
+  updateProfileUI();
+
+  renderDailyRewards();
+
+  renderCraftEggs();
+
+  S.treasure();
+
+
+  toast(
+    `${r.icon} Day ${r.day}: ${r.label}!`
+  );
+
+}
+
+
+function renderDailyRewards(){
+
+  const grid=
+    $('#dailyRewardGrid');
+
+
+  if(
+    !grid
+  )
+    return;
+
+
+  const next=
+    getNextDailyRewardDay();
+
+
+  const claimable=
+    canClaimDailyReward();
+
+
+  $('#dailyStreakLabel')
+    .textContent=
+      profile.dailyRewards.streak||
+      0;
+
+
+  grid.innerHTML=
+    dailyRewardTable
+      .map(
+        r=>
+          `
+          <div
+            class="
+              daily-reward-card
+              ${
+                claimable &&
+                r.day===next
+                  ?'current'
+                  :''
+              }
+
+              ${
+                !claimable &&
+                r.day===
+                profile.dailyRewards.streak
+                  ?'claimed'
+                  :''
+              }
+
+              ${
+                r.day===7
+                  ?'day-seven'
+                  :''
+              }
+            "
+          >
+
+            <span class="daily-day">
+              DAY ${r.day}
+            </span>
+
+            <div class="daily-icon">
+              ${r.icon}
+            </div>
+
+            <strong>
+              ${r.label}
+            </strong>
+
+          </div>
+          `
+      )
+      .join('');
+
+
+  const b=
+    $('#claimDailyBtn');
+
+
+  b.disabled=
+    !claimable;
+
+
+  b.textContent=
+    claimable
+      ?`CLAIM DAY ${next}`
+      :'COME BACK TOMORROW';
+
+}
+
+
+/* ============================ QUESTS / GEAR / PETS ============================ */
+
+const questDefs=[
+
+  {
+    id:'fight',
+    name:'Battle Practice',
+    goal:3,
+    label:'Defeat 3 RPG enemies',
+    xp:10,
+    coins:6
+  },
+
+  {
+    id:'mine',
+    name:'Deep Miner',
+    goal:20,
+    label:'Mine 20 MusicCraft blocks',
+    xp:10,
+    coins:6
+  },
+
+  {
+    id:'battle',
+    name:'Arena Winner',
+    goal:1,
+    label:'Win 1 Solo or Team Battle',
+    xp:12,
+    coins:8
+  }
+
+];
+
+
+function ensureQuests(){
+
+  questDefs
+    .forEach(
+      q=>{
+
+        if(
+          !profile.quests[
+            q.id
+          ]
+        ){
+
+          profile.quests[
+            q.id
+          ]={
+
+            progress:0,
+
+            claimed:false
+
+          };
+
+        }
+
+      }
+    );
+
+}
+
+
+function progressQuest(
+  id,
+  n=1
+){
+
+  ensureQuests();
+
+
+  const q=
+    questDefs.find(
+      x=>
+        x.id===id
+    );
+
+
+  const s=
+    profile.quests[
+      id
+    ];
+
+
+  if(
+    !q ||
+    s.claimed
+  )
+    return;
+
+
+  s.progress=
+    Math.min(
+      q.goal,
+      s.progress+n
+    );
+
+
+  persist();
+
+  renderQuests();
+
+}
+
+
+function claimQuest(
+  id
+){
+
+  const q=
+    questDefs.find(
+      x=>
+        x.id===id
+    );
+
+
+  const s=
+    profile.quests[
+      id
+    ];
+
+
+  if(
+    !q ||
+    !s ||
+    s.progress<q.goal ||
+    s.claimed
+  )
+    return;
+
+
+  s.claimed=
+    true;
+
+
+  reward(
+    q.xp,
+    q.coins,
+    `${q.name} complete!`
+  );
+
+
+  renderQuests();
+
+}
+
+
+function renderQuests(){
+
+  const el=
+    $('#questList');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  ensureQuests();
+
+
+  el.innerHTML=
+    questDefs
+      .map(
+        q=>{
+
+          const s=
+            profile.quests[
+              q.id
+            ];
+
+
+          const pct=
+            Math.min(
+              100,
+              s.progress/
+              q.goal*
+              100
+            );
+
+
+          return `
+            <div class="quest-card">
+
+              <strong>
+                ${q.name}
+              </strong>
+
+              <span>
+                ${q.label}
+              </span>
+
+              <div class="quest-progress">
+                <i
+                  style="
+                    width:${pct}%
+                  "
+                ></i>
+              </div>
+
+              <small>
+
+                ${s.progress}/${q.goal}
+
+                • ${q.xp} EXP
+
+                • ${q.coins} Coins
+
+              </small>
+
+
+              ${
+                s.progress>=q.goal &&
+                !s.claimed
+
+                  ?`
+                  <button
+                    class="btn gold small"
+                    data-quest-claim="${q.id}"
+                  >
+                    Claim
+                  </button>
+                  `
+
+                  :s.claimed
+
+                    ?'<small> ✓ Claimed</small>'
+
+                    :''
+              }
+
+            </div>
+          `;
+
+        }
+      )
+      .join('');
+
+
+  $$(
+    '[data-quest-claim]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>
+          claimQuest(
+            b.dataset.questClaim
+          )
+  );
+
+}
+
+
+function renderEquipment(){
+
+  const el=
+    $('#equipmentList');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  el.innerHTML=
+    profile.equipmentInventory
+      .map(
+        (
+          g,
+          i
+        )=>{
+
+          const eq=
+            profile.equippedGear[
+              g.slot
+            ]?.name===
+            g.name;
+
+
+          return `
+            <div class="gear-card">
+
+              <div>
+
+                <strong>
+                  ${g.name}
+                </strong>
+
+                <small>
+
+                  ${g.slot}
+
+                  •
+
+                  ${
+                    g.attack
+                      ?`+${g.attack} ATK `
+                      :''
+                  }
+
+                  ${
+                    g.defense
+                      ?`+${g.defense} DEF`
+                      :''
+                  }
+
+                </small>
+
+              </div>
+
+
+              <button
+                class="
+                  btn
+                  small
+                  ${
+                    eq
+                      ?'gold'
+                      :'ghost'
+                  }
+                "
+                data-gear="${i}"
+              >
+
+                ${
+                  eq
+                    ?'Equipped'
+                    :'Equip'
+                }
+
+              </button>
+
+            </div>
+          `;
+
+        }
+      )
+      .join('');
+
+
+  $$(
+    '[data-gear]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>{
+
+          const g=
+            profile.equipmentInventory[
+              +b.dataset.gear
+            ];
+
+
+          profile.equippedGear[
+            g.slot
+          ]=
+            g;
+
+
+          persist();
+
+          renderEquipment();
+
+          renderInstruments();
+
+          S.click();
+
+        }
+  );
+
+}
+
+
+const petTypes={
+
+  'Music Bunny':'melody',
+
+  'Mole Beat':'defense',
+
+  'Rock Pup':'attack',
+
+  'Shadow Bat':'attack',
+
+  'Gear Fox':'defense',
+
+  'Echo Spider':'melody',
+
+  'Gold Chick':'all',
+
+  'Crystal Fox':'melody',
+
+  'Diamond Dragon':'attack',
+
+  'Obsidian Wolf':'defense',
+
+  'Relic Guardian':'defense',
+
+  'Lava Dragon':'attack',
+
+  'Echo Spirit':'melody',
+
+  'Star Phoenix':'all',
+
+  'Harmony Dragon':'all'
+
+};
+
+
+function hatchCraftEgg(
+  id
+){
+
+  const egg=
+    profile.petEggs.find(
+      e=>
+        e.id===id
+    );
+
+
+  if(
+    !egg ||
+    egg.hatched
+  )
+    return;
+
+
+  egg.hatched=
+    true;
+
+
+  const existing=
+    profile.pets.find(
+      p=>
+        p.name===
+        egg.pet
+    );
+
+
+  if(
+    existing
+  ){
+
+    profile.dust+=10;
+
+
+    toast(
+      `✨ Duplicate ${egg.pet}! +10 Star Dust`
+    );
+
+  }
+
+  else{
+
+    profile.pets.push({
+
+      id:
+        `pet-${Date.now()}-${Math.random()}`,
+
+      name:
+        egg.pet,
+
+      level:1,
+
+      xp:0,
+
+      type:
+        petTypes[
+          egg.pet
+        ]||
+        'all',
+
+      source:
+        egg.layer
+
+    });
+
+
+    toast(
+      `🐾 ${egg.pet} hatched!`
+    );
+
+  }
+
+
+  persist();
+
+  renderCraftEggs();
+
+  renderPets();
+
+  updateProfileUI();
+
+  S.gacha();
+
+}
+
+
+function renderPets(){
+
+  const el=
+    $('#petList');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  if(
+    !profile.pets.length
+  ){
+
+    el.innerHTML=
+      '<p class="muted">Hatch eggs in MusicCraft to collect pets.</p>';
+
+
+    return;
+
+  }
+
+
+  el.innerHTML=
+    profile.pets
+      .map(
+        p=>{
+
+          const need=
+            (
+              p.level||
+              1
+            )*
+            40;
+
+
+          const eq=
+            profile.equippedPet===
+            p.id;
+
+
+          return `
+            <div class="pet-card">
+
+              <div>
+
+                <strong>
+
+                  ${p.name}
+
+                  • Lv.${p.level||1}
+
+                </strong>
+
+                <small>
+                  ${p.type} pet
+                </small>
+
+                <div class="pet-xp">
+
+                  <i
+                    style="
+                      width:${
+                        Math.min(
+                          100,
+                          (
+                            p.xp||
+                            0
+                          )/
+                          need*
+                          100
+                        )
+                      }%
+                    "
+                  ></i>
+
+                </div>
+
+              </div>
+
+
+              <button
+                class="
+                  btn
+                  small
+                  ${
+                    eq
+                      ?'gold'
+                      :'ghost'
+                  }
+                "
+                data-pet="${p.id}"
+              >
+
+                ${
+                  eq
+                    ?'Active'
+                    :'Equip'
+                }
+
+              </button>
+
+            </div>
+          `;
+
+        }
+      )
+      .join('');
+
+
+  $$(
+    '[data-pet]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>{
+
+          profile.equippedPet=
+            b.dataset.pet;
+
+
+          persist();
+
+          renderPets();
+
+          renderInstruments();
+
+          S.click();
+
+        }
+  );
+
+}
+
+
+function renderEvolutionPanel(){
+
+  const el=
+    $('#evolutionPanel');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  const name=
+    profile.equipped;
+
+
+  const u=
+    getInstrumentUpgradeData(
+      name
+    );
+
+
+  const done=
+    profile.instrumentEvolutions[
+      name
+    ];
+
+
+  const req={
+
+    Stone:20,
+
+    Crystal:5
+
+  };
+
+
+  if(
+    done
+  ){
+
+    el.innerHTML=
+      `
+      <div class="evolution-card">
+
+        <strong>
+          ${done.name}
+        </strong>
+
+        <span>
+          Evolution complete • +10% base stats
+        </span>
+
+      </div>
+      `;
+
+
+    return;
+
+  }
+
+
+  const can=
+    u.level>=10
+    &&
+    (
+      profile.materials.Stone||
+      0
+    )>=20
+    &&
+    (
+      profile.materials.Crystal||
+      0
+    )>=5;
+
+
+  el.innerHTML=
+    `
+    <div class="evolution-card">
+
+      <strong>
+        ${name} Evolution
+      </strong>
+
+      <span>
+        Requires Instrument Lv.10 + 20 Stone + 5 Crystal
+      </span>
+
+      <button
+        id="evolveInstrumentBtn"
+        class="
+          btn
+          ${
+            can
+              ?'gold'
+              :'ghost'
+          }
+          small
+        "
+        ${
+          can
+            ?''
+            :'disabled'
+        }
+      >
+        Evolve
+      </button>
+
+    </div>
+    `;
+
+
+  if(
+    can
+  ){
+
+    $('#evolveInstrumentBtn')
+      .onclick=
+        ()=>{
+
+          profile.materials.Stone-=20;
+
+          profile.materials.Crystal-=5;
+
+
+          profile.instrumentEvolutions[
+            name
+          ]={
+
+            name:
+              `${name} ★ Harmonic`
+
+          };
+
+
+          persist();
+
+          S.ultimate();
+
+
+          toast(
+            `✨ ${name} evolved!`
+          );
+
+
+          renderEvolutionPanel();
+
+          renderInstruments();
+
+        };
+
+  }
+
+}
+
+
+/* ============================ MUSICVERSE ADVENTURE RPG ============================ */
+
+
+/* ============================ SKILL TREE ============================ */
+
+const skillTreeDefs={
+
+  power:{
+
+    name:
+      'Power',
+
+    icon:
+      '⚔️',
+
+    desc:
+      'Stronger attacks and special moves.',
+
+    nodes:[
+
+      {
+
+        id:
+          'power1',
+
+        icon:
+          '🎸',
+
+        name:
+          'Forte',
+
+        desc:
+          '+3% attack damage per rank.',
+
+        max:3,
+
+        requires:null
+
+      },
+
+      {
+
+        id:
+          'power2',
+
+        icon:
+          '💥',
+
+        name:
+          'Critical Ear',
+
+        desc:
+          '+2% critical chance per rank.',
+
+        max:3,
+
+        requires:
+          'power1'
+
+      },
+
+      {
+
+        id:
+          'power3',
+
+        icon:
+          '🔥',
+
+        name:
+          'Encore Strike',
+
+        desc:
+          '+5% special move damage per rank.',
+
+        max:3,
+
+        requires:
+          'power2'
+
+      }
+
+    ]
+
+  },
+
+
+  rhythm:{
+
+    name:
+      'Rhythm',
+
+    icon:
+      '🥁',
+
+    desc:
+      'Defence, dodging and tempo control.',
+
+    nodes:[
+
+      {
+
+        id:
+          'rhythm1',
+
+        icon:
+          '🛡️',
+
+        name:
+          'Tempo Guard',
+
+        desc:
+          '+3% defence per rank.',
+
+        max:3,
+
+        requires:null
+
+      },
+
+      {
+
+        id:
+          'rhythm2',
+
+        icon:
+          '💨',
+
+        name:
+          'Quick Beat',
+
+        desc:
+          '+2% dodge chance per rank.',
+
+        max:3,
+
+        requires:
+          'rhythm1'
+
+      },
+
+      {
+
+        id:
+          'rhythm3',
+
+        icon:
+          '⚡',
+
+        name:
+          'Momentum',
+
+        desc:
+          '+4% normal attack damage per rank.',
+
+        max:3,
+
+        requires:
+          'rhythm2'
+
+      }
+
+    ]
+
+  },
+
+
+  harmony:{
+
+    name:
+      'Harmony',
+
+    icon:
+      '🎼',
+
+    desc:
+      'More HP, healing and pet growth.',
+
+    nodes:[
+
+      {
+
+        id:
+          'harmony1',
+
+        icon:
+          '❤️',
+
+        name:
+          'Vital Chorus',
+
+        desc:
+          '+5 max RPG HP per rank.',
+
+        max:3,
+
+        requires:null
+
+      },
+
+      {
+
+        id:
+          'harmony2',
+
+        icon:
+          '✨',
+
+        name:
+          'Healing Notes',
+
+        desc:
+          '+8% healing per rank.',
+
+        max:3,
+
+        requires:
+          'harmony1'
+
+      },
+
+      {
+
+        id:
+          'harmony3',
+
+        icon:
+          '🐾',
+
+        name:
+          'Companion Bond',
+
+        desc:
+          '+10% pet EXP per rank.',
+
+        max:3,
+
+        requires:
+          'harmony2'
+
+      }
+
+    ]
+
+  }
+
+};
+
+
+function totalSkillPointsEarned(){
+
+  return Math.floor(
+    (
+      profile.level-1
+    )/
+    2
+  );
+
+}
+
+
+function spentSkillPoints(){
+
+  return Object
+    .values(
+      profile.skillTree||
+      {}
+    )
+    .reduce(
+      (
+        a,
+        b
+      )=>
+
+        a+
+        (
+          Number(
+            b
+          )||
+          0
+        ),
+
+      0
+    );
+
+}
+
+
+function availableSkillPoints(){
+
+  return Math.max(
+    0,
+
+    totalSkillPointsEarned()
+    -
+    spentSkillPoints()
+  );
+
+}
+
+
+function skillRank(
+  id
+){
+
+  return Number(
+    profile.skillTree?.[
+      id
+    ]||
+    0
+  );
+
+}
+
+
+function canBuySkill(
+  node
+){
+
+  if(
+    availableSkillPoints()<=0
+  ){
+
+    return false;
+
+  }
+
+
+  if(
+    skillRank(
+      node.id
+    )>=
+    node.max
+  ){
+
+    return false;
+
+  }
+
+
+  if(
+    node.requires
+    &&
+    skillRank(
+      node.requires
+    )<=0
+  ){
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+function buySkill(
+  id
+){
+
+  let node=
+    null;
+
+
+  for(
+    const branch of
+    Object.values(
+      skillTreeDefs
+    )
+  ){
+
+    node=
+      branch.nodes.find(
+        n=>
+          n.id===id
+      );
+
+
+    if(
+      node
+    )
+      break;
+
+  }
+
+
+  if(
+    !node
+  )
+    return;
+
+
+  if(
+    !canBuySkill(
+      node
+    )
+  ){
+
+    if(
+      availableSkillPoints()<=0
+    ){
+
+      toast(
+        'You need another Skill Point.'
+      );
+
+    }
+
+    else if(
+      node.requires
+      &&
+      skillRank(
+        node.requires
+      )<=0
+    ){
+
+      toast(
+        'Unlock the previous skill first.'
+      );
+
+    }
+
+
+    return;
+
+  }
+
+
+  profile.skillTree[
+    id
+  ]=
+
+    skillRank(
+      id
+    )+
+    1;
+
+
+  applySkillTreeVitals();
+
+  persist();
+
+  S.level();
+
+
+  toast(
+    `🌳 ${node.name} is now Rank ${profile.skillTree[id]}!`
+  );
+
+
+  renderSkillTree();
+
+  renderRpgMap();
+
+
+  if(
+    rpgEnemy
+  ){
+
+    renderRpgBattle();
+
+  }
+
+}
+
+
+function getSkillBonuses(){
+
+  return{
+
+    attackPct:
+      skillRank(
+        'power1'
+      )*
+      .03,
+
+
+    critChance:
+      skillRank(
+        'power2'
+      )*
+      .02,
+
+
+    specialPct:
+      skillRank(
+        'power3'
+      )*
+      .05,
+
+
+    defensePct:
+      skillRank(
+        'rhythm1'
+      )*
+      .03,
+
+
+    dodgeChance:
+      skillRank(
+        'rhythm2'
+      )*
+      .02,
+
+
+    normalPct:
+      skillRank(
+        'rhythm3'
+      )*
+      .04,
+
+
+    maxHp:
+      skillRank(
+        'harmony1'
+      )*
+      5,
+
+
+    healPct:
+      skillRank(
+        'harmony2'
+      )*
+      .08,
+
+
+    petXpPct:
+      skillRank(
+        'harmony3'
+      )*
+      .10
+
+  };
+
+}
+
+
+function applySkillTreeVitals(){
+
+  const b=
+    getSkillBonuses();
+
+
+  const oldMax=
+    profile.rpg.maxHp||
+    100;
+
+
+  const newMax=
+    100+
+    b.maxHp;
+
+
+  profile.rpg.maxHp=
+    newMax;
+
+
+  if(
+    profile.rpg.hp>
+    newMax
+  ){
+
+    profile.rpg.hp=
+      newMax;
+
+  }
+
+
+  if(
+    newMax>
+    oldMax
+  ){
+
+    profile.rpg.hp=
+      Math.min(
+
+        newMax,
+
+        profile.rpg.hp+
+        (
+          newMax-
+          oldMax
+        )
+
+      );
+
+  }
+
+}
+
+
+function renderSkillTree(){
+
+  const el=
+    $('#skillTree');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  applySkillTreeVitals();
+
+
+  $('#skillPointsAvailable')
+    .textContent=
+      availableSkillPoints();
+
+
+  el.innerHTML=
+
+    Object
+      .values(
+        skillTreeDefs
+      )
+      .map(
+        branch=>
+          `
+          <div class="skill-branch">
+
+            <div class="skill-branch-title">
+
+              <strong>
+                ${branch.icon}
+                ${branch.name}
+              </strong>
+
+              <span>
+                ${branch.desc}
+              </span>
+
+            </div>
+
+
+            ${
+
+              branch.nodes
+                .map(
+                  (
+                    n,
+                    i
+                  )=>{
+
+                    const rank=
+                      skillRank(
+                        n.id
+                      );
+
+
+                    const locked=
+                      n.requires
+                      &&
+                      skillRank(
+                        n.requires
+                      )<=0;
+
+
+                    const maxed=
+                      rank>=
+                      n.max;
+
+
+                    return `
+
+                      ${
+                        i
+                          ?'<div class="skill-connector"></div>'
+                          :''
+                      }
+
+                      <div
+                        class="
+                          skill-node
+                          ${
+                            locked
+                              ?'locked'
+                              :''
+                          }
+
+                          ${
+                            maxed
+                              ?'maxed'
+                              :''
+                          }
+                        "
+                      >
+
+                        <div class="skill-icon">
+                          ${n.icon}
+                        </div>
+
+                        <div>
+
+                          <strong>
+                            ${n.name}
+                          </strong>
+
+                          <small>
+                            ${n.desc}
+                          </small>
+
+                        </div>
+
+                        <div>
+
+                          <div class="skill-rank">
+
+                            Rank
+                            ${rank}
+                            /
+                            ${n.max}
+
+                          </div>
+
+                          <button
+                            data-skill="${n.id}"
+
+                            ${
+                              maxed
+                              ||
+                              locked
+                              ||
+                              availableSkillPoints()<=0
+
+                                ?'disabled'
+
+                                :''
+                            }
+                          >
+
+                            ${
+                              maxed
+                                ?'MAX'
+
+                                :locked
+                                  ?'LOCKED'
+
+                                  :'UPGRADE'
+                            }
+
+                          </button>
+
+                        </div>
+
+                      </div>
+                    `;
+
+                  }
+                )
+                .join('')
+
+            }
+
+          </div>
+          `
+      )
+      .join('')
+
+    +
+
+    `
+    <div class="skill-summary">
+
+      <div>
+
+        <b>
+          +${
+            Math.round(
+              getSkillBonuses()
+                .attackPct*
+              100
+            )
+          }%
+        </b>
+
+        <span>
+          Attack
+        </span>
+
+      </div>
+
+
+      <div>
+
+        <b>
+          +${getSkillBonuses().maxHp}
+        </b>
+
+        <span>
+          RPG Max HP
+        </span>
+
+      </div>
+
+
+      <div>
+
+        <b>
+          +${
+            Math.round(
+              getSkillBonuses()
+                .petXpPct*
+              100
+            )
+          }%
+        </b>
+
+        <span>
+          Pet EXP
+        </span>
+
+      </div>
+
+    </div>
+    `;
+
+
+  $$(
+    '[data-skill]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>
+          buySkill(
+            b.dataset.skill
+          )
+  );
+
+}
+
+
+/* ============================ RPG WORLD ============================ */
+
+const rpgZones=[
+
+  {
+    name:'Melody Village',
+    emoji:'🏡',
+    enemy:'Slime Note',
+    boss:'Village Maestro'
+  },
+
+  {
+    name:'Rhythm Forest',
+    emoji:'🌲',
+    enemy:'Beat Bug',
+    boss:'Tempo Wolf'
+  },
+
+  {
+    name:'Echo Caves',
+    emoji:'🕳️',
+    enemy:'Echo Bat',
+    boss:'Crystal Golem'
+  },
+
+  {
+    name:'Brass Kingdom',
+    emoji:'🏰',
+    enemy:'Horn Guard',
+    boss:'Royal Conductor'
+  },
+
+  {
+    name:'Crystal Highlands',
+    emoji:'💎',
+    enemy:'Shard Sprite',
+    boss:'Crystal Maestro'
+  },
+
+  {
+    name:'Shadow Ruins',
+    emoji:'🗿',
+    enemy:'Shadow Note',
+    boss:'Silent Knight'
+  },
+
+  {
+    name:'Magma Canyon',
+    emoji:'🔥',
+    enemy:'Fire Beat',
+    boss:'Inferno Dragon'
+  },
+
+  {
+    name:'Celestial Valley',
+    emoji:'✨',
+    enemy:'Star Wisp',
+    boss:'Celestial Titan'
+  },
+
+  {
+    name:'Void Realm',
+    emoji:'🌌',
+    enemy:'Void Spirit',
+    boss:'Abyss Titan'
+  },
+
+  {
+    name:'MusicVerse Citadel',
+    emoji:'🎼',
+    enemy:'Dark Virtuoso',
+    boss:'The Silent King'
+  }
+
+];
+
+
+let rpgMapData=[];
+
+let rpgEnemy=null;
+
+
+function makeRpgMap(){
+
+  rpgMapData=
+    Array.from(
+      {
+        length:8
+      },
+      (
+        _,
+        y
+      )=>
+
+        Array.from(
+          {
+            length:12
+          },
+          (
+            _,
+            x
+          )=>
+
+            x===0
+            ||
+            x===11
+            ||
+            y===0
+            ||
+            y===7
+
+              ?'wall'
+
+              :'floor'
+        )
+    );
+
+
+  for(
+    let i=0;
+    i<10;
+    i++
+  ){
+
+    const x=
+      rand(
+        2,
+        10
+      );
+
+
+    const y=
+      rand(
+        1,
+        6
+      );
+
+
+    if(
+      x!==profile.rpg.x
+      ||
+      y!==profile.rpg.y
+    ){
+
+      rpgMapData[
+        y
+      ][
+        x
+      ]=
+        'wall';
+
+    }
+
+  }
+
+
+  for(
+    let i=0;
+    i<4;
+    i++
+  ){
+
+    const x=
+      rand(
+        2,
+        10
+      );
+
+
+    const y=
+      rand(
+        1,
+        6
+      );
+
+
+    if(
+      rpgMapData[
+        y
+      ][
+        x
+      ]===
+      'floor'
+    ){
+
+      rpgMapData[
+        y
+      ][
+        x
+      ]=
+        'enemy';
+
+    }
+
+  }
+
+
+  for(
+    let i=0;
+    i<2;
+    i++
+  ){
+
+    const x=
+      rand(
+        2,
+        10
+      );
+
+
+    const y=
+      rand(
+        1,
+        6
+      );
+
+
+    if(
+      rpgMapData[
+        y
+      ][
+        x
+      ]===
+      'floor'
+    ){
+
+      rpgMapData[
+        y
+      ][
+        x
+      ]=
+        'chest';
+
+    }
+
+  }
+
+
+  rpgMapData[
+    6
+  ][
+    10
+  ]=
+    'exit';
+
+
+  profile.rpg.x=
+    1;
+
+
+  profile.rpg.y=
+    1;
+
+
+  persist();
+
+  renderRpgMap();
+
+}
+
+
+function renderRpgMap(){
+
+  const el=
+    $('#rpgMap');
+
+
+  if(
+    !el
+  )
+    return;
+
+
+  $('#rpgZoneName')
+    .textContent=
+      rpgZones[
+        profile.rpg.zone
+      ].name;
+
+
+  $('#rpgHpText')
+    .textContent=
+      `${profile.rpg.hp} / ${profile.rpg.maxHp}`;
+
+
+  $('#rpgStoryText')
+    .textContent=
+      `${profile.rpg.storyStep+1} / ${rpgZones.length}`;
+
+
+  el.innerHTML=
+    rpgMapData
+      .flatMap(
+        (
+          row,
+          y
+        )=>
+
+          row.map(
+            (
+              t,
+              x
+            )=>{
+
+              const p=
+                x===profile.rpg.x
+                &&
+                y===profile.rpg.y;
+
+
+              const icon=
+                p
+
+                  ?'🎸'
+
+                  :t==='wall'
+
+                    ?''
+
+                    :t==='enemy'
+
+                      ?'👾'
+
+                      :t==='chest'
+
+                        ?'🎁'
+
+                        :t==='exit'
+
+                          ?'🚪'
+
+                          :'';
+
+
+              return `
+                <div
+                  class="
+                    rpg-tile
+                    ${
+                      p
+                        ?'player'
+                        :t
+                    }
+                  "
+                >
+                  ${icon}
+                </div>
+              `;
+
+            }
+          )
+      )
+      .join('');
+
+}
+
+
+function moveRpg(
+  dx,
+  dy
+){
+
+  if(
+    rpgEnemy
+  )
+    return;
+
+
+  const nx=
+    profile.rpg.x+
+    dx;
+
+
+  const ny=
+    profile.rpg.y+
+    dy;
+
+
+  const t=
+    rpgMapData[
+      ny
+    ]?.[
+      nx
+    ];
+
+
+  if(
+    !t
+    ||
+    t==='wall'
+  )
+    return;
+
+
+  if(
+    t==='enemy'
+  ){
+
+    profile.rpg.x=
+      nx;
+
+
+    profile.rpg.y=
+      ny;
+
+
+    startRpgBattle(
+      false
+    );
+
+
+    return;
+
+  }
+
+
+  if(
+    t==='chest'
+  ){
+
+    rpgMapData[
+      ny
+    ][
+      nx
+    ]=
+      'floor';
+
+
+    const coins=
+      rand(
+        2,
+        7
+      );
+
+
+    profile.coins+=
+      coins;
+
+
+    if(
+      Math.random()<.35
+    ){
+
+      profile.equipmentInventory.push({
+
+        name:
+          pick(
+            [
+              'Echo Ring',
+              'Rhythm Boots',
+              'Crystal Charm'
+            ]
+          ),
+
+        slot:
+          pick(
+            [
+              'Ring',
+              'Feet',
+              'Charm'
+            ]
+          ),
+
+        attack:
+          rand(
+            1,
+            3
+          ),
+
+        defense:
+          rand(
+            1,
+            3
+          )
+
+      });
+
+    }
+
+
+    persist();
+
+    updateProfileUI();
+
+    renderEquipment();
+
+    S.treasure();
+
+
+    toast(
+      `🎁 Chest: +${coins} Coins`
+    );
+
+  }
+
+
+  if(
+    t==='exit'
+  ){
+
+    startRpgBattle(
+      true
+    );
+
+
+    return;
+
+  }
+
+
+  profile.rpg.x=
+    nx;
+
+
+  profile.rpg.y=
+    ny;
+
+
+  persist();
+
+  renderRpgMap();
+
+}
+
+
+function startRpgBattle(
+  boss
+){
+
+  const z=
+    rpgZones[
+      profile.rpg.zone
+    ];
+
+
+  const inst=
+    getUpgradedInstrument(
+      profile.equipped
+    );
+
+
+  rpgEnemy={
+
+    name:
+      boss
+        ?z.boss
+        :z.enemy,
+
+
+    hp:
+      boss
+        ?220+
+         profile.rpg.zone*
+         70
+        :75+
+         profile.rpg.zone*
+         25,
+
+
+    max:
+      boss
+        ?220+
+         profile.rpg.zone*
+         70
+        :75+
+         profile.rpg.zone*
+         25,
+
+
+    boss,
+
+    attack:
+      boss
+        ?12+
+         profile.rpg.zone*
+         2
+        :6+
+         profile.rpg.zone
+
+  };
+
+
+  renderRpgBattle();
+
+}
+
+
+function renderRpgBattle(){
+
+  const p=
+    $('#rpgBattlePanel');
+
+
+  if(
+    !p
+    ||
+    !rpgEnemy
+  )
+    return;
+
+
+  p.classList
+    .remove(
+      'hidden'
+    );
+
+
+  const inst=
+    getUpgradedInstrument(
+      profile.equipped
+    );
+
+
+  p.innerHTML=
+    `
+    <div class="story-banner">
+
+      ${
+        rpgEnemy.boss
+
+          ?`Boss guarding the fragment of the Grand Melody: ${rpgEnemy.name}`
+
+          :`A ${rpgEnemy.name} blocks your path.`
+      }
+
+    </div>
+
+
+    <div class="rpg-battle-grid">
+
+      <div>
+
+        <strong>
+          ${profile.name||'Player'}
+        </strong>
+
+        <p>
+          HP ${profile.rpg.hp}/${profile.rpg.maxHp}
+        </p>
+
+        <small>
+          ${inst.icon} ${profile.equipped}
+        </small>
+
+      </div>
+
+
+      <div>
+
+        <strong>
+
+          ${
+            rpgEnemy.boss
+              ?'👑'
+              :'👾'
+          }
+
+          ${rpgEnemy.name}
+
+        </strong>
+
+        <p>
+          HP ${rpgEnemy.hp}/${rpgEnemy.max}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="rpg-actions">
+
+      <button
+        class="btn gold"
+        id="rpgAttack"
+      >
+        Attack
+      </button>
+
+      <button
+        class="btn ghost"
+        id="rpgSkill"
+      >
+        Special Move
+      </button>
+
+      <button
+        class="btn ghost"
+        id="rpgHeal"
+      >
+        Heal
+      </button>
+
+      <button
+        class="btn ghost"
+        id="rpgRun"
+      >
+        Run
+      </button>
+
+    </div>
+    `;
+
+
+  $('#rpgAttack')
+    .onclick=
+      ()=>
+        rpgPlayerAction(
+          'attack'
+        );
+
+
+  $('#rpgSkill')
+    .onclick=
+      ()=>
+        rpgPlayerAction(
+          'skill'
+        );
+
+
+  $('#rpgHeal')
+    .onclick=
+      ()=>
+        rpgPlayerAction(
+          'heal'
+        );
+
+
+  $('#rpgRun')
+    .onclick=
+      ()=>{
+
+        if(
+          rpgEnemy.boss
+        ){
+
+          return toast(
+            'You cannot run from a boss!'
+          );
+
+        }
+
+
+        rpgEnemy=
+          null;
+
+
+        p.classList
+          .add(
+            'hidden'
+          );
+
+
+        rpgMapData[
+          profile.rpg.y
+        ][
+          profile.rpg.x
+        ]=
+          'floor';
+
+
+        renderRpgMap();
+
+      };
+
+}
+
+
+function rpgPlayerAction(
+  type
+){
+
+  const inst=
+    getUpgradedInstrument(
+      profile.equipped
+    );
+
+
+  const skills=
+    getSkillBonuses();
+
+
+  if(
+    type==='heal'
+  ){
+
+    const base=
+      Math.round(
+        inst.melody*
+        .12
+      )+
+      6;
+
+
+    const heal=
+      Math.round(
+
+        base*
+
+        (
+          1+
+          skills.healPct
+        )
+
+      );
+
+
+    profile.rpg.hp=
+      Math.min(
+
+        profile.rpg.maxHp,
+
+        profile.rpg.hp+
+        heal
+
+      );
+
+
+    S.heal();
+
+
+    toast(
+      `✨ Healed ${heal} HP`
+    );
+
+  }
+
+  else{
+
+    let mult=
+      type==='skill'
+        ?1.45
+        :1;
+
+
+    mult*=
+      1+
+      skills.attackPct;
+
+
+    mult*=
+      type==='skill'
+
+        ?1+
+         skills.specialPct
+
+        :1+
+         skills.normalPct;
+
+
+    let damage=
+      Math.max(
+
+        5,
+
+        Math.round(
+
+          (
+            inst.attack*.22
+
+            +
+
+            inst.rhythm*.08
+
+            +
+
+            rand(
+              0,
+              6
+            )
+          )
+
+          *
+
+          mult
+
+        )
+
+      );
+
+
+    const crit=
+      Math.random()
+      <
+      .06
+      +
+      inst.melody/
+      1600
+      +
+      skills.critChance;
+
+
+    if(
+      crit
+    ){
+
+      damage=
+        Math.round(
+          damage*
+          1.5
+        );
+
+
+      S.critical();
+
+
+      toast(
+        '💥 Critical hit!'
+      );
+
+    }
+
+
+    rpgEnemy.hp=
+      Math.max(
+
+        0,
+
+        rpgEnemy.hp-
+        damage
+
+      );
+
+
+    playInstrument(
+
+      profile.equipped,
+
+      type==='skill'
+        ?660
+        :440
+
+    );
+
+
+    type==='skill'
+      ?S.ultimate()
+      :S.attack();
+
+  }
+
+
+  if(
+    rpgEnemy.hp<=0
+  ){
+
+    finishRpgBattle();
+
+    return;
+
+  }
+
+
+  if(
+    Math.random()<
+    skills.dodgeChance
+  ){
+
+    S.great();
+
+
+    toast(
+      '💨 Quick Beat! You dodged the attack.'
+    );
+
+
+    persist();
+
+    renderRpgBattle();
+
+    renderRpgMap();
+
+
+    return;
+
+  }
+
+
+  const effectiveDefense=
+    inst.defense*
+    (
+      1+
+      skills.defensePct
+    );
+
+
+  const hurt=
+    Math.max(
+
+      1,
+
+      rpgEnemy.attack
+
+      -
+
+      Math.round(
+        effectiveDefense*
+        .035
+      )
+
+    );
+
+
+  profile.rpg.hp=
+    Math.max(
+
+      0,
+
+      profile.rpg.hp-
+      hurt
+
+    );
+
+
+  if(
+    profile.rpg.hp<=0
+  ){
+
+    profile.rpg.hp=
+      profile.rpg.maxHp;
+
+
+    rpgEnemy=
+      null;
+
+
+    $('#rpgBattlePanel')
+      .classList
+      .add(
+        'hidden'
+      );
+
+
+    profile.rpg.x=
+      1;
+
+
+    profile.rpg.y=
+      1;
+
+
+    persist();
+
+    S.defeat();
+
+
+    toast(
+      'Defeated! You returned to the zone entrance.'
+    );
+
+
+    renderRpgMap();
+
+
+    return;
+
+  }
+
+
+  persist();
+
+  renderRpgBattle();
+
+  renderRpgMap();
+
+}
+
+
+function finishRpgBattle(){
+
+  const boss=
+    rpgEnemy.boss;
+
+
+  const name=
+    rpgEnemy.name;
+
+
+  progressQuest(
+    'fight',
+    1
+  );
+
+
+  addInstrumentXP(
+
+    profile.equipped,
+
+    boss
+      ?8
+      :2
+
+  );
+
+
+  if(
+    profile.equippedPet
+  ){
+
+    addPetXP(
+
+      profile.equippedPet,
+
+      boss
+        ?12
+        :3
+
+    );
+
+  }
+
+
+  reward(
+
+    boss
+      ?28
+      :6,
+
+    boss
+      ?18
+      :3,
+
+    `${name} defeated!`
+
+  );
+
+
+  if(
+    boss
+  ){
+
+    profile.rpg.storyStep=
+      Math.max(
+
+        profile.rpg.storyStep,
+
+        profile.rpg.zone+1
+
+      );
+
+
+    if(
+      profile.rpg.zone<
+      rpgZones.length-1
+    ){
+
+      profile.rpg.zone++;
+
+
+      profile.rpg.hp=
+        profile.rpg.maxHp;
+
+
+      toast(
+        `🗺️ ${rpgZones[profile.rpg.zone].name} unlocked!`
+      );
+
+    }
+
+    else{
+
+      toast(
+        '🎼 The Grand Melody has been restored!'
+      );
+
+    }
+
+
+    makeRpgMap();
+
+  }
+
+  else{
+
+    rpgMapData[
+      profile.rpg.y
+    ][
+      profile.rpg.x
+    ]=
+      'floor';
+
+  }
+
+
+  rpgEnemy=
+    null;
+
+
+  $('#rpgBattlePanel')
+    .classList
+    .add(
+      'hidden'
+    );
+
+
+  persist();
+
+  renderRpgMap();
+
+  renderQuests();
+
+}
+
+
+function setupRpg(){
+
+  if(
+    !rpgMapData.length
+  ){
+
+    makeRpgMap();
+
+  }
+
+
+  const map=
+    $('#rpgMap');
+
+
+  if(
+    map
+  ){
+
+    map.onkeydown=
+      e=>{
+
+        const k=
+          e.key
+            .toLowerCase();
+
+
+        const m={
+
+          arrowup:[
+            0,
+            -1
+          ],
+
+          w:[
+            0,
+            -1
+          ],
+
+          arrowdown:[
+            0,
+            1
+          ],
+
+          s:[
+            0,
+            1
+          ],
+
+          arrowleft:[
+            -1,
+            0
+          ],
+
+          a:[
+            -1,
+            0
+          ],
+
+          arrowright:[
+            1,
+            0
+          ],
+
+          d:[
+            1,
+            0
+          ]
+
+        }[
+          k
+        ];
+
+
+        if(
+          m
+        ){
+
+          e.preventDefault();
+
+          moveRpg(
+            ...m
+          );
+
+        }
+
+      };
+
+  }
+
+
+  [
+
+    [
+      'rpgUp',
+      0,
+      -1
+    ],
+
+    [
+      'rpgDown',
+      0,
+      1
+    ],
+
+    [
+      'rpgLeft',
+      -1,
+      0
+    ],
+
+    [
+      'rpgRight',
+      1,
+      0
+    ]
+
+  ]
+  .forEach(
+    (
+      [
+        id,
+        x,
+        y
+      ]
+    )=>{
+
+      $('#'+id)
+        .onclick=
+          ()=>
+            moveRpg(
+              x,
+              y
+            );
+
+    }
+  );
+
+}
