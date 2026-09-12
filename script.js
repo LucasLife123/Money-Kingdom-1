@@ -8616,3 +8616,1809 @@ function startDungeon(){
 
   render();
 }
+/* ============================ GACHA ============================ */
+
+const gachaData={
+  accessory:[
+    ['Black Cap','Common'],
+    ['Studio Headphones','Uncommon'],
+    ['Star Glasses','Rare'],
+    ['Cyber Visor','Epic'],
+    ['Royal Crown','Legendary'],
+    ['MusicVerse Crown','Mythic']
+  ],
+
+  pet:[
+    ['Music Cat','Common'],
+    ['Beat Puppy','Common'],
+    ['Neon Fox','Rare'],
+    ['Music Ghost','Epic'],
+    ['Phoenix','Legendary'],
+    ['Celestial Dragon','Mythic']
+  ],
+
+  aura:[
+    ['Musical Notes','Common'],
+    ['Rhythm Pulse','Uncommon'],
+    ['Flame Aura','Rare'],
+    ['Lightning Aura','Epic'],
+    ['Celestial Aura','Legendary'],
+    ['Galaxy Aura','Mythic']
+  ],
+
+  skin:[
+    ['Sakura Skin','Rare'],
+    ['Thunder Skin','Epic'],
+    ['Phoenix Skin','Legendary'],
+    ['Cosmic Void Skin','Mythic']
+  ]
+};
+
+let activeGacha='accessory';
+
+const costs={
+  accessory:100,
+  pet:200,
+  aura:175,
+  skin:150
+};
+
+function rarityRoll(){
+
+  const r=
+    Math.random()*100;
+
+  return r<.5
+    ?'Mythic'
+    :r<3
+      ?'Legendary'
+      :r<11
+        ?'Epic'
+        :r<27
+          ?'Rare'
+          :r<55
+            ?'Uncommon'
+            :'Common';
+}
+
+function updateGachaUI(){
+
+  const titles={
+    accessory:'Accessory Capsule',
+    pet:'Pet Capsule',
+    aura:'Aura Capsule',
+    skin:'Skin Capsule'
+  };
+
+  $('#gachaTitle').textContent=
+    titles[activeGacha];
+
+  $('#rollOneBtn').textContent=
+    `Roll x1 • ${costs[activeGacha]} Coins`;
+
+  $('#rollTenBtn').textContent=
+    `Roll x10 • ${costs[activeGacha]*9} Coins`;
+}
+
+function rollGacha(
+  count=1
+){
+
+  const cost=
+    costs[activeGacha]*
+    (
+      count===10
+        ?9
+        :1
+    );
+
+  if(
+    profile.coins<
+    cost
+  ){
+
+    return toast(
+      'Not enough coins.'
+    );
+  }
+
+  profile.coins-=
+    cost;
+
+  const results=[];
+
+  for(
+    let i=0;
+    i<count;
+    i++
+  ){
+
+    const desired=
+      rarityRoll();
+
+    const pool=
+      gachaData[
+        activeGacha
+      ];
+
+    const valid=
+      pool.filter(
+        x=>
+          x[1]===desired
+      );
+
+    const item=
+      pick(
+        valid.length
+          ?valid
+          :pool
+      );
+
+    const key=
+      `${activeGacha}:${item[0]}`;
+
+    if(
+      profile.inventory.some(
+        x=>
+          x.key===key
+      )
+    ){
+
+      profile.dust+=
+        item[1]==='Mythic'
+          ?80
+          :item[1]==='Legendary'
+            ?40
+            :10;
+
+      results.push(
+        `${item[0]} → Dust`
+      );
+
+    }
+
+    else{
+
+      profile.inventory.push({
+
+        key,
+
+        type:
+          activeGacha,
+
+        name:
+          item[0],
+
+        rarity:
+          item[1]
+
+      });
+
+      results.push(
+        `${item[1]} ${item[0]}`
+      );
+    }
+  }
+
+  persist();
+
+  updateProfileUI();
+
+  renderInventory();
+
+  $('#gachaReveal').textContent=
+    results.join(' • ');
+
+  S.gacha();
+}
+
+function renderInventory(){
+
+  $('#inventoryGrid').innerHTML=
+    profile.inventory.length
+
+      ?profile.inventory
+        .map(
+          x=>
+            `
+            <div class="inventory-item">
+
+              <b>
+                ${x.rarity}
+              </b>
+
+              ${x.name}
+
+              <small>
+                ${x.type}
+              </small>
+
+            </div>
+            `
+        )
+        .join('')
+
+      :'<p class="muted">No cosmetics yet.</p>';
+}
+
+$$('.gacha-tab')
+.forEach(
+  b=>
+    b.onclick=
+      ()=>{
+
+        $$('.gacha-tab')
+        .forEach(
+          x=>
+            x.classList.remove(
+              'active'
+            )
+        );
+
+        b.classList.add(
+          'active'
+        );
+
+        activeGacha=
+          b.dataset.gacha;
+
+        updateGachaUI();
+
+      }
+);
+
+$('#rollOneBtn').onclick=
+  ()=>
+    rollGacha(
+      1
+    );
+
+$('#rollTenBtn').onclick=
+  ()=>
+    rollGacha(
+      10
+    );
+
+
+/* ============================ MUSICCRAFT ============================ */
+
+const craftCanvas=
+  $('#craftCanvas');
+
+const ctx=
+  craftCanvas.getContext(
+    '2d'
+  );
+
+let craftWorld=[];
+
+let craftMined=0;
+
+let craftDepth=0;
+
+let craftLayer=0;
+
+
+const craftTypesByDepth=[
+
+  {
+    name:'Surface',
+
+    blocks:[
+      ['Dirt','#70513c',1,1],
+      ['Stone','#6d7885',1,2],
+      ['Coal','#28313a',2,2]
+    ]
+  },
+
+  {
+    name:'Shallow Underground',
+
+    blocks:[
+      ['Dirt','#5f4435',1,1],
+      ['Stone','#68727d',1,2],
+      ['Coal','#28313a',2,2],
+      ['Copper','#b87333',3,2]
+    ]
+  },
+
+  {
+    name:'Stone Tunnels',
+
+    blocks:[
+      ['Stone','#626d79',1,2],
+      ['Coal','#252d34',2,2],
+      ['Copper','#b87333',3,2],
+      ['Iron','#9b8c7a',3,3]
+    ]
+  },
+
+  {
+    name:'Coal Depths',
+
+    blocks:[
+      ['Stone','#5c6570',1,2],
+      ['Coal','#1f252b',3,2],
+      ['Iron','#9b8c7a',3,3],
+      ['Silver','#b7bec8',4,3]
+    ]
+  },
+
+  {
+    name:'Iron Caverns',
+
+    blocks:[
+      ['Stone','#59636e',1,2],
+      ['Iron','#9b8c7a',4,3],
+      ['Silver','#b7bec8',5,3],
+      ['Gold','#d8ad42',6,4]
+    ]
+  },
+
+  {
+    name:'Deep Caves',
+
+    blocks:[
+      ['Stone','#525b66',1,2],
+      ['Iron','#8f8274',4,3],
+      ['Gold','#d8ad42',6,4],
+      ['Ruby','#d94a62',8,4]
+    ]
+  },
+
+  {
+    name:'Gold Veins',
+
+    blocks:[
+      ['Stone','#4d5661',1,2],
+      ['Gold','#d8ad42',7,4],
+      ['Ruby','#d94a62',9,4],
+      ['Emerald','#4fca83',10,4]
+    ]
+  },
+
+  {
+    name:'Crystal Caverns',
+
+    blocks:[
+      ['Stone','#48525e',1,2],
+      ['Gold','#d8ad42',7,4],
+      ['Crystal','#8e73ff',12,5],
+      ['Amethyst','#a66cff',14,5]
+    ]
+  },
+
+  {
+    name:'Diamond Depths',
+
+    blocks:[
+      ['Dark Stone','#3b4652',2,3],
+      ['Crystal','#8e73ff',12,5],
+      ['Diamond','#55d7e8',16,6],
+      ['Sapphire','#4a78ef',15,5]
+    ]
+  },
+
+  {
+    name:'Obsidian Ruins',
+
+    blocks:[
+      ['Obsidian','#27243a',4,5],
+      ['Diamond','#55d7e8',16,6],
+      ['Sapphire','#4a78ef',15,5],
+      ['Ancient Ore','#9f865a',20,6]
+    ]
+  },
+
+  {
+    name:'Ancient Depths',
+
+    blocks:[
+      ['Obsidian','#211d31',4,5],
+      ['Ancient Ore','#9f865a',20,6],
+      ['Ancient Crystal','#d6b3ff',24,7],
+      ['Relic Stone','#786246',18,6]
+    ]
+  },
+
+  {
+    name:'Magma Zone',
+
+    blocks:[
+      ['Basalt','#2c292e',4,5],
+      ['Obsidian','#1c1925',5,6],
+      ['Magma Crystal','#ff6a3d',28,7],
+      ['Fire Gem','#ffb347',32,7]
+    ]
+  },
+
+  {
+    name:'Echo Abyss',
+
+    blocks:[
+      ['Void Stone','#171624',5,6],
+      ['Echo Crystal','#5ed4ff',32,7],
+      ['Void Gem','#8857ff',38,8],
+      ['Resonance Ore','#d04fff',42,8]
+    ]
+  },
+
+  {
+    name:'Celestial Core',
+
+    blocks:[
+      ['Celestial Stone','#27395d',6,7],
+      ['Star Crystal','#ffe178',45,8],
+      ['Moonstone','#b9d7ff',48,8],
+      ['Celestial Gem','#e5d3ff',55,9]
+    ]
+  },
+
+  {
+    name:'MusicVerse Core',
+
+    blocks:[
+      ['Core Stone','#13101d',7,8],
+      ['Music Crystal','#f3d77c',65,9],
+      ['Harmony Gem','#71e7d3',75,9],
+      ['CoreShard','#fff1a8',100,10]
+    ]
+  }
+
+];
+
+
+const craftPetEggs=[
+
+  [
+    'Surface',
+    'Meadow Egg',
+    '🌱',
+    'Music Bunny',
+    '#8bd46e',
+    .035
+  ],
+
+  [
+    'Shallow Underground',
+    'Cave Egg',
+    '🪨',
+    'Mole Beat',
+    '#92745c',
+    .032
+  ],
+
+  [
+    'Stone Tunnels',
+    'Stone Egg',
+    '🐾',
+    'Rock Pup',
+    '#858f9a',
+    .03
+  ],
+
+  [
+    'Coal Depths',
+    'Coal Egg',
+    '⚫',
+    'Shadow Bat',
+    '#353942',
+    .028
+  ],
+
+  [
+    'Iron Caverns',
+    'Iron Egg',
+    '⚙️',
+    'Gear Fox',
+    '#a9a097',
+    .026
+  ],
+
+  [
+    'Deep Caves',
+    'Echo Egg',
+    '🕷️',
+    'Echo Spider',
+    '#645a75',
+    .024
+  ],
+
+  [
+    'Gold Veins',
+    'Golden Egg',
+    '🪙',
+    'Gold Chick',
+    '#f2c74e',
+    .022
+  ],
+
+  [
+    'Crystal Caverns',
+    'Crystal Egg',
+    '💎',
+    'Crystal Fox',
+    '#9a78ff',
+    .02
+  ],
+
+  [
+    'Diamond Depths',
+    'Diamond Egg',
+    '🔷',
+    'Diamond Dragon',
+    '#60e7f7',
+    .018
+  ],
+
+  [
+    'Obsidian Ruins',
+    'Obsidian Egg',
+    '🖤',
+    'Obsidian Wolf',
+    '#302b45',
+    .016
+  ],
+
+  [
+    'Ancient Depths',
+    'Ancient Egg',
+    '🏺',
+    'Relic Guardian',
+    '#b79a68',
+    .014
+  ],
+
+  [
+    'Magma Zone',
+    'Magma Egg',
+    '🔥',
+    'Lava Dragon',
+    '#ff6535',
+    .012
+  ],
+
+  [
+    'Echo Abyss',
+    'Void Egg',
+    '🌌',
+    'Echo Spirit',
+    '#7454e8',
+    .01
+  ],
+
+  [
+    'Celestial Core',
+    'Celestial Egg',
+    '✨',
+    'Star Phoenix',
+    '#f6e69a',
+    .008
+  ],
+
+  [
+    'MusicVerse Core',
+    'MusicVerse Egg',
+    '🎵',
+    'Harmony Dragon',
+    '#ffe783',
+    .005
+  ]
+
+].map(
+  x=>({
+
+    layer:
+      x[0],
+
+    egg:
+      x[1],
+
+    icon:
+      x[2],
+
+    pet:
+      x[3],
+
+    color:
+      x[4],
+
+    chance:
+      x[5]
+
+  })
+);
+
+
+function getCraftDepthName(){
+
+  return craftTypesByDepth[
+    Math.min(
+      craftDepth,
+      craftTypesByDepth.length-1
+    )
+  ].name;
+}
+
+
+function getCurrentCraftEgg(){
+
+  return craftPetEggs[
+    Math.min(
+      craftDepth,
+      craftPetEggs.length-1
+    )
+  ];
+}
+
+
+function resetCraftInventory(){
+
+  craftTypesByDepth
+  .flatMap(
+    z=>
+      z.blocks.map(
+        b=>b[0]
+      )
+  )
+  .forEach(
+    n=>{
+
+      if(
+        profile.materials[n]===
+        undefined
+      ){
+
+        profile.materials[n]=0;
+      }
+
+    }
+  );
+}
+
+
+function generateCraftLayer(){
+
+  const d=
+    craftTypesByDepth[
+      craftDepth
+    ];
+
+  const egg=
+    getCurrentCraftEgg();
+
+  craftWorld=
+    Array.from(
+      {
+        length:12
+      },
+
+      (
+        _,
+        y
+      )=>
+
+        Array.from(
+          {
+            length:20
+          },
+
+          (
+            _,
+            x
+          )=>{
+
+            if(
+              y===0
+              &&
+              x>=8
+              &&
+              x<=11
+            ){
+
+              return null;
+            }
+
+            if(
+              Math.random()<
+              egg.chance
+            ){
+
+              return[
+                'PET_EGG',
+                egg.color,
+                0,
+                1,
+                egg
+              ];
+            }
+
+            const r=
+              Math.random();
+
+            return r<.5
+
+              ?d.blocks[0]
+
+              :r<.75
+
+                ?d.blocks[
+                  Math.min(
+                    1,
+                    d.blocks.length-1
+                  )
+                ]
+
+                :r<.9
+
+                  ?d.blocks[
+                    Math.min(
+                      2,
+                      d.blocks.length-1
+                    )
+                  ]
+
+                  :d.blocks[
+                    d.blocks.length-1
+                  ];
+
+          }
+        )
+    );
+
+  renderCraft();
+}
+
+
+function newCraftWorld(){
+
+  craftMined=0;
+
+  craftDepth=0;
+
+  craftLayer=0;
+
+  resetCraftInventory();
+
+  generateCraftLayer();
+
+  renderCraftEggs();
+}
+
+
+function drawEgg(
+  x,
+  y,
+  w,
+  h,
+  egg
+){
+
+  const cx=
+    x*w+
+    w/2;
+
+  const cy=
+    y*h+
+    h/2;
+
+  ctx.save();
+
+  ctx.shadowBlur=
+    18;
+
+  ctx.shadowColor=
+    egg.color;
+
+  ctx.fillStyle=
+    egg.color;
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+    cx,
+    cy,
+    w*.27,
+    h*.36,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.shadowBlur=
+    0;
+
+  ctx.font=
+    `${Math.max(
+      14,
+      w*.36
+    )}px sans-serif`;
+
+  ctx.textAlign=
+    'center';
+
+  ctx.textBaseline=
+    'middle';
+
+  ctx.fillText(
+    egg.icon,
+    cx,
+    cy
+  );
+
+  ctx.restore();
+}
+
+
+function renderCraft(){
+
+  const w=
+    craftCanvas.width/20;
+
+  const h=
+    craftCanvas.height/12;
+
+  ctx.clearRect(
+    0,
+    0,
+    craftCanvas.width,
+    craftCanvas.height
+  );
+
+  craftWorld
+  .forEach(
+    (
+      row,
+      y
+    )=>
+
+      row.forEach(
+        (
+          b,
+          x
+        )=>{
+
+          if(
+            !b
+          )
+            return;
+
+          if(
+            b[0]==='PET_EGG'
+          ){
+
+            drawEgg(
+              x,
+              y,
+              w,
+              h,
+              b[4]
+            );
+
+            return;
+          }
+
+          ctx.fillStyle=
+            b[1];
+
+          ctx.fillRect(
+            x*w+1,
+            y*h+1,
+            w-2,
+            h-2
+          );
+
+          ctx.fillStyle=
+            'rgba(255,255,255,.12)';
+
+          ctx.fillRect(
+            x*w+3,
+            y*h+3,
+            w-7,
+            4
+          );
+
+        }
+      )
+  );
+
+  const current=
+    craftTypesByDepth[
+      craftDepth
+    ].blocks
+    .map(
+      b=>b[0]
+    );
+
+  $('#craftInventory').innerHTML=
+    current
+    .map(
+      k=>
+        `
+        <div>
+
+          <span>
+            ${k}
+          </span>
+
+          <b>
+            ${profile.materials[k]||0}
+          </b>
+
+        </div>
+        `
+    )
+    .join('');
+
+  $('#missionText').textContent=
+    `Mine 12 blocks • ${craftMined%12}/12`;
+
+  $('#craftDepthName').textContent=
+    getCraftDepthName();
+
+  $('#craftLayerLabel').textContent=
+    `${craftDepth+1} / ${craftTypesByDepth.length}`;
+
+  $('#craftDepthFill').style.width=
+    `${((craftDepth+1)/craftTypesByDepth.length)*100}%`;
+
+  renderCraftEggs();
+
+  renderEvolutionPanel();
+}
+
+
+function collectCraftPetEgg(
+  egg
+){
+
+  profile.petEggs.push({
+
+    id:
+      `egg-${Date.now()}-${Math.random()}`,
+
+    egg:
+      egg.egg,
+
+    icon:
+      egg.icon,
+
+    pet:
+      egg.pet,
+
+    layer:
+      egg.layer,
+
+    hatched:
+      false
+
+  });
+
+  persist();
+
+  S.treasure();
+
+  toast(
+    `${egg.icon} ${egg.egg} discovered!`
+  );
+
+  addXP(
+    4+
+    Math.floor(
+      craftDepth/3
+    )
+  );
+
+  renderCraftEggs();
+}
+
+
+function renderCraftEggs(){
+
+  const el=
+    $('#craftEggInventory');
+
+  if(
+    !el
+  )
+    return;
+
+  const eggs=
+    profile.petEggs.filter(
+      e=>
+        !e.hatched
+    );
+
+  el.innerHTML=
+    eggs.length
+
+      ?eggs
+        .slice(
+          -8
+        )
+        .map(
+          e=>
+            `
+            <div class="craft-egg-card">
+
+              <div class="craft-egg-icon">
+                ${e.icon}
+              </div>
+
+              <div>
+
+                <strong>
+                  ${e.egg}
+                </strong>
+
+                <small>
+                  ${e.layer}
+                </small>
+
+              </div>
+
+              <button
+                class="btn gold small"
+                data-hatch-egg="${e.id}"
+              >
+                Hatch
+              </button>
+
+            </div>
+            `
+        )
+        .join('')
+
+      :'<p class="muted">No eggs discovered yet.</p>';
+
+  $$(
+    '[data-hatch-egg]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>
+          hatchCraftEgg(
+            b.dataset.hatchEgg
+          )
+  );
+}
+
+
+function checkCraftDescent(){
+
+  let n=0;
+
+  for(
+    let y=9;
+    y<12;
+    y++
+  ){
+
+    for(
+      let x=0;
+      x<20;
+      x++
+    ){
+
+      if(
+        craftWorld[
+          y
+        ][
+          x
+        ]===
+        null
+      ){
+
+        n++;
+      }
+    }
+  }
+
+  if(
+    n>=12
+    &&
+    craftDepth<
+    craftTypesByDepth.length-1
+  ){
+
+    craftDepth++;
+
+    craftLayer++;
+
+    reward(
+
+      8+
+      craftDepth*
+      2,
+
+      5+
+      craftDepth*
+      2,
+
+      `⛏️ Descended to ${getCraftDepthName()}!`
+
+    );
+
+    generateCraftLayer();
+
+    return true;
+  }
+
+  return false;
+}
+
+
+craftCanvas.onclick=
+  e=>{
+
+    const r=
+      craftCanvas.getBoundingClientRect();
+
+    const x=
+      Math.floor(
+        (
+          e.clientX-
+          r.left
+        )
+        /
+        r.width
+        *
+        20
+      );
+
+    const y=
+      Math.floor(
+        (
+          e.clientY-
+          r.top
+        )
+        /
+        r.height
+        *
+        12
+      );
+
+    const b=
+      craftWorld[
+        y
+      ]?.[
+        x
+      ];
+
+    if(
+      !b
+    )
+      return;
+
+    craftWorld[
+      y
+    ][
+      x
+    ]=
+      null;
+
+    if(
+      b[0]==='PET_EGG'
+    ){
+
+      collectCraftPetEgg(
+        b[4]
+      );
+
+      renderCraft();
+
+      return;
+    }
+
+    profile.materials[
+      b[0]
+    ]=
+      (
+        profile.materials[
+          b[0]
+        ]||
+        0
+      )
+      +
+      1;
+
+    craftMined++;
+
+    progressQuest(
+      'mine',
+      1
+    );
+
+    const coin=
+      Math.max(
+        0,
+        Math.floor(
+          b[2]*
+          .15
+        )
+      );
+
+    const xp=
+      b[2]>=12
+        ?Math.max(
+          1,
+          Math.floor(
+            b[2]*
+            .08
+          )
+        )
+        :0;
+
+    if(
+      coin
+    ){
+
+      profile.coins+=
+        coin;
+    }
+
+    if(
+      xp
+    ){
+
+      addXP(
+        xp
+      );
+    }
+
+    if(
+      b[0]==='CoreShard'
+    ){
+
+      profile.coins+=25;
+
+      addXP(
+        15
+      );
+
+      S.ultimate();
+
+      toast(
+        '🌟 MYTHIC CORE SHARD! +25 Coins • +15 EXP'
+      );
+    }
+
+    persist();
+
+    updateProfileUI();
+
+    S.mine();
+
+    const descended=
+      y>=10
+      &&
+      checkCraftDescent();
+
+    if(
+      !descended
+    ){
+
+      renderCraft();
+    }
+  };
+
+
+$('#missionBtn').onclick=
+  ()=>{
+
+    if(
+      craftMined<12
+    ){
+
+      return toast(
+        'Mine 12 blocks first.'
+      );
+    }
+
+    reward(
+      8,
+      5,
+      'Mining mission complete!'
+    );
+
+    craftMined=
+      0;
+
+    renderCraft();
+  };
+
+
+$('#newWorldBtn').onclick=
+  ()=>
+    newCraftWorld();
+
+
+/* ============================ LEADERBOARD ============================ */
+
+function renderLeaderboard(){
+
+  const bots=
+    Array.from(
+      {
+        length:99
+      },
+
+      (
+        _,
+        i
+      )=>({
+
+        name:
+          `${pick(botNames)}${i+1}`,
+
+        level:
+          rand(
+            1,
+            70
+          ),
+
+        xp:
+          rand(
+            100,
+            8000
+          )
+
+      })
+    );
+
+  bots.push({
+
+    name:
+      profile.name||
+      'You',
+
+    level:
+      profile.level,
+
+    xp:
+      profile.totalXp,
+
+    you:true
+
+  });
+
+  bots.sort(
+    (
+      a,
+      b
+    )=>
+      b.xp-
+      a.xp
+  );
+
+  const rank=
+    bots.findIndex(
+      x=>x.you
+    )
+    +
+    1;
+
+  $('#yourRank').textContent=
+    '#'+rank;
+
+  $('#podium').innerHTML=
+    bots
+    .slice(
+      0,
+      3
+    )
+    .map(
+      (
+        x,
+        i
+      )=>
+        `
+        <div>
+
+          <span>
+            ${[
+              '🥇',
+              '🥈',
+              '🥉'
+            ][i]}
+          </span>
+
+          <b>
+            ${x.name}
+          </b>
+
+          <small>
+            ${x.xp.toLocaleString()} EXP
+          </small>
+
+        </div>
+        `
+    )
+    .join('');
+
+  $('#leaderboardBody').innerHTML=
+    bots
+    .map(
+      (
+        x,
+        i
+      )=>
+        `
+        <tr
+          ${
+            x.you
+              ?'style="background:#12263c"'
+              :''
+          }
+        >
+
+          <td>
+            #${i+1}
+          </td>
+
+          <td>
+
+            ${
+              x.you
+                ?'⭐ '
+                :''
+            }
+
+            ${x.name}
+
+          </td>
+
+          <td>
+            ${x.level}
+          </td>
+
+          <td>
+            ${x.xp.toLocaleString()}
+          </td>
+
+        </tr>
+        `
+    )
+    .join('');
+}
+
+
+/* ============================ QUIZ ============================ */
+
+const quizQs=[
+
+  [
+    'Which instrument usually has 88 keys?',
+
+    [
+      'Piano',
+      'Violin',
+      'Flute',
+      'Trumpet'
+    ],
+
+    0
+  ],
+
+  [
+    'Which family does the trumpet belong to?',
+
+    [
+      'Strings',
+      'Brass',
+      'Keys',
+      'Woodwind'
+    ],
+
+    1
+  ],
+
+  [
+    'What does tempo describe?',
+
+    [
+      'Volume',
+      'Speed',
+      'Pitch',
+      'Instrument size'
+    ],
+
+    1
+  ],
+
+  [
+    'Which instrument is played with a bow?',
+
+    [
+      'Violin',
+      'Trumpet',
+      'Drums',
+      'Flute'
+    ],
+
+    0
+  ],
+
+  [
+    'Which symbol often means a musical note?',
+
+    [
+      '♪',
+      '©',
+      '%',
+      '@'
+    ],
+
+    0
+  ],
+
+  [
+    'Which instrument is percussion?',
+
+    [
+      'Drums',
+      'Cello',
+      'Saxophone',
+      'Harp'
+    ],
+
+    0
+  ],
+
+  [
+    'What is a melody?',
+
+    [
+      'A sequence of notes',
+      'A stage light',
+      'A drum stick',
+      'A microphone'
+    ],
+
+    0
+  ],
+
+  [
+    'Which is a woodwind instrument?',
+
+    [
+      'Clarinet',
+      'Tuba',
+      'Piano',
+      'Guitar'
+    ],
+
+    0
+  ],
+
+  [
+    'What does forte usually mean?',
+
+    [
+      'Loud',
+      'Soft',
+      'Slow',
+      'Silent'
+    ],
+
+    0
+  ],
+
+  [
+    'Which instrument has strings and pedals?',
+
+    [
+      'Harp',
+      'Flute',
+      'Bongos',
+      'Cornet'
+    ],
+
+    0
+  ]
+
+];
+
+let quizIndex=0;
+
+let quizScore=0;
+
+
+function renderQuiz(){
+
+  const q=
+    quizQs[
+      quizIndex
+    ];
+
+  $('#quizScore').textContent=
+    quizScore;
+
+  $('#quizCard').innerHTML=
+    `
+    <span class="eyebrow">
+      QUESTION ${quizIndex+1}/${quizQs.length}
+    </span>
+
+    <h3>
+      ${q[0]}
+    </h3>
+
+    <div class="quiz-options">
+
+      ${
+        q[1]
+        .map(
+          (
+            a,
+            i
+          )=>
+            `
+            <button data-quiz="${i}">
+              ${a}
+            </button>
+            `
+        )
+        .join('')
+      }
+
+    </div>
+    `;
+
+  $$(
+    '[data-quiz]'
+  )
+  .forEach(
+    b=>
+      b.onclick=
+        ()=>{
+
+          const i=
+            +b.dataset.quiz;
+
+          const ok=
+            i===
+            q[2];
+
+          $$(
+            '[data-quiz]'
+          )
+          .forEach(
+            x=>
+              x.disabled=
+                true
+          );
+
+          b.classList.add(
+            ok
+              ?'correct'
+              :'wrong'
+          );
+
+          if(
+            ok
+          ){
+
+            quizScore++;
+
+            addXP(
+              2
+            );
+
+            profile.coins+=1;
+
+            persist();
+
+            updateProfileUI();
+
+            S.correct();
+
+          }
+
+          else{
+
+            S.wrong();
+          }
+
+          setTimeout(
+            ()=>{
+
+              quizIndex++;
+
+              if(
+                quizIndex>=
+                quizQs.length
+              ){
+
+                $('#quizCard').innerHTML=
+                  `
+                  <h3>
+                    Quiz complete: ${quizScore}/${quizQs.length}
+                  </h3>
+
+                  <button
+                    id="quizRestart"
+                    class="btn gold"
+                  >
+                    Play Again
+                  </button>
+                  `;
+
+                $('#quizRestart').onclick=
+                  ()=>{
+
+                    quizIndex=0;
+
+                    quizScore=0;
+
+                    renderQuiz();
+
+                  };
+
+              }
+
+              else{
+
+                renderQuiz();
+              }
+
+            },
+            650
+          );
+
+        }
+  );
+}
+
+
+/* ============================ START ============================ */
+
+setupProfile();
+
+updateProfileUI();
+
+renderDailyRewards();
+
+renderFamilies();
+
+renderInstruments();
+
+refreshBattle(
+  true
+);
+
+openLobby(
+  10
+);
+
+renderGameCards();
+
+updateGachaUI();
+
+renderInventory();
+
+newCraftWorld();
+
+renderLeaderboard();
+
+renderQuiz();
+
+ensureQuests();
+
+renderQuests();
+
+renderEquipment();
+
+renderPets();
+
+renderEvolutionPanel();
+
+renderSkillTree();
+
+setupRpg();
+
+$('#claimDailyBtn').onclick=
+  claimDailyReward;
