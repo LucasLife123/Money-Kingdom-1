@@ -1,1088 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Money Kingdom</title>
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Money Kingdom</title>
+<style>
+:root{
+  --navy:#132747;--gold:#f5c852;--cream:#fff8e7;--green:#53bb6d;
+  --panel:rgba(255,250,236,.96);--shadow:0 12px 40px rgba(0,0,0,.22);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#91c8ff}
+button,input,select{font-family:inherit}button{cursor:pointer}.hidden{display:none!important}
+#gameContainer{position:fixed;inset:0;z-index:0}#gameContainer canvas{display:block;width:100%;height:100%}
+.start-screen{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#ffe89a 0,#a3d7ff 38%,#68a8e8 100%)}
+.start-card{width:min(520px,90vw);padding:48px 38px;text-align:center;border:4px solid rgba(255,255,255,.72);border-radius:34px;background:linear-gradient(#fffcec,#ffefb7);box-shadow:0 30px 80px rgba(30,64,110,.35)}
+.logo-crown{font-size:72px}.start-card h1{margin:8px 0 6px;font-size:clamp(36px,7vw,62px);color:var(--navy)}.start-card p{font-weight:800;color:#8a6b25}
+.primary-button,.secondary-button{border:none;border-radius:15px;padding:13px 20px;font-weight:900}.primary-button{color:var(--navy);background:linear-gradient(#ffe989,#f2bd3d);box-shadow:0 6px 18px rgba(0,0,0,.18)}.secondary-button{background:#fff8e4;color:var(--navy);border:2px solid #d5bd7e}
+.top-hud{position:fixed;top:14px;left:18px;right:18px;z-index:40;display:flex;align-items:center;gap:12px}
+.player-card,.resource-pill,.icon-button{color:#fff;background:rgba(19,39,71,.86);border:2px solid rgba(255,255,255,.45);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.player-card{display:flex;gap:9px;align-items:center;padding:8px 14px 8px 8px;border-radius:18px}.player-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(#ffe699,#d7a638)}.player-name{font-weight:900}.castle-label{font-size:12px;color:#dbe8ff}
+.resources{display:flex;gap:7px;margin-right:auto}.resource-pill{padding:9px 12px;border-radius:16px;font-weight:900}.icon-button{width:43px;height:43px;border-radius:14px;font-size:19px}
+.quest-tracker{position:fixed;top:92px;left:18px;z-index:25;width:250px;padding:14px 16px;border-radius:16px;color:#fff;background:rgba(19,39,71,.83);box-shadow:0 6px 18px rgba(0,0,0,.18)}.tracker-title{font-size:10px;letter-spacing:1.5px;font-weight:900;color:#ffe89b}.tracker-progress{height:7px;margin-top:10px;border-radius:20px;background:rgba(255,255,255,.16);overflow:hidden}.tracker-progress div{height:100%;background:linear-gradient(90deg,#f9c843,#fff19d)}
+.kingdom-status{position:fixed;top:92px;right:18px;z-index:20;display:grid;gap:7px;color:#fff;font-size:13px}.kingdom-status>div{display:flex;justify-content:space-between;gap:18px;min-width:155px;padding:8px 10px;border-radius:12px;background:rgba(19,39,71,.76)}
+.bottom-nav{position:fixed;left:50%;bottom:18px;z-index:45;display:flex;gap:7px;padding:8px;transform:translateX(-50%);border-radius:22px;background:rgba(19,39,71,.92);border:2px solid rgba(255,255,255,.6);box-shadow:var(--shadow)}
+.nav-button{min-width:82px;padding:8px 10px;border:none;border-radius:13px;color:#dce8f7;font-size:10px;font-weight:900;background:transparent}.nav-button span{display:block;font-size:20px}.nav-button.active,.nav-button:hover{color:var(--navy);background:linear-gradient(#fff1a9,#efc653)}
+.game-panel{position:fixed;z-index:100;overflow:auto;color:var(--navy);background:var(--panel);box-shadow:var(--shadow)}
+.side-panel{top:85px;left:18px;bottom:105px;width:370px;border-radius:24px}.right-panel{left:auto;right:18px}.center-panel{top:50%;left:50%;width:min(680px,92vw);max-height:80vh;transform:translate(-50%,-50%);border-radius:28px}.full-panel{top:85px;left:4vw;right:4vw;bottom:100px;border-radius:28px}
+.panel-header{position:sticky;top:0;z-index:4;display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #ead9ae;background:#fff8e7}.panel-header h2{margin:4px 0 0}.eyebrow{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#a9893c}.close-panel{width:37px;height:37px;border:none;border-radius:11px;color:#fff;background:#b15e5e}
+.shop-tabs{display:flex;gap:7px;padding:14px 16px}.shop-tab{flex:1;padding:9px;border:1px solid #d7c18f;border-radius:12px;background:#fff8e4;font-weight:800}.shop-tab.active{background:var(--navy);color:#fff}.shop-list{display:grid;gap:10px;padding:0 16px 18px}.shop-item{display:grid;grid-template-columns:55px 1fr auto;gap:11px;align-items:center;padding:12px;border:1px solid #dfce9f;border-radius:16px;background:#fff}.shop-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:13px;font-size:27px;background:#fff2bd}.shop-info h4{margin:0 0 4px}.shop-info p{margin:0;font-size:12px;color:#756b5d}.shop-cost{margin-top:5px;font-size:11px;font-weight:900;color:#8a6b24}.shop-buy-button{border:none;border-radius:10px;padding:9px 10px;background:var(--green);color:#fff;font-weight:900}.locked-shop-item{filter:grayscale(.7);opacity:.62}.placement-help{margin:5px 16px 18px;padding:13px;border-radius:14px;background:#fff3c9;font-size:12px}
+.castle-content{padding:24px;text-align:center}.castle-big-icon{font-size:78px}.upgrade-box,.unlock-preview{margin-top:18px;padding:15px;border:1px solid #e4cf94;border-radius:16px;background:#fffaf0}.upgrade-title{font-size:12px;font-weight:900;color:#8f7131;margin-bottom:8px}
+.story-world-header{display:flex;align-items:center;justify-content:space-between;padding:28px;color:#fff;background:linear-gradient(120deg,#507c55,#8eb466)}.world-mood{font-size:76px}.stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;padding:20px}.stage-card{position:relative;min-height:180px;padding:16px;border:2px solid #e6d6a6;border-radius:18px;background:linear-gradient(#fffdf7,#f8edce)}.stage-card.locked{filter:grayscale(1);opacity:.5}.stage-number{font-size:11px;font-weight:900;color:#9e813c}.stage-enemy{font-size:42px;margin:12px 0}.stage-power{font-size:12px;color:#6d675d;margin-bottom:10px}.stage-battle-button{width:100%;padding:9px;border:none;border-radius:11px;background:linear-gradient(#4fbd67,#348a49);color:#fff;font-weight:900}.stage-clear-stars{position:absolute;top:11px;right:11px;font-size:12px}
+.cookie-toolbar{display:flex;gap:9px;padding:16px 20px}.cookie-toolbar input,.cookie-toolbar select{padding:10px 12px;border:1px solid #ddca93;border-radius:12px;background:#fff}.cookie-toolbar input{flex:1}.cookie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:4px 20px 24px}.cookie-card{position:relative;min-height:200px;padding:14px;border:2px solid #e1d09e;border-radius:18px;text-align:center;background:#fff}.cookie-card.not-owned{filter:grayscale(.8);opacity:.55}.cookie-icon{height:90px;display:grid;place-items:center;font-size:58px}.cookie-card h4{margin:3px 0 5px}.cookie-rarity{margin-top:7px;font-size:10px;font-weight:900;color:#94742d}.not-owned-label{position:absolute;right:8px;bottom:8px;padding:4px 6px;border-radius:7px;color:#fff;font-size:8px;font-weight:900;background:rgba(33,33,33,.86)}
+.modal-backdrop{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:rgba(8,18,35,.62);backdrop-filter:blur(6px)}.cookie-modal{position:relative;display:grid;grid-template-columns:220px 1fr;gap:22px;width:min(760px,92vw);padding:26px;border:3px solid #f0d37b;border-radius:28px;background:linear-gradient(150deg,#fffdfa,#fff0bd);box-shadow:var(--shadow)}.cookie-modal-portrait{display:grid;place-items:center;min-height:290px;border-radius:22px;font-size:120px;background:radial-gradient(circle,#fff7c0,#e5c878)}.modal-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:none;border-radius:11px;color:#fff;background:#a95050}.rarity-label{display:inline-block;padding:5px 9px;border-radius:8px;background:#8e6bd6;color:#fff;font-size:10px;font-weight:900}.cookie-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.cookie-stat-row div{padding:9px;border-radius:11px;text-align:center;font-size:11px;background:rgba(255,255,255,.65)}.cookie-stat-row strong{display:block;margin-top:3px}.exp-area{margin-top:16px}.exp-label{display:flex;justify-content:space-between;font-size:11px;font-weight:900}.exp-bar{height:12px;margin-top:6px;border-radius:30px;overflow:hidden;background:#d8d4c9}.exp-bar div{height:100%;background:linear-gradient(90deg,#6aa7ff,#7a65dd)}.candy-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:14px}.candy-button{padding:8px 3px;border:1px solid #d7c18c;border-radius:9px;background:#fff;font-size:10px}
+.quest-list{display:grid;gap:11px;padding:16px}.quest-card{padding:14px;border:1px solid #e0cb91;border-radius:16px;background:#fff}.quest-type{font-size:9px;font-weight:900;color:#96752f}.quest-card p{font-size:12px;color:#746c60}.quest-progress{height:8px;border-radius:8px;overflow:hidden;background:#e3ded2}.quest-progress div{height:100%;background:var(--green)}
+.concert-hall-display{padding:20px;text-align:center}.concert-stage{position:relative;display:grid;place-items:end center;height:230px;overflow:hidden;border-radius:20px;background:radial-gradient(circle at 50% 20%,#ffe29c,#8f532e 58%,#332037)}.concert-stage:after{content:"";position:absolute;left:0;right:0;bottom:0;height:48px;background:#5b3425}.music-performer{position:relative;z-index:3;margin-bottom:40px;font-size:88px;animation:bounce 2s ease-in-out infinite}@keyframes bounce{50%{transform:translateY(-8px)}}.music-arrangement-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;margin-top:16px}.music-arrangement-button{padding:11px;border:2px solid #dec889;border-radius:14px;background:#fff;font-weight:800}.music-arrangement-button.active{background:var(--navy);color:#fff}
+.battle-screen{position:fixed;inset:0;z-index:500;background:#21384a}.battle-background{position:absolute;inset:0;display:flex;flex-direction:column;background:linear-gradient(#9fd5ff 0 45%,#78ba65 45%)}.battle-background.eerie{background:linear-gradient(#34354c 0 45%,#4c4d53 45%)}.battle-top{display:flex;align-items:center;gap:13px;padding:14px 18px;color:#fff;background:rgba(16,33,56,.82)}.battle-controls{margin-left:auto;display:flex;gap:6px}.battle-top button{padding:8px 11px;border:none;border-radius:9px;color:#fff;background:rgba(255,255,255,.12)}.battle-area{position:relative;flex:1;display:flex;align-items:flex-end;justify-content:space-between;padding:0 8vw 12vh}.battle-team{display:flex;align-items:flex-end;gap:8px}.battle-unit{width:72px;text-align:center}.battle-unit-icon{font-size:52px;filter:drop-shadow(0 5px 3px rgba(0,0,0,.25))}.battle-hp{width:64px;height:8px;margin:5px auto 0;border:2px solid #fff;border-radius:10px;overflow:hidden;background:#3a3a3a}.battle-hp div{height:100%;background:#68d36d}.wave-text{position:absolute;top:20%;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:20px;color:#fff;font-weight:900;background:rgba(19,39,71,.65)}.battle-bottom{padding:11px;background:rgba(14,27,47,.88)}.skill-bar{display:flex;justify-content:center;gap:9px}.skill-button{position:relative;width:70px;height:70px;border:3px solid #f5d574;border-radius:18px;background:#f5ebcd;font-size:34px}.skill-cooldown{position:absolute;inset:0;display:grid;place-items:center;border-radius:15px;color:#fff;font-weight:900;background:rgba(17,26,40,.62)}
+.victory-screen{position:fixed;inset:0;z-index:600;display:grid;place-items:center;background:radial-gradient(circle,#fff8b7,#b7d9ff 48%,#253a65)}.victory-card{width:min(780px,94vw);padding:26px;border:4px solid #f4d45a;border-radius:32px;text-align:center;background:linear-gradient(#fffdf4,#f6e4a9);box-shadow:0 30px 90px rgba(0,0,0,.32)}.victory-title{font-size:clamp(44px,8vw,72px);font-weight:1000;color:#c18b19}.victory-stars{font-size:36px}.victory-cookie-row,.victory-rewards,.victory-buttons{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}.victory-cookie{font-size:54px}.reward-pill{padding:8px 11px;border-radius:11px;background:#fff;font-weight:900}.victory-buttons{margin-top:20px}
+.toast{position:fixed;left:50%;bottom:115px;z-index:1000;transform:translateX(-50%);padding:11px 18px;border-radius:13px;color:#fff;font-weight:800;background:rgba(19,39,71,.92)}
+.placement-hud{position:fixed;top:88px;left:50%;z-index:150;transform:translateX(-50%);padding:10px 18px;border-radius:16px;text-align:center;color:#fff;font-size:12px;background:rgba(19,39,71,.9)}
+@media(max-width:850px){.quest-tracker,.kingdom-status{display:none}.resource-pill{font-size:12px;padding:7px 8px}.bottom-nav{width:calc(100% - 14px);bottom:7px}.nav-button{min-width:0;flex:1;font-size:8px;padding:7px 3px}.side-panel,.full-panel{top:76px;left:7px;right:7px;bottom:78px;width:auto}.cookie-modal{grid-template-columns:1fr;max-height:90vh;overflow:auto}.cookie-modal-portrait{min-height:170px;font-size:78px}}
+</style>
 </head>
-
 <body>
 
-<!-- =========================================================
-     TOP HUD
-========================================================= -->
-
-<header class="topbar">
-
-  <div class="brand">
-    <div class="brand-icon">👑</div>
-
-    <div>
-      <h1>Money Kingdom</h1>
-      <small>Sweeter Habits • Brighter Futures</small>
-    </div>
+<div id="startScreen" class="start-screen">
+  <div class="start-card">
+    <div class="logo-crown">👑</div>
+    <h1>MONEY KINGDOM</h1>
+    <p>Sweeter Habits • Brighter Futures</p>
+    <button id="startGameButton" class="primary-button">ENTER PROSPERA</button>
+    <div style="margin-top:15px;font-size:13px;color:#786b54">Click once to enable game music.</div>
   </div>
+</div>
 
+<div id="gameContainer"></div>
 
+<header class="top-hud">
+  <div class="player-card">
+    <div class="player-icon">👑</div>
+    <div><div class="player-name">Prospera</div><div class="castle-label">Castle Lv. <span id="castleLevelText">1</span></div></div>
+  </div>
   <div class="resources">
-
-    <div class="resource">
-      🪙
-      <span id="coinsText">0</span>
-    </div>
-
-    <div class="resource">
-      🪵
-      <span id="woodText">0</span>
-    </div>
-
-    <div class="resource">
-      🪨
-      <span id="stoneText">0</span>
-    </div>
-
-    <div class="resource">
-      💎
-      <span id="gemsText">0</span>
-    </div>
-
+    <div class="resource-pill">🪙 <span id="coinText">0</span></div>
+    <div class="resource-pill">🪵 <span id="woodText">0</span></div>
+    <div class="resource-pill">🪨 <span id="stoneText">0</span></div>
+    <div class="resource-pill">💎 <span id="gemText">0</span></div>
   </div>
-
+  <button id="musicToggleButton" class="icon-button">🎵</button>
+  <button id="saveButton" class="icon-button">💾</button>
 </header>
 
+<aside class="quest-tracker">
+  <div class="tracker-title">CURRENT QUEST</div>
+  <div id="questTrackerText">Rebuild Prospera</div>
+  <div class="tracker-progress"><div id="questTrackerBar" style="width:0%"></div></div>
+</aside>
 
+<aside class="kingdom-status">
+  <div>✨ Prosperity <strong id="prosperityText">10</strong></div>
+  <div>😊 Happiness <strong id="happinessText">70</strong></div>
+  <div>👥 Population <strong id="populationText">5</strong></div>
+</aside>
 
-<!-- =========================================================
-     LEFT NAV
-========================================================= -->
-
-<nav class="side-nav">
-
-  <button
-    class="nav-btn active"
-    data-screen="kingdomScreen"
-  >
-    <span>🏰</span>
-    Kingdom
-  </button>
-
-  <button
-    class="nav-btn"
-    data-screen="storyScreen"
-  >
-    <span>🗺️</span>
-    Story
-  </button>
-
-  <button
-    class="nav-btn"
-    data-screen="cookiesScreen"
-  >
-    <span>🍪</span>
-    Cookies
-  </button>
-
+<nav class="bottom-nav">
+  <button class="nav-button active" data-panel="kingdom"><span>🏰</span>KINGDOM</button>
+  <button class="nav-button" data-panel="build"><span>🔨</span>BUILD</button>
+  <button class="nav-button" data-panel="story"><span>🗺️</span>STORY</button>
+  <button class="nav-button" data-panel="cookies"><span>🍪</span>COOKIES</button>
+  <button class="nav-button" data-panel="quests"><span>📜</span>QUESTS</button>
+  <button class="nav-button" data-panel="music"><span>🎼</span>MUSIC</button>
 </nav>
 
-
-
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-
-<main class="game">
-
-<!-- =========================================================
-     KINGDOM SCREEN
-========================================================= -->
-
-<section
-  id="kingdomScreen"
-  class="screen active-screen"
->
-
-  <div class="screen-heading">
-
-    <div>
-      <p class="eyebrow">
-        PROSPERA
-      </p>
-
-      <h2>
-        Your Kingdom
-      </h2>
-
-      <p>
-        Build, produce resources and restore the kingdom.
-      </p>
-    </div>
-
-
-    <div class="kingdom-level-card">
-
-      <span>
-        Fortune Castle
-      </span>
-
-      <strong>
-        Lv.
-        <span id="castleLevelText">
-          1
-        </span>
-      </strong>
-
-    </div>
-
+<section id="buildPanel" class="game-panel side-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">PROSPERA CONSTRUCTION</div><h2>Build Shop</h2></div><button class="close-panel">✕</button></div>
+  <div class="shop-tabs">
+    <button class="shop-tab active" data-category="production">Buildings</button>
+    <button class="shop-tab" data-category="decor">Decor</button>
+    <button class="shop-tab" data-category="nature">Nature</button>
   </div>
-
-
-
-  <!-- KINGDOM -->
-
-  <div class="kingdom-world">
-
-    <div class="sky-cloud cloud-one">
-      ☁️
-    </div>
-
-    <div class="sky-cloud cloud-two">
-      ☁️
-    </div>
-
-
-    <div class="kingdom-map">
-
-      <!-- CASTLE -->
-
-      <button
-        id="castleBuilding"
-        class="building castle-building"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="castleBadgeLevel">
-            1
-          </span>
-        </div>
-
-        <div
-          id="castleEmoji"
-          class="building-art castle-art"
-        >
-          🏚️
-        </div>
-
-        <span>
-          Fortune Castle
-        </span>
-
-      </button>
-
-
-
-      <!-- FARM -->
-
-      <button
-        class="building"
-        data-building="farm"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="farmLevel">
-            1
-          </span>
-        </div>
-
-        <div class="building-art">
-          🌾
-        </div>
-
-        <span>
-          Fortune Farm
-        </span>
-
-        <div
-          id="farmBubble"
-          class="production-bubble"
-        >
-          🪙 Collect
-        </div>
-
-      </button>
-
-
-
-      <!-- LUMBER MILL -->
-
-      <button
-        class="building"
-        data-building="lumber"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="lumberLevel">
-            1
-          </span>
-        </div>
-
-        <div class="building-art">
-          🪵
-        </div>
-
-        <span>
-          Lumber Mill
-        </span>
-
-        <div
-          id="lumberBubble"
-          class="production-bubble"
-        >
-          🪵 Collect
-        </div>
-
-      </button>
-
-
-
-      <!-- QUARRY -->
-
-      <button
-        id="quarryBuilding"
-        class="building locked-building"
-        data-building="quarry"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="quarryLevel">
-            1
-          </span>
-        </div>
-
-        <div class="building-art">
-          ⛏️
-        </div>
-
-        <span>
-          Stone Quarry
-        </span>
-
-        <div
-          id="quarryLock"
-          class="building-lock"
-        >
-          🔒 Castle Lv. 2
-        </div>
-
-        <div
-          id="quarryBubble"
-          class="production-bubble hidden"
-        >
-          🪨 Collect
-        </div>
-
-      </button>
-
-
-
-      <!-- BAKERY -->
-
-      <button
-        id="bakeryBuilding"
-        class="building locked-building"
-        data-building="bakery"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="bakeryLevel">
-            1
-          </span>
-        </div>
-
-        <div class="building-art">
-          🥐
-        </div>
-
-        <span>
-          Golden Bakery
-        </span>
-
-        <div
-          id="bakeryLock"
-          class="building-lock"
-        >
-          🔒 Castle Lv. 3
-        </div>
-
-        <div
-          id="bakeryBubble"
-          class="production-bubble hidden"
-        >
-          🪙 Collect
-        </div>
-
-      </button>
-
-
-
-      <!-- BANK -->
-
-      <button
-        id="bankBuilding"
-        class="building locked-building"
-        data-building="bank"
-      >
-
-        <div class="building-level">
-          Lv.
-          <span id="bankLevel">
-            1
-          </span>
-        </div>
-
-        <div class="building-art">
-          🏦
-        </div>
-
-        <span>
-          Golden Bank
-        </span>
-
-        <div
-          id="bankLock"
-          class="building-lock"
-        >
-          🔒 Castle Lv. 5
-        </div>
-
-        <div
-          id="bankBubble"
-          class="production-bubble hidden"
-        >
-          🪙 Collect
-        </div>
-
-      </button>
-
-
-
-      <!-- TREE -->
-
-      <button
-        id="treeBuilding"
-        class="building tree-building locked-building"
-      >
-
-        <div class="building-art">
-          🌳
-        </div>
-
-        <span>
-          Tree of Fortune
-        </span>
-
-        <div
-          id="treeLock"
-          class="building-lock"
-        >
-          🔒 Castle Lv. 4
-        </div>
-
-      </button>
-
-    </div>
-
-
-
-    <!-- COOKIE WALKERS -->
-
-    <div
-      id="kingdomWalkers"
-      class="kingdom-walkers"
-    ></div>
-
-  </div>
-
-
-
-  <!-- CASTLE PROGRESS -->
-
-  <div class="kingdom-bottom-grid">
-
-    <div class="panel">
-
-      <div class="panel-title-row">
-
-        <div>
-          <p class="eyebrow">
-            KINGDOM PROGRESSION
-          </p>
-
-          <h3>
-            Upgrade Fortune Castle
-          </h3>
-        </div>
-
-        <div class="castle-mini">
-          🏰
-        </div>
-
-      </div>
-
-
-      <div
-        id="castleRequirements"
-        class="requirement-list"
-      ></div>
-
-
-      <button
-        id="upgradeCastleBtn"
-        class="gold-button large-button"
-      >
-        Upgrade Castle
-      </button>
-
-    </div>
-
-
-
-    <div class="panel">
-
-      <p class="eyebrow">
-        NEXT GOAL
-      </p>
-
-      <h3 id="nextUnlockTitle">
-        Unlock Stone Quarry
-      </h3>
-
-      <p
-        id="nextUnlockDescription"
-        class="muted"
-      >
-        Upgrade Fortune Castle to level 2.
-      </p>
-
-
-      <div class="progress-track">
-
-        <div
-          id="kingdomProgressBar"
-          class="progress-fill"
-        ></div>
-
-      </div>
-
-
-      <div
-        id="kingdomProgressText"
-        class="progress-text"
-      >
-        Castle Lv. 1 / 50
-      </div>
-
-    </div>
-
-  </div>
-
+  <div id="buildShopList" class="shop-list"></div>
+  <div class="placement-help"><strong>Placement Mode</strong><p>Buy, move your mouse, click to place. R rotates. Esc cancels.</p></div>
 </section>
 
-
-
-<!-- =========================================================
-     STORY SCREEN
-========================================================= -->
-
-<section
-  id="storyScreen"
-  class="screen"
->
-
-  <div class="screen-heading">
-
-    <div>
-      <p class="eyebrow">
-        STORY MODE
-      </p>
-
-      <h2>
-        World 1 • Empty Village
-      </h2>
-
-      <p>
-        Fight through the story to earn EXP Candies
-        and rebuild Prospera.
-      </p>
-    </div>
-
+<section id="castlePanel" class="game-panel center-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">HEART OF PROSPERA</div><h2>Fortune Castle</h2></div><button class="close-panel">✕</button></div>
+  <div class="castle-content">
+    <div class="castle-big-icon">🏰</div>
+    <h3>Level <span id="castlePanelLevel">1</span></h3>
+    <p id="castleDescription"></p>
+    <div class="upgrade-box"><div class="upgrade-title">Upgrade Requirements</div><div id="castleUpgradeRequirements"></div><button id="upgradeCastleButton" class="primary-button">UPGRADE CASTLE</button></div>
+    <div class="unlock-preview"><div class="upgrade-title">Next Level Unlocks</div><div id="castleUnlockText"></div></div>
   </div>
-
-
-  <div class="story-layout">
-
-    <div class="story-map">
-
-      <div class="story-path"></div>
-
-      <div
-        id="storyStageList"
-        class="stage-list"
-      ></div>
-
-    </div>
-
-
-
-    <aside class="story-info panel">
-
-      <p class="eyebrow">
-        STORY REWARDS
-      </p>
-
-      <h3>
-        EXP Candies
-      </h3>
-
-      <p class="muted">
-        EXP Candies are mainly earned by completing
-        Story Mode stages.
-      </p>
-
-
-      <div class="candy-guide">
-
-        <div>
-          <span>🍬</span>
-          <strong>XS</strong>
-          <small>100 EXP</small>
-        </div>
-
-        <div>
-          <span>🍬</span>
-          <strong>S</strong>
-          <small>150 EXP</small>
-        </div>
-
-        <div>
-          <span>🍬</span>
-          <strong>M</strong>
-          <small>200 EXP</small>
-        </div>
-
-        <div>
-          <span>🍬</span>
-          <strong>L</strong>
-          <small>300 EXP</small>
-        </div>
-
-        <div>
-          <span>🍬</span>
-          <strong>XL</strong>
-          <small>400 EXP</small>
-        </div>
-
-      </div>
-
-    </aside>
-
-  </div>
-
 </section>
 
-
-
-<!-- =========================================================
-     COOKIES SCREEN
-========================================================= -->
-
-<section
-  id="cookiesScreen"
-  class="screen"
->
-
-  <div class="screen-heading">
-
-    <div>
-
-      <p class="eyebrow">
-        KINGDOM HEROES
-      </p>
-
-      <h2>
-        Cookies
-      </h2>
-
-      <p>
-        Level up your Cookies using EXP Candies earned
-        from Story Mode.
-      </p>
-
-    </div>
-
-
-    <div class="collection-counter">
-
-      <span>
-        Collection
-      </span>
-
-      <strong id="collectionCount">
-        0 / 0
-      </strong>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- CANDY INVENTORY -->
-
-  <div class="candy-inventory">
-
-    <div class="inventory-title">
-      EXP Candy
-    </div>
-
-
-    <div
-      class="inventory-candy"
-      data-candy-display="XS"
-    >
-      <span class="candy candy-xs">
-        🍬
-      </span>
-
-      <div>
-        <strong>XS</strong>
-        <small>100 EXP</small>
-      </div>
-
-      <b id="candyXSCount">
-        ×0
-      </b>
-    </div>
-
-
-    <div
-      class="inventory-candy"
-      data-candy-display="S"
-    >
-      <span class="candy candy-s">
-        🍬
-      </span>
-
-      <div>
-        <strong>S</strong>
-        <small>150 EXP</small>
-      </div>
-
-      <b id="candySCount">
-        ×0
-      </b>
-    </div>
-
-
-    <div
-      class="inventory-candy"
-      data-candy-display="M"
-    >
-      <span class="candy candy-m">
-        🍬
-      </span>
-
-      <div>
-        <strong>M</strong>
-        <small>200 EXP</small>
-      </div>
-
-      <b id="candyMCount">
-        ×0
-      </b>
-    </div>
-
-
-    <div
-      class="inventory-candy"
-      data-candy-display="L"
-    >
-      <span class="candy candy-l">
-        🍬
-      </span>
-
-      <div>
-        <strong>L</strong>
-        <small>300 EXP</small>
-      </div>
-
-      <b id="candyLCount">
-        ×0
-      </b>
-    </div>
-
-
-    <div
-      class="inventory-candy"
-      data-candy-display="XL"
-    >
-      <span class="candy candy-xl">
-        🍬
-      </span>
-
-      <div>
-        <strong>XL</strong>
-        <small>400 EXP</small>
-      </div>
-
-      <b id="candyXLCount">
-        ×0
-      </b>
-    </div>
-
-  </div>
-
-
-
-  <!-- FILTERS -->
-
-  <div class="cookie-filters">
-
-    <button
-      class="filter-btn active"
-      data-filter="ALL"
-    >
-      All
-    </button>
-
-    <button
-      class="filter-btn"
-      data-filter="EPIC"
-    >
-      Epic
-    </button>
-
-    <button
-      class="filter-btn"
-      data-filter="LEGENDARY"
-    >
-      Legendary
-    </button>
-
-    <button
-      class="filter-btn"
-      data-filter="ANCIENT"
-    >
-      Ancient
-    </button>
-
-    <button
-      class="filter-btn"
-      data-filter="BEAST"
-    >
-      Beast
-    </button>
-
-  </div>
-
-
-
-  <div
-    id="cookieGrid"
-    class="cookie-grid"
-  ></div>
-
+<section id="storyPanel" class="game-panel full-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">THE GOLDEN SEEDS</div><h2>Story</h2></div><button class="close-panel">✕</button></div>
+  <div class="story-world-header"><div><div class="eyebrow" style="color:#fff1a0">WORLD 1</div><h2>Empty Village</h2><p>Something strange remains among the ruins.</p></div><div class="world-mood">🌱</div></div>
+  <div id="storyStageList" class="stage-grid"></div>
 </section>
 
-</main>
-
-
-
-<!-- =========================================================
-     COOKIE UPGRADE MODAL
-========================================================= -->
-
-<div
-  id="cookieModal"
-  class="modal hidden"
->
-
-  <div class="modal-card cookie-upgrade-modal">
-
-    <button
-      id="closeCookieModal"
-      class="close-btn"
-    >
-      ✕
-    </button>
-
-
-    <div class="cookie-profile-top">
-
-      <div
-        id="profileGlow"
-        class="profile-character"
-      >
-        <div
-          id="profileCookieIcon"
-          class="profile-cookie-icon"
-        >
-          🍪
-        </div>
-      </div>
-
-
-      <div class="profile-main-info">
-
-        <span
-          id="profileRarity"
-          class="profile-rarity"
-        >
-          EPIC
-        </span>
-
-        <h2 id="profileCookieName">
-          Dollar Cookie
-        </h2>
-
-        <p id="profileCookieTitle">
-          The Bright Earner
-        </p>
-
-
-        <div class="cookie-position">
-          <span id="profileRole">
-            Attacker
-          </span>
-
-          •
-
-          <span id="profilePosition">
-            Middle
-          </span>
-        </div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- LOCKED MESSAGE -->
-
-    <div
-      id="lockedCookieArea"
-      class="locked-cookie-area hidden"
-    >
-
-      <div class="locked-big">
-        🔒
-      </div>
-
-      <h3>
-        Cookie Not Obtained
-      </h3>
-
-      <p>
-        Continue through the story and explore Prospera
-        to discover this Cookie.
-      </p>
-
-    </div>
-
-
-
-    <!-- OWNED UPGRADE -->
-
-    <div id="ownedCookieArea">
-
-      <div class="level-row">
-
-        <div>
-          <small>
-            LEVEL
-          </small>
-
-          <strong id="profileLevel">
-            1
-          </strong>
-        </div>
-
-        <div>
-          <small>
-            POWER
-          </small>
-
-          <strong id="profilePower">
-            0
-          </strong>
-        </div>
-
-      </div>
-
-
-
-      <div class="exp-header">
-
-        <strong>
-          EXP
-        </strong>
-
-        <span id="profileExpText">
-          0 / 1000
-        </span>
-
-      </div>
-
-
-      <div class="exp-track">
-
-        <div
-          id="profileExpBar"
-          class="exp-fill"
-        ></div>
-
-      </div>
-
-
-
-      <div class="stats-grid">
-
-        <div>
-          ❤️
-          <small>HP</small>
-          <strong id="profileHP">
-            0
-          </strong>
-        </div>
-
-        <div>
-          ⚔️
-          <small>ATK</small>
-          <strong id="profileATK">
-            0
-          </strong>
-        </div>
-
-        <div>
-          🛡️
-          <small>DEF</small>
-          <strong id="profileDEF">
-            0
-          </strong>
-        </div>
-
-      </div>
-
-
-
-      <h3 class="upgrade-title">
-        Give EXP Candy
-      </h3>
-
-
-      <div
-        id="upgradeCandyList"
-        class="upgrade-candy-list"
-      ></div>
-
-
-      <div class="candy-help">
-        Every Cookie level requires
-        <strong>1,000 EXP</strong>.
-        Extra EXP carries into the next level.
-      </div>
-
-    </div>
-
+<section id="cookiesPanel" class="game-panel full-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">RESIDENTS OF PROSPERA</div><h2>Cookies</h2></div><button class="close-panel">✕</button></div>
+  <div class="cookie-toolbar">
+    <input id="cookieSearch" type="text" placeholder="Search Cookies...">
+    <select id="cookieRarityFilter">
+      <option value="ALL">All Rarities</option><option value="RARE">Rare</option><option value="EPIC">Epic</option><option value="SUPER EPIC">Super Epic</option><option value="LEGENDARY">Legendary</option><option value="ANCIENT">Ancient</option><option value="BEAST">Beast</option>
+    </select>
   </div>
+  <div id="cookieCollection" class="cookie-grid"></div>
+</section>
 
-</div>
+<section id="questsPanel" class="game-panel side-panel right-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">PROSPERA JOURNAL</div><h2>Quests</h2></div><button class="close-panel">✕</button></div>
+  <div id="questList" class="quest-list"></div>
+</section>
 
-
-
-<!-- =========================================================
-     STORY BATTLE MODAL
-========================================================= -->
-
-<div
-  id="battleModal"
-  class="modal hidden"
->
-
-  <div class="modal-card battle-modal-card">
-
-    <div id="battleContent"></div>
-
+<section id="musicPanel" class="game-panel center-panel hidden">
+  <div class="panel-header"><div><div class="eyebrow">PROSPERA GRAND CONCERT HALL</div><h2>Kingdom Music</h2></div><button class="close-panel">✕</button></div>
+  <div class="concert-hall-display">
+    <div class="concert-stage"><div id="musicPerformer" class="music-performer">🎼</div></div>
+    <h3>Choose Your Kingdom Arrangement</h3>
+    <p>The Prospera melody stays the same, but the performer changes how it sounds.</p>
+    <div id="musicArrangementList" class="music-arrangement-list"></div>
   </div>
+</section>
 
-</div>
-
-
-
-<!-- =========================================================
-     LEVEL-UP EFFECT
-========================================================= -->
-
-<div
-  id="levelUpOverlay"
-  class="level-up-overlay hidden"
->
-
-  <div class="level-rays"></div>
-
-  <div class="level-up-content">
-
-    <div
-      id="levelUpCookieIcon"
-      class="level-up-cookie"
-    >
-      🍪
+<section id="cookieModal" class="modal-backdrop hidden">
+  <div class="cookie-modal">
+    <button id="closeCookieModal" class="modal-close">✕</button>
+    <div id="cookieModalPortrait" class="cookie-modal-portrait">🍪</div>
+    <div>
+      <div id="cookieModalRarity" class="rarity-label">EPIC</div>
+      <h2 id="cookieModalName">Cookie</h2>
+      <div id="cookieModalElements"></div>
+      <p id="cookieModalDescription"></p>
+      <div class="cookie-stat-row">
+        <div>Level<strong id="cookieModalLevel">1</strong></div>
+        <div>Power<strong id="cookieModalPower">100</strong></div>
+        <div>Role<strong id="cookieModalRole">Support</strong></div>
+      </div>
+      <div class="exp-area">
+        <div class="exp-label">EXP <span id="cookieExpText">0 / 1000</span></div>
+        <div class="exp-bar"><div id="cookieExpBar" style="width:0%"></div></div>
+      </div>
+      <div id="candyButtons" class="candy-buttons"></div>
     </div>
-
-    <p>
-      LEVEL UP!
-    </p>
-
-    <h2 id="levelUpCookieName">
-      Dollar Cookie
-    </h2>
-
-    <strong id="levelUpNumbers">
-      1 → 2
-    </strong>
-
   </div>
+</section>
 
-</div>
+<section id="battleScreen" class="battle-screen hidden">
+  <div id="battleBackground" class="battle-background">
+    <div class="battle-top">
+      <button id="exitBattleButton">←</button>
+      <div><strong id="battleStageLabel">1-1</strong><div id="battleStageName">Empty Road</div></div>
+      <div class="battle-controls"><button id="autoBattleButton">AUTO</button><button id="speedBattleButton">×1</button></div>
+    </div>
+    <div class="battle-area">
+      <div id="playerBattleTeam" class="battle-team"></div>
+      <div id="waveText" class="wave-text">WAVE 1 / 3</div>
+      <div id="enemyBattleTeam" class="battle-team"></div>
+    </div>
+    <div class="battle-bottom"><div id="battleSkillBar" class="skill-bar"></div></div>
+  </div>
+</section>
 
+<section id="victoryScreen" class="victory-screen hidden">
+  <div class="victory-card">
+    <div class="victory-title">VICTORY</div>
+    <div class="victory-stars">⭐ ⭐ ⭐</div>
+    <h2 id="victoryStageName"></h2>
+    <div id="victoryCookieRow" class="victory-cookie-row"></div>
+    <div id="victoryRewards" class="victory-rewards"></div>
+    <div class="victory-buttons">
+      <button id="victoryKingdomButton" class="secondary-button">BACK TO KINGDOM</button>
+      <button id="victoryRetryButton" class="secondary-button">TRY AGAIN</button>
+      <button id="victoryNextButton" class="primary-button">NEXT STAGE</button>
+    </div>
+  </div>
+</section>
 
+<div id="toast" class="toast hidden">Hello!</div>
+<div id="placementHud" class="placement-hud hidden"><strong id="placementName">Building</strong><div>Click = Place • R = Rotate • ESC = Cancel</div></div>
 
-<!-- =========================================================
-     TOAST
-========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const SAVE_KEY="moneyKingdomSingleV1",EXP_PER_LEVEL=1000,candyValues={XS:100,S:150,M:200,L:300,XL:400};
+const defaultState={coins:5000,wood:250,stone:100,gems:300,castleLevel:1,prosperity:10,happiness:70,population:5,storyUnlocked:1,clearedStages:[],currentMusic:"orchestra",candies:{XS:15,S:5,M:2,L:0,XL:0},ownedCookies:["dollar","coin","budget","violin"],cookieProgress:{dollar:{level:1,exp:0},coin:{level:1,exp:0},budget:{level:1,exp:0},violin:{level:1,exp:0}},placedBuildings:[{id:"farm0",type:"farm",x:-7,z:5,rotation:0},{id:"lumber0",type:"lumber",x:7,z:5,rotation:0},{id:"house0",type:"house",x:-5,z:-6,rotation:0},{id:"house1",type:"house",x:5,z:-6,rotation:0}],quests:{buildThree:0,clearThree:0,levelCookie:0}};
+let state=loadState();
 
-<div
-  id="toast"
-  class="toast"
-></div>
+const cookies=[
+{id:"dollar",name:"Dollar Cookie",icon:"💵",rarity:"EPIC",elements:["⚪ Neutral"],role:"Ranged",basePower:1050,description:"An energetic dreamer who believes every small beginning can grow into something greater."},
+{id:"coin",name:"Coin Cookie",icon:"🪙",rarity:"RARE",elements:["🪨 Earth"],role:"Defence",basePower:900,description:"A dependable guardian who knows that even the smallest coin can become the start of something important."},
+{id:"budget",name:"Budget Cookie",icon:"📒",rarity:"RARE",elements:["⚪ Neutral"],role:"Support",basePower:820,description:"Careful, practical and impossible to trick with an unnecessary purchase."},
+{id:"investor",name:"Investor Cookie",icon:"📈",rarity:"EPIC",elements:["🌿 Nature"],role:"Support",basePower:1200,description:"Patient enough to wait while tiny seeds grow into mighty forests."},
+{id:"lucky",name:"Lucky Cookie",icon:"🍀",rarity:"LEGENDARY",elements:["🌪️ Wind","✨ Light"],role:"Ranged",basePower:1950,description:"Fortune seems to follow wherever Lucky Cookie goes."},
+{id:"chronos",name:"Chronos Cookie",icon:"⏳",rarity:"LEGENDARY",elements:["🔮 Arcane","✨ Light"],role:"Support",basePower:2050,description:"Guardian of the Clocktower of Ages."},
+{id:"diamond",name:"Diamond Cookie",icon:"💎",rarity:"LEGENDARY",elements:["🪨 Earth"],role:"Defence",basePower:2250,description:"Protector of the deep crystal caverns beneath Prospera."},
+{id:"verdantis",name:"Verdantis Cookie",icon:"🌳",rarity:"LEGENDARY",elements:["🌿 Nature","🪨 Earth"],role:"Defence",basePower:2150,description:"The ancient protector of the Evergreen Wilds."},
+{id:"stellara",name:"Stellara Cookie",icon:"🌟",rarity:"LEGENDARY",elements:["✨ Light","🔮 Arcane"],role:"Magic",basePower:2200,description:"Keeper of dreams and the stars above Prospera."},
+{id:"equilibra",name:"Equilibra Cookie",icon:"⚖️",rarity:"ANCIENT",elements:["⚪ Neutral"],role:"Support",basePower:2750,description:"The Ancient Keeper of Balance."},
+{id:"sapheon",name:"Sapheon Cookie",icon:"📜",rarity:"ANCIENT",elements:["✨ Light"],role:"Support",basePower:2800,description:"The Seeker of Truth."},
+{id:"florentia",name:"Florentia Cookie",icon:"🌺",rarity:"ANCIENT",elements:["🌿 Nature","✨ Light"],role:"Healer",basePower:2850,description:"The Ancient Bringer of Prosperity."},
+{id:"liberis",name:"Liberis Cookie",icon:"🪽",rarity:"ANCIENT",elements:["🌪️ Wind","✨ Light"],role:"Charge",basePower:2900,description:"The Ancient Guide of Freedom."},
+{id:"memoria",name:"Memoria Cookie",icon:"🕯️",rarity:"ANCIENT",elements:["✨ Light","🔮 Arcane"],role:"Defence",basePower:2950,description:"The Ancient Keeper of Legacy."},
+{id:"greed",name:"Greed Cookie",icon:"👹",rarity:"BEAST",elements:["🌑 Dark","🔥 Fire"],role:"Magic",basePower:3300,description:"Once a guardian of ambition. Now the desire for prosperity has become endless hunger."},
+{id:"deception",name:"Deception Cookie",icon:"🎭",rarity:"BEAST",elements:["🌑 Dark","🔮 Arcane"],role:"Magic",basePower:3400,description:"Once the Wonder of Knowledge. One tiny lie showed him something truth never could: surprise."},
+{id:"ruin",name:"Ruin Cookie",icon:"💥",rarity:"BEAST",elements:["🔥 Fire","🌑 Dark"],role:"Bomber",basePower:3450,description:"Once a guardian of change. Destruction became an obsession."},
+{id:"debt",name:"Debt Cookie",icon:"⛓️",rarity:"BEAST",elements:["🪨 Earth","🌑 Dark"],role:"Defence",basePower:3500,description:"Once a guardian of trust and promises. Now every promise becomes a chain."},
+{id:"oblivion",name:"Oblivion Cookie",icon:"🌑",rarity:"BEAST",elements:["🌑 Dark","🔮 Arcane"],role:"Magic",basePower:3600,description:"Once a guardian of memory. After trying to erase suffering, Oblivion began erasing everything."},
+{id:"piano",name:"Piano Cookie",icon:"🎹",rarity:"EPIC",elements:["🔮 Arcane"],role:"Support",basePower:1150,description:"A calm musician whose melodies once filled Fortune Castle."},
+{id:"violin",name:"Violin Cookie",icon:"🎻",rarity:"EPIC",elements:["🌪️ Wind","🔮 Arcane"],role:"Support",basePower:1180,description:"A graceful member of the Prospera Ensemble."},
+{id:"drummer",name:"Drummer Cookie",icon:"🥁",rarity:"RARE",elements:["🪨 Earth"],role:"Support",basePower:860,description:"The heartbeat of every parade in Prospera."},
+{id:"flute",name:"Flute Cookie",icon:"🪈",rarity:"EPIC",elements:["🌪️ Wind","🌿 Nature"],role:"Healer",basePower:1100,description:"Forest birds often stop flying just to listen."},
+{id:"dj",name:"DJ Cookie",icon:"🎧",rarity:"SUPER EPIC",elements:["⚡ Lightning","🔮 Arcane"],role:"Support",basePower:1700,description:"The Concert Hall has never been the same since DJ Cookie found the bass knob."},
+{id:"musicbox",name:"Music Box Cookie",icon:"🎶",rarity:"SUPER EPIC",elements:["❄️ Ice","🔮 Arcane"],role:"Magic",basePower:1750,description:"A mysterious musician carrying melodies from Prospera's forgotten past."},
+{id:"conductor",name:"Conductor Cookie",icon:"🎼",rarity:"SUPER EPIC",elements:["🔮 Arcane","✨ Light"],role:"Support",basePower:1850,description:"Former leader of the Prospera Ensemble."},
+{id:"rockstar",name:"Rockstar Cookie",icon:"🎸",rarity:"EPIC",elements:["⚡ Lightning","🔥 Fire"],role:"Charge",basePower:1300,description:"Quiet music? Never heard of it."},
+{id:"saxophone",name:"Saxophone Cookie",icon:"🎷",rarity:"EPIC",elements:["🌪️ Wind"],role:"Magic",basePower:1210,description:"Cool, calm and always performing under perfect lighting."},
+{id:"bell",name:"Bell Cookie",icon:"🔔",rarity:"RARE",elements:["✨ Light"],role:"Support",basePower:890,description:"A single clear chime can be heard throughout the kingdom."},
+{id:"detective",name:"Detective Cookie",icon:"🕵️",rarity:"EPIC",elements:["⚪ Neutral"],role:"Support",basePower:1200,description:"He does not know everything. He simply notices what everyone else missed."},
+{id:"baguette",name:"Baguette Cookie",icon:"🥖",rarity:"RARE",elements:["⚪ Neutral"],role:"Charge",basePower:780,description:"Nobody knows why the baguette is being used as a sword."}
+];
 
+const buildingCatalog={
+farm:{name:"Fortune Farm",icon:"🌾",category:"production",unlockLevel:1,cost:{coins:1000,wood:20,stone:0},description:"Produces crops.",color:0xe2c45b,size:[3.8,2.3,3.4]},
+lumber:{name:"Lumber Mill",icon:"🪵",category:"production",unlockLevel:1,cost:{coins:1200,wood:0,stone:20},description:"Processes wood.",color:0x9b6846,size:[3.6,2.4,3.2]},
+house:{name:"Prospera Cottage",icon:"🏠",category:"production",unlockLevel:1,cost:{coins:750,wood:25,stone:10},description:"Provides homes for residents.",color:0xf4c887,size:[3,2.5,3]},
+quarry:{name:"Stone Quarry",icon:"⛏️",category:"production",unlockLevel:2,cost:{coins:2500,wood:75,stone:0},description:"Produces stone.",color:0x9299a4,size:[4,2,3.8]},
+bakery:{name:"Golden Bakery",icon:"🥐",category:"production",unlockLevel:3,cost:{coins:5000,wood:100,stone:75},description:"Turns crops into goods.",color:0xf0a76e,size:[4,3.2,3.6]},
+concertHall:{name:"Prospera Concert Hall",icon:"🎼",category:"production",unlockLevel:4,cost:{coins:8000,wood:130,stone:100},description:"Home of the Prospera Ensemble.",color:0xaa779c,size:[5.2,4,4.8]},
+bank:{name:"Golden Bank",icon:"🏦",category:"production",unlockLevel:5,cost:{coins:12000,wood:200,stone:150},description:"Improves coin production.",color:0xe7ca68,size:[4.8,4,4.2]},
+fountain:{name:"Fortune Fountain",icon:"⛲",category:"decor",unlockLevel:1,cost:{coins:500,wood:0,stone:15},description:"A peaceful gathering place.",color:0x8ecbe2,size:[2.8,1.1,2.8]},
+bench:{name:"Garden Bench",icon:"🪑",category:"decor",unlockLevel:1,cost:{coins:100,wood:5,stone:0},description:"A nice place to rest.",color:0x9a623e,size:[2.2,.8,.8]},
+lamp:{name:"Golden Lamp",icon:"🏮",category:"decor",unlockLevel:2,cost:{coins:220,wood:4,stone:3},description:"Lights the roads.",color:0xf4d76c,size:[.8,2.5,.8]},
+tree:{name:"Prospera Tree",icon:"🌳",category:"nature",unlockLevel:1,cost:{coins:80,wood:0,stone:0},description:"Adds natural beauty.",color:0x58a95b,size:[2,3.5,2]},
+flowers:{name:"Flower Garden",icon:"🌸",category:"nature",unlockLevel:1,cost:{coins:120,wood:0,stone:0},description:"Bright flowers.",color:0xef88a7,size:[2,.4,2]}
+};
 
-<script src="script.js"></script>
+const castleLevels={1:{requirements:{coins:2500,wood:100,stone:40},unlock:"Stone Quarry"},2:{requirements:{coins:5000,wood:160,stone:100},unlock:"Golden Bakery"},3:{requirements:{coins:8500,wood:220,stone:170},unlock:"Prospera Concert Hall"},4:{requirements:{coins:13000,wood:300,stone:250},unlock:"Golden Bank"},5:{requirements:{coins:20000,wood:450,stone:380},unlock:"Tree of Fortune"}};
 
+const storyStages=[
+{number:1,code:"1-1",name:"Empty Road",enemy:"👾",power:900,mood:"hopeful",rewards:{coins:450,candies:{XS:3}}},
+{number:2,code:"1-2",name:"Lost Savings",enemy:"👺",power:1200,mood:"eerie",rewards:{coins:600,candies:{XS:4}}},
+{number:3,code:"1-3",name:"Broken Market",enemy:"🦹",power:1700,mood:"sad",rewards:{coins:800,candies:{XS:3,S:2},unlockCookie:"investor"}},
+{number:4,code:"1-4",name:"Impulse Imps",enemy:"😈",power:2300,mood:"danger",rewards:{coins:1000,candies:{S:3}}},
+{number:5,code:"1-5",name:"Temptation Trail",enemy:"🎭",power:3100,mood:"eerie",rewards:{coins:1300,candies:{S:2,M:2}}},
+{number:6,code:"1-6",name:"Fortune's Test",enemy:"🧿",power:4000,mood:"mystery",rewards:{coins:1700,candies:{M:3},unlockCookie:"lucky"}},
+{number:7,code:"1-7",name:"Road to the Beast",enemy:"🐲",power:5200,mood:"danger",rewards:{coins:2200,candies:{M:2,L:2}}},
+{number:8,code:"1-8",name:"Shopping Beast",enemy:"👹",power:6800,mood:"boss",rewards:{coins:3500,gems:100,candies:{L:3,XL:1}}}
+];
+
+const questDefinitions=[
+{id:"buildThree",type:"KINGDOM",name:"A Kingdom Takes Shape",description:"Place 3 new buildings or decorations.",goal:3,reward:"🪙 1,500 Coins"},
+{id:"clearThree",type:"STORY",name:"Into the Ruins",description:"Clear 3 Story stages.",goal:3,reward:"💎 50 Gems"},
+{id:"levelCookie",type:"COOKIE",name:"Growing Stronger",description:"Level up a Cookie once.",goal:1,reward:"🍬 5 XS EXP Candies"}
+];
+
+const $=id=>document.getElementById(id);
+let scene,camera,renderer,controls,raycaster,mouse,kingdomGround,castleObject,placementMode=false,placementType=null,placementGhost=null,placementRotation=0;
+const buildingMeshes=new Map(),residentMeshes=[];
+
+function initThree(){
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x9ed4ff);scene.fog=new THREE.Fog(0x9ed4ff,42,95);
+  camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,200);camera.position.set(24,25,30);
+  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
+  $("gameContainer").appendChild(renderer.domElement);
+  controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=12;controls.maxDistance=58;controls.maxPolarAngle=Math.PI/2.25;
+  raycaster=new THREE.Raycaster();mouse=new THREE.Vector2();
+  scene.add(new THREE.HemisphereLight(0xe8f4ff,0x6b834f,1.2));
+  const sun=new THREE.DirectionalLight(0xfff2ce,1.35);sun.position.set(20,32,18);sun.castShadow=true;scene.add(sun);
+  const g=new THREE.PlaneGeometry(70,70),m=new THREE.MeshStandardMaterial({color:0x7cc96a,roughness:.92});kingdomGround=new THREE.Mesh(g,m);kingdomGround.rotation.x=-Math.PI/2;kingdomGround.receiveShadow=true;scene.add(kingdomGround);
+  createCastle();for(let i=0;i<28;i++){const a=Math.random()*Math.PI*2,d=25+Math.random()*9;scene.add(createTreeMesh(Math.cos(a)*d,Math.sin(a)*d,.8+Math.random()*.6))}
+  rebuildPlacedBuildings();createResidents();attachWorldEvents();animate();
+}
+function createCastle(){
+  if(castleObject)scene.remove(castleObject);castleObject=new THREE.Group();castleObject.userData.type="castle";
+  const l=state.castleLevel,h=3.6+l*.4,main=new THREE.Mesh(new THREE.BoxGeometry(7,h,6),new THREE.MeshStandardMaterial({color:l>=5?0xf0d77d:0xe8d3a2}));main.position.y=h/2;main.castShadow=true;castleObject.add(main);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(4.8,2.3,4),new THREE.MeshStandardMaterial({color:l>=4?0x315f9e:0x765491}));roof.rotation.y=Math.PI/4;roof.position.y=h+1.1;castleObject.add(roof);
+  scene.add(castleObject);
+}
+function createTreeMesh(x,z,s=1){
+  const g=new THREE.Group(),tr=new THREE.Mesh(new THREE.CylinderGeometry(.35,.45,2,10),new THREE.MeshStandardMaterial({color:0x775036}));tr.position.y=1;g.add(tr);
+  const c=new THREE.Mesh(new THREE.SphereGeometry(1.45,12,12),new THREE.MeshStandardMaterial({color:0x4fa455}));c.position.y=2.6;c.scale.set(1.1,1.25,1.1);g.add(c);g.position.set(x,0,z);g.scale.setScalar(s);return g;
+}
+function createBuildingMesh(type){
+  const d=buildingCatalog[type],g=new THREE.Group();g.userData.type="building";g.userData.buildingType=type;
+  if(type==="tree"){g.add(createTreeMesh(0,0,1));return g}
+  if(type==="flowers"){for(let i=0;i<8;i++){const f=new THREE.Mesh(new THREE.SphereGeometry(.16,7,7),new THREE.MeshStandardMaterial({color:[0xff6f91,0xffcc68,0xb777e5,0xffffff][Math.floor(Math.random()*4)]}));f.position.set((Math.random()-.5)*1.7,.18,(Math.random()-.5)*1.7);g.add(f)}return g}
+  if(type==="fountain"){const b=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.6,.45,24),new THREE.MeshStandardMaterial({color:0xd1c9b5}));b.position.y=.22;g.add(b);const w=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.15,.12,24),new THREE.MeshStandardMaterial({color:0x68bfe4,transparent:true,opacity:.8}));w.position.y=.48;g.add(w);return g}
+  if(type==="bench"){const s=new THREE.Mesh(new THREE.BoxGeometry(2,.25,.7),new THREE.MeshStandardMaterial({color:0x9a623e}));s.position.y=.65;g.add(s);return g}
+  if(type==="lamp"){const p=new THREE.Mesh(new THREE.CylinderGeometry(.1,.14,2.4,10),new THREE.MeshStandardMaterial({color:0x4b4752}));p.position.y=1.2;g.add(p);const l=new THREE.Mesh(new THREE.SphereGeometry(.3,12,12),new THREE.MeshStandardMaterial({color:0xffe784,emissive:0x6f5710}));l.position.y=2.45;g.add(l);return g}
+  const [w,h,dep]=d.size,base=new THREE.Mesh(new THREE.BoxGeometry(w,h,dep),new THREE.MeshStandardMaterial({color:d.color}));base.position.y=h/2;base.castShadow=true;g.add(base);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,dep)*.7,1.6,4),new THREE.MeshStandardMaterial({color:type==="bank"?0x345c91:type==="concertHall"?0x713c75:0xb7584d}));roof.rotation.y=Math.PI/4;roof.position.y=h+.75;g.add(roof);return g;
+}
+function rebuildPlacedBuildings(){buildingMeshes.forEach(m=>scene.remove(m));buildingMeshes.clear();state.placedBuildings.forEach(b=>{const m=createBuildingMesh(b.type);m.position.set(b.x,0,b.z);m.rotation.y=b.rotation||0;m.userData.instanceId=b.id;scene.add(m);buildingMeshes.set(b.id,m)})}
+function createResidents(){residentMeshes.forEach(m=>scene.remove(m));residentMeshes.length=0;state.ownedCookies.slice(0,10).forEach((id,i)=>{const c=getCookie(id),g=new THREE.Group();g.userData.type="resident";g.userData.cookieId=id;const body=new THREE.Mesh(new THREE.SphereGeometry(.62,18,18),new THREE.MeshStandardMaterial({color:id==="coin"?0xd9ad43:id==="budget"?0x90aa74:id==="violin"?0xb889c8:0xd7a76a}));body.scale.y=1.1;body.position.y=.85;g.add(body);const a=i/Math.max(1,state.ownedCookies.length)*Math.PI*2;g.position.set(Math.cos(a)*11,0,Math.sin(a)*11);g.userData.target=randomPoint();g.userData.speed=.012+Math.random()*.008;residentMeshes.push(g);scene.add(g)})}
+function randomPoint(){return{x:(Math.random()-.5)*28,z:(Math.random()-.5)*28}}
+function updateResidents(){residentMeshes.forEach(r=>{const t=r.userData.target,dx=t.x-r.position.x,dz=t.z-r.position.z,dist=Math.hypot(dx,dz);if(dist<.4){r.userData.target=randomPoint();return}r.position.x+=dx/dist*r.userData.speed;r.position.z+=dz/dist*r.userData.speed;r.rotation.y=Math.atan2(dx,dz)})}
+function attachWorldEvents(){renderer.domElement.addEventListener("pointermove",onMove);renderer.domElement.addEventListener("pointerdown",onDown);addEventListener("keydown",onKey);addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)})}
+function updateMouse(e){const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1}
+function onMove(e){updateMouse(e);if(placementMode&&placementGhost){raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObject(kingdomGround);if(hits.length){const p=hits[0].point,x=Math.round(p.x),z=Math.round(p.z);placementGhost.position.set(x,.05,z)}}}
+function onDown(e){if(e.target.closest(".game-panel")||e.target.closest(".bottom-nav")||e.target.closest(".top-hud"))return;updateMouse(e);if(placementMode){placeCurrentBuilding();return}raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects([castleObject,...residentMeshes,...buildingMeshes.values()],true);if(!hits.length)return;let o=hits[0].object;while(o.parent&&!["castle","resident","building"].includes(o.userData.type))o=o.parent;if(o.userData.type==="castle")openCastlePanel();else if(o.userData.type==="resident")openCookieModal(o.userData.cookieId)}
+function onKey(e){if(!placementMode)return;if(e.key.toLowerCase()==="r"){placementRotation+=Math.PI/2;placementGhost.rotation.y=placementRotation}if(e.key==="Escape"){refundResources(buildingCatalog[placementType].cost);finishPlacement();updateHUD()}}
+function beginPlacement(type){const d=buildingCatalog[type];if(state.castleLevel<d.unlockLevel)return showToast("Castle level too low.");if(!canAfford(d.cost))return showToast("Not enough resources.");spendResources(d.cost);placementMode=true;placementType=type;placementRotation=0;placementGhost=createBuildingMesh(type);placementGhost.traverse(c=>{if(c.material){c.material=c.material.clone();c.material.transparent=true;c.material.opacity=.6}});scene.add(placementGhost);controls.enabled=false;$("placementHud").classList.remove("hidden");$("placementName").textContent=d.icon+" "+d.name;closeAllPanels();updateHUD()}
+function placeCurrentBuilding(){if(!placementGhost)return;const x=placementGhost.position.x,z=placementGhost.position.z;if(!isPlacementValid(x,z))return showToast("You cannot place it there.");state.placedBuildings.push({id:placementType+"_"+Date.now(),type:placementType,x,z,rotation:placementRotation});if(placementType==="house")state.population+=2;state.prosperity+=["fountain","flowers","tree","lamp","bench"].includes(placementType)?1:3;state.quests.buildThree=Math.min(3,state.quests.buildThree+1);finishPlacement();rebuildPlacedBuildings();saveGame();updateHUD();renderQuests()}
+function isPlacementValid(x,z){if(Math.abs(x)>31||Math.abs(z)>31||Math.hypot(x,z)<6.5)return false;return !state.placedBuildings.some(b=>Math.hypot(b.x-x,b.z-z)<3.2)}
+function finishPlacement(){if(placementGhost)scene.remove(placementGhost);placementGhost=null;placementMode=false;placementType=null;controls.enabled=true;$("placementHud").classList.add("hidden")}
+function canAfford(c){return state.coins>=(c.coins||0)&&state.wood>=(c.wood||0)&&state.stone>=(c.stone||0)}
+function spendResources(c){state.coins-=c.coins||0;state.wood-=c.wood||0;state.stone-=c.stone||0}
+function refundResources(c){state.coins+=c.coins||0;state.wood+=c.wood||0;state.stone+=c.stone||0}
+
+let currentShopCategory="production";
+function renderBuildShop(){$("buildShopList").innerHTML="";Object.entries(buildingCatalog).filter(([k,b])=>b.category===currentShopCategory).forEach(([type,b])=>{const unlocked=state.castleLevel>=b.unlockLevel,el=document.createElement("div");el.className="shop-item"+(unlocked?"":" locked-shop-item");el.innerHTML=`<div class="shop-icon">${b.icon}</div><div class="shop-info"><h4>${b.name}</h4><p>${b.description}</p><div class="shop-cost">🪙 ${b.cost.coins} &nbsp; 🪵 ${b.cost.wood} &nbsp; 🪨 ${b.cost.stone}</div></div><button class="shop-buy-button" ${unlocked?"":"disabled"}>${unlocked?"BUY":"LV."+b.unlockLevel}</button>`;if(unlocked)el.querySelector("button").onclick=()=>beginPlacement(type);$("buildShopList").appendChild(el)})}
+function openCastlePanel(){closeAllPanels();$("castlePanelLevel").textContent=state.castleLevel;$("castleDescription").textContent="Fortune Castle is slowly returning to life.";const d=castleLevels[state.castleLevel];if(d){$("castleUpgradeRequirements").innerHTML=`🪙 ${d.requirements.coins} &nbsp; 🪵 ${d.requirements.wood} &nbsp; 🪨 ${d.requirements.stone}`;$("castleUnlockText").textContent=d.unlock;$("upgradeCastleButton").disabled=false}else{$("castleUpgradeRequirements").textContent="Maximum prototype level reached.";$("castleUnlockText").textContent="More levels later.";$("upgradeCastleButton").disabled=true}$("castlePanel").classList.remove("hidden")}
+$("upgradeCastleButton").onclick=()=>{const d=castleLevels[state.castleLevel];if(!d)return;if(!canAfford(d.requirements))return showToast("You need more resources.");spendResources(d.requirements);state.castleLevel++;state.prosperity+=5;createCastle();saveGame();updateHUD();renderBuildShop();openCastlePanel();showToast("Castle upgraded!")};
+
+function renderStory(){$("storyStageList").innerHTML="";storyStages.forEach(s=>{const unlocked=s.number<=state.storyUnlocked,cleared=state.clearedStages.includes(s.code),c=document.createElement("div");c.className="stage-card"+(unlocked?"":" locked");c.innerHTML=`<div class="stage-number">STAGE ${s.code}</div>${cleared?'<div class="stage-clear-stars">⭐⭐⭐</div>':""}<h3>${s.name}</h3><div class="stage-enemy">${s.enemy}</div><div class="stage-power">Recommended Power: ${s.power.toLocaleString()}</div><button class="stage-battle-button" ${unlocked?"":"disabled"}>${unlocked?"BATTLE":"LOCKED"}</button>`;if(unlocked)c.querySelector("button").onclick=()=>startBattle(s.number);$("storyStageList").appendChild(c)})}
+
+let currentBattleStage,battleWave=1,battleTimer,battleSpeed=1,autoBattle=true,battlePlayerUnits=[],battleEnemyUnits=[];
+function startBattle(n){const s=storyStages.find(x=>x.number===n);if(!s)return;currentBattleStage=s;battleWave=1;closeAllPanels();$("battleScreen").classList.remove("hidden");$("battleStageLabel").textContent=s.code;$("battleStageName").textContent=s.name;$("battleBackground").className="battle-background"+(["eerie","mystery","boss"].includes(s.mood)?" eerie":"");playStoryMusic(s.mood);setupBattleTeams();renderBattle();scheduleWave()}
+function setupBattleTeams(){battlePlayerUnits=state.ownedCookies.slice(0,5).map(id=>({id,icon:getCookie(id).icon,hp:100,cooldown:0}));battleEnemyUnits=[1,2,3].map(()=>({icon:currentBattleStage.enemy,hp:100}))}
+function createBattleUnit(u){const e=document.createElement("div");e.className="battle-unit";e.innerHTML=`<div class="battle-unit-icon">${u.icon}</div><div class="battle-hp"><div style="width:${Math.max(0,u.hp)}%"></div></div>`;return e}
+function renderBattle(){const p=$("playerBattleTeam"),en=$("enemyBattleTeam");p.innerHTML=en.innerHTML="";battlePlayerUnits.forEach(u=>p.appendChild(createBattleUnit(u)));battleEnemyUnits.forEach(u=>en.appendChild(createBattleUnit(u)));$("waveText").textContent=`WAVE ${battleWave} / 3`;renderSkillBar()}
+function renderSkillBar(){const b=$("battleSkillBar");b.innerHTML="";battlePlayerUnits.forEach(u=>{const x=document.createElement("button");x.className="skill-button";x.innerHTML=u.icon+(u.cooldown>0?`<div class="skill-cooldown">${Math.ceil(u.cooldown)}</div>`:"");x.onclick=()=>useSkill(u);b.appendChild(x)})}
+function useSkill(u){if(u.cooldown>0)return;u.cooldown=5;battleEnemyUnits.forEach(e=>e.hp-=24+Math.random()*10);renderBattle()}
+function scheduleWave(){clearInterval(battleTimer);battleTimer=setInterval(battleTick,650/battleSpeed)}
+function battleTick(){battlePlayerUnits.forEach(u=>{u.cooldown=Math.max(0,u.cooldown-.65);if(autoBattle&&u.cooldown===0&&Math.random()<.25)useSkill(u)});const t=battleEnemyUnits.find(e=>e.hp>0);if(t)t.hp-=8+Math.random()*8;const p=battlePlayerUnits.find(u=>u.hp>0);if(p)p.hp-=1.5+currentBattleStage.number*.5;battleEnemyUnits=battleEnemyUnits.filter(e=>e.hp>0);battlePlayerUnits=battlePlayerUnits.filter(e=>e.hp>0);if(!battlePlayerUnits.length){clearInterval(battleTimer);$("battleScreen").classList.add("hidden");startKingdomMusic();return showToast("Defeated. Strengthen your Cookies.")}if(!battleEnemyUnits.length){if(battleWave>=3)return winBattle();battleWave++;battleEnemyUnits=[1,2,3].map(()=>({icon:currentBattleStage.enemy,hp:100+battleWave*10}))}renderBattle()}
+function winBattle(){clearInterval(battleTimer);$("battleScreen").classList.add("hidden");const s=currentBattleStage,first=!state.clearedStages.includes(s.code);state.coins+=s.rewards.coins||0;state.gems+=s.rewards.gems||0;Object.entries(s.rewards.candies||{}).forEach(([k,v])=>state.candies[k]+=v);if(first){state.clearedStages.push(s.code);state.storyUnlocked=Math.max(state.storyUnlocked,Math.min(storyStages.length,s.number+1));state.quests.clearThree=Math.min(3,state.quests.clearThree+1);if(s.rewards.unlockCookie)unlockCookie(s.rewards.unlockCookie)}saveGame();updateHUD();renderStory();renderQuests();renderVictory(s)}
+function renderVictory(s){$("victoryScreen").classList.remove("hidden");$("victoryStageName").textContent=s.code+" • "+s.name;$("victoryCookieRow").innerHTML=state.ownedCookies.slice(0,5).map(id=>`<div class="victory-cookie">${getCookie(id).icon}</div>`).join("");let r=`<div class="reward-pill">🪙 ${s.rewards.coins}</div>`;if(s.rewards.gems)r+=`<div class="reward-pill">💎 ${s.rewards.gems}</div>`;Object.entries(s.rewards.candies||{}).forEach(([k,v])=>r+=`<div class="reward-pill">🍬 ${k} ×${v}</div>`);$("victoryRewards").innerHTML=r;playVictoryMusic()}
+$("exitBattleButton").onclick=()=>{clearInterval(battleTimer);$("battleScreen").classList.add("hidden");startKingdomMusic()};
+$("autoBattleButton").onclick=e=>{autoBattle=!autoBattle;e.currentTarget.textContent=autoBattle?"AUTO":"MANUAL"};
+$("speedBattleButton").onclick=e=>{battleSpeed=battleSpeed===1?1.5:battleSpeed===1.5?2:1;e.currentTarget.textContent="×"+battleSpeed;scheduleWave()};
+$("victoryKingdomButton").onclick=()=>{$("victoryScreen").classList.add("hidden");startKingdomMusic()};
+$("victoryRetryButton").onclick=()=>{const n=currentBattleStage.number;$("victoryScreen").classList.add("hidden");startBattle(n)};
+$("victoryNextButton").onclick=()=>{const n=currentBattleStage.number+1;$("victoryScreen").classList.add("hidden");n<=storyStages.length?startBattle(n):startKingdomMusic()};
+
+function renderCookieCollection(){const q=$("cookieSearch").value.toLowerCase(),r=$("cookieRarityFilter").value;$("cookieCollection").innerHTML="";cookies.filter(c=>c.name.toLowerCase().includes(q)&&(r==="ALL"||c.rarity===r)).forEach(c=>{const owned=state.ownedCookies.includes(c.id),p=getCookieProgress(c.id),e=document.createElement("div");e.className="cookie-card"+(owned?"":" not-owned");e.innerHTML=`<div class="cookie-icon">${c.icon}</div><h4>${c.name}</h4><div>${c.elements.join(" ")}</div><div class="cookie-rarity">${c.rarity}</div>${owned?`<div>Lv.${p.level}</div>`:`<div class="not-owned-label">🔒 NOT OBTAINED</div>`}`;e.onclick=()=>openCookieModal(c.id);$("cookieCollection").appendChild(e)})}
+let selectedCookieId=null;
+function openCookieModal(id){selectedCookieId=id;const c=getCookie(id),owned=state.ownedCookies.includes(id),p=getCookieProgress(id);$("cookieModalPortrait").textContent=c.icon;$("cookieModalRarity").textContent=c.rarity;$("cookieModalName").textContent=c.name;$("cookieModalElements").textContent=c.elements.join(" • ");$("cookieModalDescription").textContent=c.description;$("cookieModalLevel").textContent=owned?p.level:"-";$("cookieModalPower").textContent=owned?calculateCookiePower(id).toLocaleString():"???";$("cookieModalRole").textContent=c.role;$("cookieExpText").textContent=owned?`${p.exp} / ${EXP_PER_LEVEL}`:"Not Obtained";$("cookieExpBar").style.width=owned?(p.exp/EXP_PER_LEVEL*100)+"%":"0%";renderCandyButtons(owned);$("cookieModal").classList.remove("hidden")}
+function renderCandyButtons(owned){$("candyButtons").innerHTML="";Object.entries(candyValues).forEach(([s,v])=>{const b=document.createElement("button");b.className="candy-button";b.disabled=!owned||state.candies[s]<=0;b.innerHTML=`🍬 ${s}<br>+${v}<br>×${state.candies[s]}`;b.onclick=()=>giveExpCandy(selectedCookieId,s);$("candyButtons").appendChild(b)})}
+function giveExpCandy(id,s){if(state.candies[s]<=0)return;const p=getCookieProgress(id);state.candies[s]--;p.exp+=candyValues[s];let leveled=false;while(p.exp>=EXP_PER_LEVEL){p.exp-=EXP_PER_LEVEL;p.level++;leveled=true}if(leveled)state.quests.levelCookie=1;saveGame();openCookieModal(id);renderCookieCollection();renderQuests()}
+function getCookie(id){return cookies.find(c=>c.id===id)}function getCookieProgress(id){return state.cookieProgress[id]||(state.cookieProgress[id]={level:1,exp:0})}function calculateCookiePower(id){const c=getCookie(id),p=getCookieProgress(id);return Math.round(c.basePower*(1+(p.level-1)*.085))}function unlockCookie(id){if(state.ownedCookies.includes(id))return;state.ownedCookies.push(id);state.cookieProgress[id]={level:1,exp:0};createResidents()}
+
+function renderQuests(){$("questList").innerHTML="";questDefinitions.forEach(q=>{const p=state.quests[q.id]||0,e=document.createElement("div");e.className="quest-card";e.innerHTML=`<div class="quest-type">${q.type} QUEST</div><h4>${p>=q.goal?"✅ ":""}${q.name}</h4><p>${q.description}</p><p>${Math.min(p,q.goal)} / ${q.goal}</p><div class="quest-progress"><div style="width:${Math.min(100,p/q.goal*100)}%"></div></div><p>Reward: ${q.reward}</p>`;$("questList").appendChild(e)});const a=questDefinitions.find(q=>(state.quests[q.id]||0)<q.goal);$("questTrackerText").textContent=a?a.name:"All current quests complete!";$("questTrackerBar").style.width=a?((state.quests[a.id]||0)/a.goal*100)+"%":"100%"}
+
+let audioContext=null,musicEnabled=true,activeMusicTimers=[],musicSession=0;
+const arrangements=[{id:"orchestra",name:"Grand Orchestra",icon:"🎼",wave:"sine",oct:0},{id:"piano",name:"Piano",icon:"🎹",wave:"triangle",oct:0},{id:"violin",name:"Violin",icon:"🎻",wave:"sawtooth",oct:1},{id:"dj",name:"DJ Remix",icon:"🎧",wave:"square",oct:-1},{id:"musicbox",name:"Music Box",icon:"🎶",wave:"sine",oct:1}];
+const melody=["E4","G4","A4","G4","E4","D4","C4","E4","G4","A4","C5","B4","A4","G4","E4","D4","E4","G4","A4","C5","B4","A4","G4","E4","D4","E4","G4","D4","E4","D4","C4","C4"];
+const noteMap={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,G5:783.99,A5:880,B5:987.77};
+function initAudio(){if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)()}
+function tone(freq,d=.22,w="sine",vol=.03){if(!musicEnabled||!audioContext)return;const o=audioContext.createOscillator(),g=audioContext.createGain();o.type=w;o.frequency.value=freq;g.gain.setValueAtTime(.0001,audioContext.currentTime);g.gain.exponentialRampToValueAtTime(vol,audioContext.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+d);o.connect(g);g.connect(audioContext.destination);o.start();o.stop(audioContext.currentTime+d+.03)}
+function stopMusic(){musicSession++;activeMusicTimers.forEach(clearTimeout);activeMusicTimers=[]}
+function freq(note,shift=0){return (noteMap[note]||440)*Math.pow(2,shift)}
+function startKingdomMusic(){if(!musicEnabled)return;initAudio();stopMusic();const s=musicSession,a=arrangements.find(x=>x.id===state.currentMusic)||arrangements[0],beat=state.currentMusic==="dj"?250:320;function loop(){if(s!==musicSession)return;melody.forEach((n,i)=>activeMusicTimers.push(setTimeout(()=>{if(s!==musicSession)return;tone(freq(n,a.oct),state.currentMusic==="musicbox"?.18:.28,a.wave,state.currentMusic==="violin"?.018:.03);if(state.currentMusic==="orchestra"&&i%4===0)tone(freq(n,a.oct)/2,.7,"triangle",.018);if(state.currentMusic==="dj"&&i%2===0)tone(65,.09,"sine",.055)},i*beat)));activeMusicTimers.push(setTimeout(loop,melody.length*beat))}loop()}
+function playStoryMusic(mood){initAudio();stopMusic();const s=musicSession,patterns={hopeful:{n:["C4","E4","G4","E4","D4","G4"],w:"sine",b:520},sad:{n:["A3","C4","E4","D4","C4","A3"],w:"triangle",b:650},eerie:{n:["C4","D4","C4","F3","E4","D4"],w:"sine",b:760},mystery:{n:["E4","G4","D4","A4","C4"],w:"triangle",b:560},danger:{n:["E3","E3","G3","F3","E3","A3"],w:"sawtooth",b:300},boss:{n:["C3","C3","E3","D3","C3","G3"],w:"sawtooth",b:260}},p=patterns[mood]||patterns.hopeful;function loop(){if(s!==musicSession)return;p.n.forEach((n,i)=>activeMusicTimers.push(setTimeout(()=>{if(s===musicSession)tone(freq(n),p.b/1000*.75,p.w,mood==="boss"?.045:.025)},i*p.b)));activeMusicTimers.push(setTimeout(loop,p.n.length*p.b))}loop()}
+function playVictoryMusic(){initAudio();stopMusic();["C4","E4","G4","C5","G4","C5"].forEach((n,i)=>activeMusicTimers.push(setTimeout(()=>tone(freq(n),.4,"triangle",.05),i*160)))}
+function renderMusicPanel(){const l=$("musicArrangementList");l.innerHTML="";arrangements.forEach(a=>{const b=document.createElement("button");b.className="music-arrangement-button"+(state.currentMusic===a.id?" active":"");b.innerHTML=`<div style="font-size:28px">${a.icon}</div>${a.name}`;b.onclick=()=>{state.currentMusic=a.id;saveGame();renderMusicPanel();startKingdomMusic()};l.appendChild(b)});$("musicPerformer").textContent=(arrangements.find(a=>a.id===state.currentMusic)||arrangements[0]).icon}
+$("musicToggleButton").onclick=e=>{musicEnabled=!musicEnabled;e.currentTarget.textContent=musicEnabled?"🎵":"🔇";musicEnabled?startKingdomMusic():stopMusic()};
+
+function updateHUD(){$("coinText").textContent=state.coins.toLocaleString();$("woodText").textContent=state.wood.toLocaleString();$("stoneText").textContent=state.stone.toLocaleString();$("gemText").textContent=state.gems.toLocaleString();$("castleLevelText").textContent=state.castleLevel;$("prosperityText").textContent=state.prosperity;$("happinessText").textContent=state.happiness;$("populationText").textContent=state.population}
+function openPanel(p){closeAllPanels();p.classList.remove("hidden")}function closeAllPanels(){["buildPanel","storyPanel","cookiesPanel","questsPanel","musicPanel","castlePanel"].forEach(id=>$(id).classList.add("hidden"))}
+document.querySelectorAll(".nav-button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-button").forEach(x=>x.classList.remove("active"));b.classList.add("active");const p=b.dataset.panel;if(p==="kingdom"){closeAllPanels();startKingdomMusic()}if(p==="build"){openPanel($("buildPanel"));renderBuildShop()}if(p==="story"){openPanel($("storyPanel"));renderStory();playStoryMusic("hopeful")}if(p==="cookies"){openPanel($("cookiesPanel"));renderCookieCollection()}if(p==="quests"){openPanel($("questsPanel"));renderQuests()}if(p==="music"){openPanel($("musicPanel"));renderMusicPanel()}});document.querySelectorAll(".close-panel").forEach(b=>b.onclick=()=>{closeAllPanels();startKingdomMusic()});document.querySelectorAll(".shop-tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".shop-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentShopCategory=b.dataset.category;renderBuildShop()});
+$("cookieSearch").oninput=renderCookieCollection;$("cookieRarityFilter").onchange=renderCookieCollection;$("closeCookieModal").onclick=()=>$("cookieModal").classList.add("hidden");
+$("startGameButton").onclick=()=>{$("startScreen").classList.add("hidden");initAudio();if(audioContext.state==="suspended")audioContext.resume();startKingdomMusic()};
+$("saveButton").onclick=()=>{saveGame();showToast("Kingdom saved!")};
+
+function saveGame(){localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
+function loadState(){try{const s=localStorage.getItem(SAVE_KEY);return s?deepMerge(JSON.parse(JSON.stringify(defaultState)),JSON.parse(s)):JSON.parse(JSON.stringify(defaultState))}catch(e){return JSON.parse(JSON.stringify(defaultState))}}
+function deepMerge(t,s){for(const k in s){if(s[k]&&typeof s[k]==="object"&&!Array.isArray(s[k])){if(!t[k])t[k]={};deepMerge(t[k],s[k])}else t[k]=s[k]}return t}
+let toastTimer;function showToast(m){$("toast").textContent=m;$("toast").classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.add("hidden"),2200)}
+function animate(){requestAnimationFrame(animate);controls.update();updateResidents();renderer.render(scene,camera)}
+function productionTick(){let c=5,w=0,s=0;state.placedBuildings.forEach(b=>{if(b.type==="farm")c+=4;if(b.type==="lumber")w+=2;if(b.type==="quarry")s+=1;if(b.type==="bakery")c+=9;if(b.type==="bank")c+=18});state.coins+=c;state.wood+=w;state.stone+=s;updateHUD();saveGame()}
+setInterval(productionTick,10000);
+
+initThree();updateHUD();renderBuildShop();renderStory();renderCookieCollection();renderQuests();renderMusicPanel();
+</script>
 </body>
 </html>
