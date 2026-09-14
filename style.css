@@ -1,1 +1,141 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#102a47;font-family:Georgia,"Times New Roman",serif}
+button,input,select{font:inherit}
+#game{position:relative;width:100vw;height:100vh;overflow:hidden;background:#7fcfff}
+#scene{position:absolute;left:50%;top:50%;width:1536px;height:1024px;transform:translate(-50%,-50%) scale(var(--scale,1));transform-origin:center;user-select:none}
+
+#mapImage{position:absolute;inset:0;width:1536px;height:1024px;object-fit:fill;display:block;z-index:0;pointer-events:none;user-select:none}
+#mapError{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);width:620px;max-width:80%;padding:28px;border-radius:20px;background:#fff4cf;color:#17345f;border:4px solid #c89338;text-align:center;font:700 20px/1.5 Arial,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+#mapError code{background:#f4dfaa;padding:3px 7px;border-radius:7px}
+
+.hotspot{position:absolute;z-index:10;border:0;background:transparent;cursor:pointer;border-radius:18px;transition:.15s}
+.hotspot:hover{outline:4px solid rgba(255,231,128,.95);box-shadow:0 0 28px rgba(255,223,92,.8);background:rgba(255,255,255,.05)}
+#tooltip{position:fixed;z-index:9999;pointer-events:none;display:none;padding:8px 12px;border-radius:10px;background:rgba(20,43,73,.96);color:#fff2bd;border:2px solid #f1ca61;font:700 13px Arial}
+.overlay{position:fixed;inset:0;z-index:5000;display:none;place-items:center;padding:20px;background:rgba(7,20,40,.72);backdrop-filter:blur(8px)}
+.overlay.open{display:grid}
+.panel-card{position:relative;width:min(820px,94vw);max-height:90vh;overflow:auto;padding:24px;color:#1d3559;border:4px solid #c89338;border-radius:28px;background:linear-gradient(#fff8df,#ecd398 30%,#edd99d 100%);box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.panel-card.wide{width:min(1180px,96vw)}
+.panel-card h2{margin:0 0 8px;font-size:38px;color:#17345f}
+.panel-card p{font:15px/1.5 Arial;margin:8px 0}
+.close{position:absolute;right:14px;top:14px;width:40px;height:40px;border:0;border-radius:50%;background:#17345f;color:white;font-weight:bold;cursor:pointer;z-index:10}
+.stage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-top:18px}
+.stage{border:2px solid #b67f2d;border-radius:14px;background:linear-gradient(#fffceb,#edcf89);padding:11px 8px;color:#17345f;font-weight:800;cursor:pointer;box-shadow:0 5px 0 #8d6124}
+.stage.done{background:linear-gradient(#dfffd9,#9bdb91);border-color:#4e9c50;box-shadow:0 5px 0 #3d7f3f}
+
+/* COLLECTION */
+.collection-shell{width:min(1380px,97vw);padding:22px;border-radius:30px;background:linear-gradient(180deg,#fff9ee 0%,#fde7b7 14%,#ffcf68 15%,#fdf0d2 18%,#fff7e9 100%);border-color:#bf8d31}
+.collection-topbar{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-right:48px;margin-bottom:12px}
+.eyebrow{font:900 11px Arial;letter-spacing:4px;color:#8a651e;margin-bottom:4px}
+.subtext{max-width:760px;color:#4f5e73}
+.collection-countbox{min-width:140px;text-align:center;padding:14px 16px;border-radius:18px;background:linear-gradient(180deg,#2c64b7,#163b72);color:#ffe488;box-shadow:0 6px 0 #0f2444}
+.big-number{font-size:30px;font-weight:900;line-height:1}
+.count-caption{font:700 12px Arial;margin-top:4px}
+.collection-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0 12px}
+.segmented{display:flex;gap:8px;flex-wrap:wrap}
+.seg-btn,.rarity-btn{border:3px solid #9a6426;border-radius:999px;background:#fff7d7;color:#17345f;padding:8px 12px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 rgba(122,78,28,.55)}
+.seg-btn.active,.rarity-btn.active{background:#17345f;color:#ffe58a}
+.search-input,.sort-select{border:3px solid #caa053;border-radius:16px;padding:10px 12px;background:#fffdf4;color:#17345f;font:700 14px Arial}
+.search-input{flex:1;min-width:210px}
+.sort-select{min-width:165px}
+.collection-raritybar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.collection-layout{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+.cookie-detail{position:sticky;top:8px;padding:16px;border-radius:26px;border:4px solid #9d6a2b;background:linear-gradient(180deg,#fffaf1,#f8e4b4);box-shadow:0 10px 0 rgba(145,97,35,.4)}
+.detail-portrait-wrap{height:330px;padding:8px;border-radius:24px;border:3px solid rgba(92,53,30,.35);display:grid;place-items:center;overflow:hidden}
+.detail-portrait-wrap.rare{background:linear-gradient(#e3f7ff,#9edfff)}
+.detail-portrait-wrap.epic{background:linear-gradient(#f0e3ff,#d0b4ff)}
+.detail-portrait-wrap.super-epic{background:linear-gradient(#ffe4f7,#ffc3eb)}
+.detail-portrait-wrap.legendary{background:linear-gradient(#e4fffb,#a9f2e7)}
+.detail-portrait-wrap.ancient{background:linear-gradient(#fff6d9,#ffe39d)}
+.detail-portrait-wrap.beast{background:linear-gradient(#ddd1e5,#8f7b9b)}
+.full-cookie-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 12px 8px rgba(70,40,20,.16))}
+.detail-rarity{display:inline-block;margin-top:14px;padding:6px 10px;border-radius:999px;font:900 11px Arial;letter-spacing:1px;color:white}
+.detail-name{font-size:30px;margin:10px 0 6px;color:#17345f}
+.detail-meta{font:700 13px Arial;color:#566376;line-height:1.6}
+.detail-status{margin-top:12px;padding:10px 12px;border-radius:15px;font:700 13px Arial;background:#fff6d8;border:1px solid rgba(193,153,73,.45);color:#234}
+.detail-status.locked{background:#ece6dd}
+.detail-lore{margin-top:12px;padding-top:12px;border-top:1px dashed rgba(99,103,120,.35);font:14px/1.55 Arial;color:#4a5770}
+
+.collection-grid-wrap{padding:10px 12px 14px;border-radius:26px;border:4px solid #9d6a2b;background:linear-gradient(180deg,#fffdf4,#f5e6bd);min-height:690px;box-shadow:0 10px 0 rgba(145,97,35,.4)}
+.collection-grid-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.book-tab{display:inline-block;padding:10px 18px;border-radius:14px 14px 0 0;background:linear-gradient(180deg,#17345f,#244c85);color:#ffe594;font-weight:900;box-shadow:0 4px 0 #0f2444}
+.grid-count{font:800 13px Arial;color:#5d6480}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;align-content:start}
+.cookie-card{position:relative;padding:10px 10px 12px;border-radius:26px;background:linear-gradient(180deg,#fffdfa,#f8eccf);border:3px solid #9d6a2b;box-shadow:0 8px 0 rgba(151,99,36,.42),0 12px 20px rgba(33,55,73,.1);cursor:pointer;transition:.16s}
+.cookie-card:hover{transform:translateY(-4px) rotate(-1deg)}
+.cookie-card.selected{outline:4px solid #f3c95d}
+.cookie-card.unowned{opacity:.68;filter:saturate(.42)}
+.cookie-frame{position:relative;height:210px;padding:4px;border-radius:20px;overflow:hidden;border:3px solid rgba(117,76,34,.35);display:grid;place-items:center}
+.cookie-frame.rare{background:linear-gradient(#e3f7ff,#9edfff)}
+.cookie-frame.epic{background:linear-gradient(#f0e3ff,#d0b4ff)}
+.cookie-frame.super-epic{background:linear-gradient(#ffe4f7,#ffc3eb)}
+.cookie-frame.legendary{background:linear-gradient(#e4fffb,#a9f2e7)}
+.cookie-frame.ancient{background:linear-gradient(#fff6d9,#ffe39d)}
+.cookie-frame.beast{background:linear-gradient(#ddd1e5,#8f7b9b)}
+.mini-cookie-svg{width:100%;height:100%;filter:drop-shadow(0 9px 6px rgba(70,40,20,.15))}
+.cookie-name{margin-top:8px;font-size:17px;line-height:1.1;text-align:center;color:#17345f;min-height:38px;font-weight:700}
+.cookie-role{margin-top:4px;text-align:center;font:700 11px Arial;color:#5e6677}
+.cookie-badges{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:7px}
+.badge{padding:3px 7px;border-radius:999px;font:900 9px Arial;letter-spacing:.6px}
+.badge.rarity{color:white}
+.badge.state{background:#fff8dd;color:#244}
+.not-obtained{position:absolute;top:8px;right:8px;z-index:5;padding:5px 7px;border-radius:10px;background:#1b2a45;color:#fff;font:900 9px Arial;letter-spacing:.7px;box-shadow:0 4px 8px rgba(0,0,0,.2)}
+.lock-shine{position:absolute;right:10px;bottom:10px;font:900 8px Arial;color:#20324d;background:#fff3c9;border-radius:8px;padding:4px 6px}
+
+/* rarity labels */
+.rare.detail-rarity,.rare.badge.rarity{background:#42a8e7}
+.epic.detail-rarity,.epic.badge.rarity{background:#8d5fe8}
+.super-epic.detail-rarity,.super-epic.badge.rarity{background:#e257b5}
+.legendary.detail-rarity,.legendary.badge.rarity{background:#31b7ad}
+.ancient.detail-rarity,.ancient.badge.rarity{background:#d89b1f}
+.beast.detail-rarity,.beast.badge.rarity{background:#4a3558}
+
+/* KINGDOM */
+.resident-field{position:relative;height:530px;margin-top:18px;overflow:hidden;border:3px solid #bd8c3a;border-radius:20px;background:linear-gradient(#89d8ff 0 40%,#8bcf72 41% 100%)}
+.resident-field:before{content:"🏰";position:absolute;left:50%;top:80px;transform:translateX(-50%);font-size:150px;filter:drop-shadow(0 12px 7px rgba(0,0,0,.2))}
+.resident{position:absolute;transition:2s linear}
+.full-resident{width:95px;height:120px}
+.full-resident .mini-cookie-svg{width:95px;height:110px}
+.resident-name{position:absolute;left:50%;bottom:-16px;transform:translateX(-50%);width:max-content;padding:2px 5px;border-radius:6px;background:rgba(23,52,95,.9);color:white;font:700 9px Arial}
+
+/* toast */
+#toast{position:fixed;z-index:10000;left:50%;top:20px;transform:translate(-50%,-20px);opacity:0;padding:10px 16px;border-radius:10px;background:#17345f;color:white;border:2px solid #efca68;font:700 13px Arial;transition:.2s;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){.collection-layout{grid-template-columns:1fr}.cookie-detail{position:relative;top:auto}.detail-portrait-wrap{height:280px}}
+@media (max-width:700px){.collection-topbar{display:block}.collection-countbox{display:inline-block;margin-top:10px}.collection-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.cookie-frame{height:185px}.cookie-name{font-size:15px}}
+
+
+/* ===== CHIBI POSES, EXPRESSIONS & RARITY FRAMES ===== */
+.detail-traits{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.detail-traits span,.position-chip{display:inline-block;padding:5px 8px;border-radius:999px;background:#213f6d;color:#fff3b1;font:900 9px Arial;letter-spacing:.8px}
+.position-chip{margin:7px auto 0;text-align:center;display:table}
+.position-chip.front{background:#9e513e}.position-chip.middle{background:#4b72a7}.position-chip.rear{background:#5d7f5d}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.reveal-preview-btn,.detail-summon-btn,.collection-summon-btn{border:0;border-radius:14px;padding:10px 14px;font:900 12px Arial;cursor:pointer;box-shadow:0 5px 0 rgba(69,44,20,.35)}
+.reveal-preview-btn{background:#17345f;color:#ffe88f}.detail-summon-btn,.collection-summon-btn{background:linear-gradient(#ffdd77,#e9a932);color:#52330f}
+.collection-summon-btn{margin-left:auto;min-height:42px}
+.rarity-crest{position:absolute;left:50%;top:-11px;transform:translateX(-50%);z-index:4;width:38px;height:30px;border-radius:50% 50% 42% 42%;display:grid;place-items:center;color:#fff;font:900 18px Georgia;border:3px solid #fff8dc;box-shadow:0 4px 0 rgba(58,39,22,.35)}
+.rarity-crest.rare{background:#42a8e7}.rarity-crest.epic{background:#8d5fe8}.rarity-crest.super-epic{background:#e257b5}.rarity-crest.legendary{background:#31b7ad}.rarity-crest.ancient{background:#d89b1f}.rarity-crest.beast{background:#4a3558}
+.rarity-card-rare{border-color:#55b9ec}.rarity-card-epic{border-color:#9b6aee}.rarity-card-super-epic{border-color:#ec68c0}.rarity-card-legendary{border-color:#43c8bc}.rarity-card-ancient{border-color:#e3af39}.rarity-card-beast{border-color:#5c416d}
+.rarity-card-legendary .cookie-frame,.rarity-card-ancient .cookie-frame{box-shadow:inset 0 0 0 3px rgba(255,255,255,.45),0 0 20px rgba(255,229,135,.25)}
+.rarity-card-beast .cookie-frame{box-shadow:inset 0 0 25px rgba(31,18,43,.35)}
+
+/* ===== GACHA REVEAL ===== */
+.gacha-overlay{z-index:8000;background:radial-gradient(circle at 50% 35%,rgba(31,65,111,.55),rgba(5,12,30,.94) 70%)}
+.gacha-card{position:relative;width:min(760px,94vw);max-height:92vh;overflow:auto;border-radius:34px;border:5px solid #d0a24a;background:linear-gradient(180deg,#10294d,#0b1731);color:#fff6d4;box-shadow:0 28px 80px rgba(0,0,0,.55);transition:.35s}
+.gacha-card.gacha-rare{--gacha:#55c6ff;--gacha2:#1976b7}.gacha-card.gacha-epic{--gacha:#c18cff;--gacha2:#6a36bf}.gacha-card.gacha-super-epic{--gacha:#ff95de;--gacha2:#b62c86}.gacha-card.gacha-legendary{--gacha:#7df4e6;--gacha2:#1a9d93}.gacha-card.gacha-ancient{--gacha:#ffe582;--gacha2:#c58614}.gacha-card.gacha-beast{--gacha:#a57ac5;--gacha2:#301d3d}
+.gacha-stage{position:relative;height:440px;overflow:hidden;background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--gacha,#ffe582) 55%,white 15%),transparent 20%),radial-gradient(circle at 50% 80%,var(--gacha2,#c58614),#081225 63%)}
+.gacha-rings{position:absolute;inset:0;display:grid;place-items:center;opacity:.62}.gacha-rings i{position:absolute;border:3px solid var(--gacha,#ffe582);border-radius:50%;width:180px;height:180px;animation:gachaSpin 7s linear infinite}.gacha-rings i:nth-child(2){width:270px;height:270px;animation-direction:reverse;animation-duration:10s;border-style:dashed}.gacha-rings i:nth-child(3){width:360px;height:360px;animation-duration:14s;opacity:.45}
+.gacha-tree{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:220px;height:260px;opacity:.9;transition:.65s}.tree-trunk{position:absolute;left:96px;bottom:0;width:30px;height:120px;border-radius:18px;background:linear-gradient(90deg,#6e3d25,#b8793d,#633720)}.tree-crown{position:absolute;left:20px;top:10px;width:180px;height:160px;border-radius:50% 46% 52% 45%;background:radial-gradient(circle at 35% 30%,#fff7b8,var(--gacha,#8fdc82) 12%,#4c9e55 52%,#26683a 80%);box-shadow:0 0 50px color-mix(in srgb,var(--gacha,#ffe582) 65%,transparent)}.tree-seed{position:absolute;left:92px;top:70px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#fff9c7;color:#8b5f0b;font-size:24px;box-shadow:0 0 30px #fff,0 0 65px var(--gacha,#ffe582);animation:seedPulse 1.2s ease-in-out infinite}
+.gacha-character,.gacha-silhouette{position:absolute;left:50%;bottom:6px;width:270px;height:330px;transform:translateX(-50%) scale(.3);opacity:0;transition:.7s cubic-bezier(.2,.8,.2,1)}
+.gacha-silhouette{opacity:.85;filter:brightness(0) drop-shadow(0 0 22px var(--gacha,#ffe582));transform:translateX(-50%) scale(.58)}
+.gacha-character .full-cookie-svg,.gacha-silhouette .full-cookie-svg{width:100%;height:100%}
+.gacha-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.gacha-particles{position:absolute;left:50%;top:48%;width:1px;height:1px}.gacha-particles span{position:absolute;width:var(--size);height:var(--size);border-radius:50%;background:var(--gacha,#ffe582);box-shadow:0 0 12px var(--gacha,#ffe582);opacity:0}
+.gacha-overlay.is-charging .gacha-tree{filter:brightness(1.35)}.gacha-overlay.is-charging .gacha-rings{animation:ringPulse .8s ease-in-out infinite alternate}.gacha-overlay.is-charging .gacha-particles span{animation:particleBurst 1s ease-out var(--delay) both}
+.gacha-overlay.is-revealed .gacha-tree{opacity:.17;transform:translateX(-50%) scale(1.4)}.gacha-overlay.is-revealed .gacha-silhouette{opacity:0;transform:translateX(-50%) scale(1.15)}.gacha-overlay.is-revealed .gacha-character{opacity:1;transform:translateX(-50%) scale(1)}.gacha-overlay.is-revealed .gacha-flash{animation:flashReveal .55s ease-out}.gacha-overlay.is-revealed .gacha-rings{opacity:.9}
+.gacha-copy{text-align:center;padding:18px 28px 10px}.gacha-kicker{font:900 10px Arial;letter-spacing:3px;color:var(--gacha,#ffe582)}.gacha-rarity{display:inline-block;margin-top:8px;padding:6px 12px;border-radius:999px;background:var(--gacha2,#c58614);font:900 11px Arial;letter-spacing:1.5px}.gacha-copy h2{margin:10px 0 4px;font-size:36px;color:#fff8dd}.gacha-tags{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.gacha-tags span{padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);font:800 10px Arial;text-transform:uppercase}.gacha-quote{font:italic 16px/1.5 Georgia;color:#e9e2cd;min-height:48px}.gacha-actions{display:flex;justify-content:center;gap:12px;padding:8px 20px 24px;flex-wrap:wrap}.gacha-primary,.gacha-secondary{min-width:150px;border:0;border-radius:16px;padding:12px 18px;font-weight:900;cursor:pointer}.gacha-primary{background:linear-gradient(#ffe581,#e9a931);color:#4d300b;box-shadow:0 5px 0 #8a5b16}.gacha-secondary{background:#244b7f;color:#fff;box-shadow:0 5px 0 #10284a}
+@keyframes gachaSpin{to{transform:rotate(360deg)}}@keyframes seedPulse{50%{transform:scale(1.18);filter:brightness(1.25)}}@keyframes ringPulse{to{transform:scale(1.05);opacity:1}}@keyframes particleBurst{0%{opacity:0;transform:translate(0,0) scale(.2)}25%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1.2)}}@keyframes flashReveal{0%{opacity:0}24%{opacity:.95}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.gacha-rings i,.tree-seed,.gacha-particles span{animation:none!important}.gacha-character,.gacha-silhouette,.gacha-tree{transition:none!important}}
+@media(max-width:700px){.gacha-stage{height:360px}.gacha-character,.gacha-silhouette{width:220px;height:285px}.gacha-copy h2{font-size:28px}.collection-summon-btn{margin-left:0;width:100%}}
 
