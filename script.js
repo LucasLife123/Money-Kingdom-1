@@ -1,4450 +1,2291 @@
-const SAVE_KEY="moneyKingdomFullBodyCookiesV1";
-
-let saveData=JSON.parse(
-  localStorage.getItem(SAVE_KEY)||"{}"
-);
-
-saveData.stages=saveData.stages||{};
-
-saveData.ownedCookies=saveData.ownedCookies||[
-  "Coin Cookie",
-  "Dollar Cookie",
-  "Budget Cookie",
-  "Investor Cookie",
-  "Violin Cookie",
-  "Lucky Cookie",
-  "Property Cookie",
-  "Banker Cookie"
-];
-
-
-const cookies=[
-
-["Coin Cookie","RARE","Defender","Earth","coin","A steadfast guardian who turns small savings into lasting safety."],
-
-["Dollar Cookie","EPIC","Attacker","Neutral","dollar","Bold and ambitious, Dollar Cookie charges ahead to build a brighter future."],
-
-["Budget Cookie","RARE","Support","Neutral","book","Calm and practical, always keeping every plan in balance."],
-
-["Investor Cookie","EPIC","Support","Nature","leaf","Patient and hopeful, Investor Cookie believes every seed can grow."],
-
-["Banker Cookie","EPIC","Healer / Support","Water","bank","Reliable and composed, offering structure and stability to the team."],
-
-["Credit Cookie","EPIC","Support","Lightning","card","Quick-thinking and flashy, but careful with every promise."],
-
-["Business Cookie","EPIC","Attacker","Fire","briefcase","Driven and energetic, turning ideas into momentum."],
-
-["Tax Cookie","RARE","Support","Neutral","receipt","Orderly, exact, and always prepared with the fine print."],
-
-["Insurance Cookie","EPIC","Defender","Water","shield","Protects friends from the unexpected with layered defenses."],
-
-["Health Cookie","EPIC","Healer","Light","heart","Warm-hearted and attentive, always caring for others first."],
-
-["Education Cookie","RARE","Support","Arcane","book","Curious and encouraging, unlocking knowledge wherever they go."],
-
-["Property Cookie","EPIC","Defender","Earth","house","A sturdy protector who makes every place feel safe and secure."],
-
-["Retirement Cookie","EPIC","Support","Light","sun","Wise and thoughtful, planning for peaceful tomorrows."],
-
-["Side Hustle Cookie","RARE","Attacker","Wind","hammer","Restless and inventive, always chasing the next opportunity."],
-
-["Spendthrift Cookie","EPIC","Bomber","Fire","bag","Excitable and impulsive, burning through resources in a flash."],
-
-["Charity Cookie","EPIC","Healer","Light","gift","A gentle soul who believes true wealth is shared."],
-
-["Sustainability Cookie","EPIC","Support","Nature","recycle","Protects what matters and helps every system last longer."],
-
-["Family Cookie","RARE","Support","Light","homeheart","Keeps the group united with comfort, trust, and warmth."],
-
-["Explorer Cookie","EPIC","Ambush","Wind","compass","Fearless and adventurous, always first to discover a new path."],
-
-["Time Cookie","EPIC","Support","Arcane","clock","Quiet and precise, making every second count."],
-
-["Savings Cookie","RARE","Defender","Earth","pig","Small but dependable, building strength one coin at a time."],
-
-["Security Cookie","EPIC","Defender","Earth","lock","Watches over allies with calm focus and strong barriers."],
-
-["Merchant Cookie","RARE","Support","Neutral","basket","Friendly and clever, always knows what others need."],
-
-["Builder Cookie","RARE","Defender","Earth","hammer","Strong and grounded, raising homes and hopes brick by brick."],
-
-["Harvest Cookie","RARE","Healer","Nature","wheat","Brings nourishment, rest, and simple abundance."],
-
-["Trader Cookie","EPIC","Support","Wind","scale","Balances value and timing with a sharp eye."],
-
-["Analyst Cookie","EPIC","Magic","Arcane","chart","Reads patterns with uncanny clarity and cool precision."],
-
-["Scamwatch Cookie","EPIC","Support","Lightning","search","Never fooled twice—sharp instincts expose danger fast."],
-
-["Piano Cookie","EPIC","Support","Arcane","piano","Elegant melodies strengthen the whole party."],
-
-["Violin Cookie","EPIC","Support","Wind + Arcane","violin","A graceful performer whose music lifts every heart."],
-
-["Drummer Cookie","RARE","Support","Earth","drum","Steady rhythms keep the team's courage alive."],
-
-["Flute Cookie","EPIC","Healer","Wind + Nature","music","Soft melodies drift like a breeze and soothe all wounds."],
-
-["DJ Cookie","SUPER EPIC","Support","Lightning + Arcane","headphones","A modern maestro who electrifies the field with powerful beats."],
-
-["Music Box Cookie","SUPER EPIC","Magic","Ice + Arcane","musicbox","Plays a dreamy tune that traps enemies in a frozen lullaby."],
-
-["Conductor Cookie","SUPER EPIC","Support","Arcane + Light","baton","Directs harmony and momentum with masterful precision."],
-
-["Rockstar Cookie","EPIC","Charge","Lightning + Fire","guitar","Loud, fearless, and impossible to ignore."],
-
-["Saxophone Cookie","EPIC","Magic","Wind","sax","Smooth and stylish, striking with jazzy gusts."],
-
-["Bell Cookie","RARE","Support","Light","bell","Rings out blessings and warding notes."],
-
-["Lucky Cookie","LEGENDARY","All-Rounder","Wind + Light","star","Fortune itself seems to bend toward Lucky Cookie."],
-
-["Golden Cookie","LEGENDARY","Attacker","Light","crown","A radiant hero shining with confidence and power."],
-
-["Chronos Cookie","LEGENDARY","Support","Arcane + Light","hourglass","Controls the flow of battle with timeless calm."],
-
-["Compound Cookie","LEGENDARY","Support","Nature","vine","Steady growth becomes overwhelming strength over time."],
-
-["Diamond Cookie","LEGENDARY","Defender","Earth","diamond","Unbreakable and brilliant, with defenses that sparkle."],
-
-["Opportuna Cookie","LEGENDARY","Ambush","Wind","door","Appears exactly when fate opens a hidden door."],
-
-["Verdantis Cookie","LEGENDARY","Defender","Nature","tree","Protector of the forest and ancient living roots."],
-
-["Stellara Cookie","LEGENDARY","Magic","Light + Arcane","starfall","Calls starfire from above to guide allies and punish foes."],
-
-["Equilibra Cookie","ANCIENT","Support","Neutral","balance","An Ancient who protects balance between abundance and restraint."],
-
-["Sapheon Cookie","ANCIENT","Support","Light","eye","Sees truth clearly and once guided knowledge with kindness."],
-
-["Florentia Cookie","ANCIENT","Healer","Nature + Light","flower","A nurturing Ancient whose gardens once fed entire kingdoms."],
-
-["Liberis Cookie","ANCIENT","All-Rounder","Wind + Light","wing","Bearer of freedom, carrying hope beyond every wall."],
-
-["Memoria Cookie","ANCIENT","Summoner / Defender","Light + Arcane","scroll","Guardian of memory, history, and the wisdom of ages."],
-
-["Greed Cookie","BEAST","Attacker","Dark + Fire","claw","Once noble ambition, now endless hunger made flesh."],
-
-["Deception Cookie","BEAST","Magic","Dark + Arcane","mask","Once keeper of truth, now a master of irresistible lies."],
-
-["Ruin Cookie","BEAST","Bomber","Fire + Dark","crack","Born from growth turned reckless destruction."],
-
-["Debt Cookie","BEAST","Defender","Dark + Earth","chain","Twists promises into chains that are hard to escape."],
-
-["Oblivion Cookie","BEAST","Magic","Dark + Arcane","void","Seeks to erase the pain of memory by erasing everything."],
-
-["Phoenix Sugar Cookie","SUPER EPIC","Attacker","Fire + Light","flame","A blazing fighter said to rise stronger after every fall."],
-
-["Nightmare Cookie","SUPER EPIC","Magic","Dark + Arcane","moon","A dreamwalker whose shadows prey on fear."],
-
-["Paradise Cookie","LEGENDARY","Healer","Nature + Light","flower","Brings peace, renewal, and gentle paradise winds."]
-
-];
-
-
-const descriptions={
-
-"Frostpeak Mountains":
-"A snowy chapter about courage, preparation and learning how to begin.",
-
-"Sunpetal Fields":
-"A bright farming region where saving, patience and growth shape the adventure.",
-
-"Azure Coast":
-"A lively port where trade, travel, risk and protection become important.",
-
-"Starfall Islands":
-"A magical chain of islands where wishes, choices and opportunities collide.",
-
-"Evergreen Woods":
-"A deep forest about balance, long-term thinking and sustainable growth.",
-
-"Crystal Caves":
-"A mysterious cave system filled with treasure, danger and difficult choices.",
-
-"Willow Marsh":
-"A quiet region about small habits, mistakes and steady improvement.",
-
-"The Forgotten Ruins":
-"Ancient ruins holding the forgotten lessons of Prospera.",
-
-"Moonlight Lake":
-"A dreamlike region where memories and hidden Cookie stories return.",
-
-"Windmill Valley":
-"A hardworking valley focused on production, teamwork and progress.",
-
-"Golden Dunes":
-"A desert region where resilience matters more than riches.",
-
-"The Republic of Cookies":
-"A distant island republic filled with travelers, Guest Cookies and new adventures."
-
-};
-
-
-const scene=
-document.getElementById("scene");
-
-const tooltip=
-document.getElementById("tooltip");
-
-const panel=
-document.getElementById("panel");
-
-const panelTitle=
-document.getElementById("panelTitle");
-
-const panelText=
-document.getElementById("panelText");
-
-const panelBody=
-document.getElementById("panelBody");
-
-const cookiePanel=
-document.getElementById("cookiePanel");
-
-const cookieGrid=
-document.getElementById("cookieGrid");
-
-const cookieDetail=
-document.getElementById("cookieDetail");
-
-const ownershipTabs=
-document.getElementById("ownershipTabs");
-
-const rarityFilters=
-document.getElementById("rarityFilters");
-
-const cookieSearch=
-document.getElementById("cookieSearch");
-
-const sortSelect=
-document.getElementById("sortSelect");
-
-const kingdomPanel=
-document.getElementById("kingdomPanel");
-
-const residentField=
-document.getElementById("residentField");
-
-const toast=
-document.getElementById("toast");
-
-
-let ownershipFilter="ALL";
-
-let rarityFilter="ALL";
-
-let selectedCookieName=
-cookies[0][0];
-
-
-const rarityClassMap={
-
-"RARE":"rare",
-
-"EPIC":"epic",
-
-"SUPER EPIC":"super-epic",
-
-"LEGENDARY":"legendary",
-
-"ANCIENT":"ancient",
-
-"BEAST":"beast"
-
-};
-
-
-function hashColor(
-  name,
-  offset=0
-){
-
-  let h=0;
-
-  for(
-    let i=0;
-    i<name.length;
-    i++
-  ){
-
-    h=
-    (
-      h*31+
-      name.charCodeAt(i)+
-      offset
-    )%360;
-
-  }
-
-  return `hsl(${h} 72% 58%)`;
-
+:root {
+  --navy: #1d2a4b;
+  --navy-2: #263964;
+  --gold: #f6c95d;
+  --cream: #fff7df;
+  --paper: #f4e2ba;
+  --ink: #4d3828;
+  --green: #5db96b;
+  --red: #d95a5a;
+  --shadow: 0 16px 45px rgba(22, 28, 48, .28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+
+  font-family:
+    Inter,
+    ui-rounded,
+    "Trebuchet MS",
+    Arial,
+    sans-serif;
+
+  background: #10192d;
+  color: var(--ink);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#game,
+.screen {
+  position: absolute;
+  inset: 0;
+}
+
+.screen {
+  display: none;
+  overflow: hidden;
+}
+
+.screen.active {
+  display: block;
 }
 
 
-function motifSVG(
-  type,
-  color="#fff6d8"
-){
+/* =====================================================
+   KINGDOM
+===================================================== */
 
-  const stroke=
-  "#50321c";
+#kingdomScreen {
+  background:
+    linear-gradient(
+      #93d4ef,
+      #d8f0d2
+    );
+}
 
-  const s=
-  `stroke="${stroke}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"`;
+#kingdomViewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
 
-  const fill=
-  `fill="${color}"`;
+#kingdomScene {
+  position: absolute;
 
+  left: 50%;
+  top: 50%;
 
-  const map={
+  width: 1536px;
+  height: 1024px;
 
-    coin:
-    `<circle cx="0" cy="0" r="18" ${fill} ${s}/>
-    <path d="M-7 0h14M0-8v16" ${s} fill="none"/>`,
+  transform:
+    translate(-50%, -50%)
+    scale(var(--sceneScale, 1));
 
-    dollar:
-    `<path d="M0-19v38M10-12c-3-4-19-6-20 3-1 8 19 5 19 14 0 10-17 9-22 3" ${s} fill="none"/>`,
+  transform-origin: center;
+}
 
-    book:
-    `<path d="M-20-14q10-5 20 1v31q-10-6-20-1zM20-14q-10-5-20 1v31q10-6 20-1z" ${fill} ${s}/>`,
+#mapImage {
+  position: absolute;
+  inset: 0;
 
-    leaf:
-    `<path d="M-18 10Q-12-18 20-18Q16 12-10 18Q2 3 14-10" ${fill} ${s}/>`,
+  width: 100%;
+  height: 100%;
 
-    bank:
-    `<path d="M-22-8L0-23 22-8zM-18-6v24M-6-6v24M6-6v24M18-6v24M-24 20h48" ${s} fill="none"/>`,
+  object-fit: cover;
 
-    card:
-    `<rect x="-23" y="-15" width="46" height="30" rx="6" ${fill} ${s}/>
-    <path d="M-21-5h42" ${s}/>`,
+  user-select: none;
+  pointer-events: none;
+}
 
-    briefcase:
-    `<rect x="-22" y="-10" width="44" height="28" rx="5" ${fill} ${s}/>
-    <path d="M-10-10v-8h20v8M-22 2h44" ${s} fill="none"/>`,
+#mapError {
+  position: absolute;
 
-    receipt:
-    `<path d="M-16-22h32v44l-5-4-5 4-6-4-6 4-5-4-5 4z" ${fill} ${s}/>
-    <path d="M-8-10h16M-8 0h16M-8 10h10" ${s}/>`,
+  left: 50%;
+  top: 50%;
 
-    shield:
-    `<path d="M0-22L20-14v14Q16 16 0 24Q-16 16-20 0v-14z" ${fill} ${s}/>`,
+  transform:
+    translate(-50%, -50%);
 
-    heart:
-    `<path d="M0 21L-19 2Q-27-8-18-17Q-8-25 0-12Q8-25 18-17Q27-8 19 2z" ${fill} ${s}/>`,
+  z-index: 100;
 
-    house:
-    `<path d="M-22 0L0-22 22 0v22h-44zM-7 22V8h14v14" ${fill} ${s}/>`,
+  width: 460px;
 
-    sun:
-    `<circle cx="0" cy="0" r="13" ${fill} ${s}/>
-    <path d="M0-25v7M0 18v7M-25 0h7M18 0h7M-18-18l5 5M13 13l5 5M18-18l-5 5M-13 13l-5 5" ${s}/>`,
+  padding: 22px;
 
-    hammer:
-    `<path d="M-18-14h28v12h-28zM1-2l-15 26" ${fill} ${s}/>`,
+  border: 4px solid #804d2c;
+  border-radius: 20px;
 
-    bag:
-    `<path d="M-18-7h36l-4 29h-28zM-9-7q0-13 9-13t9 13" ${fill} ${s}/>`,
+  background: #fff4d2;
 
-    gift:
-    `<rect x="-21" y="-10" width="42" height="30" rx="3" ${fill} ${s}/>
-    <path d="M0-10v30M-24-10h48M0-10q-15-3-14-13q11-3 14 13q15-3 14-13q-11-3-14 13" ${s} fill="none"/>`,
-
-    recycle:
-    `<path d="M-15-8l8-12 5 10M11-10l9 12-11 1M4 17h-15l6-9" ${s} fill="none"/>`,
-
-    homeheart:
-    `<path d="M-22 1L0-20 22 1v21h-44z" ${fill} ${s}/>
-    <path d="M0 15L-9 6Q-14 0-9-5Q-4-8 0-2Q4-8 9-5Q14 0 9 6z" fill="#ff8d9d" ${s}/>`,
-
-    compass:
-    `<circle cx="0" cy="0" r="21" ${fill} ${s}/>
-    <path d="M7-8l-5 15-9 5 5-15z" ${s} fill="none"/>`,
-
-    clock:
-    `<circle cx="0" cy="0" r="21" ${fill} ${s}/>
-    <path d="M0-11V2l10 7" ${s} fill="none"/>`,
-
-    pig:
-    `<ellipse cx="0" cy="3" rx="22" ry="17" ${fill} ${s}/>
-    <circle cx="19" cy="-4" r="7" ${fill} ${s}/>
-    <path d="M-11-9l-6-7M-1-11l-1-8M-13 20v5M8 20v5" ${s}/>`,
-
-    lock:
-    `<rect x="-18" y="-3" width="36" height="25" rx="6" ${fill} ${s}/>
-    <path d="M-10-3v-7q0-12 10-12t10 12v7" ${s} fill="none"/>`,
-
-    basket:
-    `<path d="M-22-7h44l-5 28h-34zM-12-7q4-16 12-16t12 16" ${fill} ${s}/>`,
-
-    wheat:
-    `<path d="M0-22v44M0-15l-10-6M0-8l10-6M0 0l-10-6M0 7l10-6" ${s} fill="none"/>`,
-
-    scale:
-    `<path d="M0-22v44M-20-12h40M-15-12l-9 18h18zM15-12L6 6h18z" ${fill} ${s}/>`,
-
-    chart:
-    `<path d="M-22 20V-20M-22 20h44M-15 8l8-12 9 6 13-17" ${s} fill="none"/>`,
-
-    search:
-    `<circle cx="-4" cy="-5" r="15" ${fill} ${s}/>
-    <path d="M7 7l16 16" ${s}/>`,
-
-    piano:
-    `<rect x="-22" y="-16" width="44" height="32" rx="5" ${fill} ${s}/>
-    <path d="M-13-16v22M-4-16v22M5-16v22M14-16v22" ${s}/>`,
-
-    violin:
-    `<path d="M0-22v44M-7-12q-12 5-6 15q6 8 13 3q7 5 13-3q6-10-6-15" ${fill} ${s}/>
-    <path d="M8-22h9M12-22v-5" ${s}/>`,
-
-    drum:
-    `<ellipse cx="0" cy="-12" rx="20" ry="8" ${fill} ${s}/>
-    <path d="M-20-12v26q20 12 40 0v-26" ${fill} ${s}/>
-    <path d="M-10-18l-10-9M10-18l10-9" ${s}/>`,
-
-    music:
-    `<path d="M5-20v28q-4-6-12-3q-8 3-4 10q4 6 12 2q4-2 4-8V-9l18-5v17q-5-5-12-2q-8 4-4 10q4 6 12 2q4-2 4-8v-31z" ${fill} ${s}/>`,
-
-    headphones:
-    `<path d="M-20 4v-6q0-20 20-20t20 20v6M-20 4v13h9V3h-9M20 4v13h-9V3h9" ${fill} ${s}/>`,
-
-    musicbox:
-    `<rect x="-20" y="-9" width="40" height="28" rx="5" ${fill} ${s}/>
-    <path d="M-10-9q10-15 20 0M0-20v11" ${s} fill="none"/>`,
-
-    baton:
-    `<path d="M-20 18L17-19M15-21l6 6" ${s} fill="none"/>`,
-
-    guitar:
-    `<path d="M-8 3q-12-5-12 8q0 13 13 9q8-3 6-11l15-19 8 6-16 18q-8 2-14-11z" ${fill} ${s}/>`,
-
-    sax:
-    `<path d="M-8-20h16M0-20v20q0 18 14 18q10 0 10-9q0-8-8-8q-7 0-9 6" ${s} fill="none"/>`,
-
-    bell:
-    `<path d="M-17 11h34q-7-7-7-20q0-11-10-11t-10 11q0 13-7 20zM-5 15q5 8 10 0" ${fill} ${s}/>`,
-
-    star:
-    `<path d="M0-24l7 15 17 2-12 12 3 17-15-8-15 8 3-17-12-12 17-2z" ${fill} ${s}/>`,
-
-    crown:
-    `<path d="M-22 13l4-28 12 13 8-18 8 18 12-13 4 28zM-18 19h36" ${fill} ${s}/>`,
-
-    hourglass:
-    `<path d="M-16-22h32M-16 22h32M-12-20q0 13 12 20q-12 7-12 20M12-20q0 13-12 20q12 7 12 20" ${fill} ${s}/>`,
-
-    vine:
-    `<path d="M-18 18Q-2 10-7-4Q-11-17 5-20Q20-22 18-7Q16 6 2 8Q-8 9-18 18" ${s} fill="none"/>
-    <circle cx="-5" cy="2" r="5" ${fill} ${s}/>`,
-
-    diamond:
-    `<path d="M-22-6L-12-20h24L22-6 0 24zM-22-6h44M-12-20L0 24M12-20L0 24" ${fill} ${s}/>`,
-
-    door:
-    `<path d="M-16-22h32v44h-32zM8 0h2" ${fill} ${s}/>`,
-
-    tree:
-    `<path d="M0 4v20M0 4q-16 2-18-11q-2-12 10-15q7-1 8 6q1-7 8-6q12 3 10 15q-2 13-18 11" ${fill} ${s}/>`,
-
-    starfall:
-    `<path d="M8-22l5 10 12 2-9 8 3 12-11-6-11 6 3-12-9-8 12-2zM-21 16l10-10M-17 21l10-10" ${fill} ${s}/>`,
-
-    balance:
-    `<path d="M0-22v44M-20-12h40M-15-12l-9 18h18zM15-12L6 6h18z" ${fill} ${s}/>`,
-
-    eye:
-    `<path d="M-24 0q24-24 48 0q-24 24-48 0z" ${fill} ${s}/>
-    <circle cx="0" cy="0" r="7" fill="#fff" ${s}/>`,
-
-    flower:
-    `<circle cx="0" cy="0" r="6" fill="#ffcf6e" ${s}/>
-    <circle cx="0" cy="-14" r="9" ${fill} ${s}/>
-    <circle cx="14" cy="0" r="9" ${fill} ${s}/>
-    <circle cx="0" cy="14" r="9" ${fill} ${s}/>
-    <circle cx="-14" cy="0" r="9" ${fill} ${s}/>`,
-
-    wing:
-    `<path d="M0 18q-20-2-24-18q13 5 18-8q3 12 6 26q20-2 24-18q-13 5-18-8q-3 12-6 26" ${fill} ${s}/>`,
-
-    scroll:
-    `<path d="M-16-18h26q8 0 8 8v28h-27q-8 0-8-8t8-8h27M-16-18v28" ${fill} ${s}/>`,
-
-    claw:
-    `<path d="M-18 20q7-22 14-35M0 20q2-23 5-38M18 20q-4-22-3-38" ${s} fill="none"/>`,
-
-    mask:
-    `<path d="M-22-15q22-12 44 0v18q-4 18-22 22q-18-4-22-22zM-12-4q5-6 10 0M2-4q5-6 10 0" ${fill} ${s}/>`,
-
-    crack:
-    `<path d="M0-23L-5-5 7-1-8 10 2 14-5 24" ${s} fill="none"/>`,
-
-    chain:
-    `<path d="M-18 8l10-10q6-6 12 0t0 12l-10 10q-6 6-12 0t0-12zM6-20l10 10q6 6 0 12t-12 0L-6-8q-6-6 0-12t12 0z" ${fill} ${s}/>`,
-
-    void:
-    `<circle cx="0" cy="0" r="20" fill="#241a32" ${s}/>
-    <circle cx="5" cy="-5" r="8" fill="#6d4f90"/>`,
-
-    flame:
-    `<path d="M0 24q-18-10-15-27q2-12 12-20q-2 13 6 18q5-8 4-16q14 11 13 26q-1 14-20 19z" ${fill} ${s}/>`,
-
-    moon:
-    `<path d="M12-22q-22 6-20 25q2 18 21 18q8 0 13-5q-19 3-22-14q-3-15 8-24z" ${fill} ${s}/>`
-
-  };
-
-
-  return map[type]||map.star;
-
+  font-weight: 900;
+  text-align: center;
 }
 
 
-const EXPRESSIONS=[
+/* TIME */
 
-  "cheerful",
-  "determined",
-  "curious",
-  "serene",
-  "mischievous",
-  "confident",
-  "gentle",
-  "focused",
-  "wink",
-  "surprised",
-  "sleepy",
-  "brave",
-  "smug",
-  "dreamy",
-  "stern"
+#timeTint {
+  position: absolute;
+  inset: 0;
 
-];
+  z-index: 5;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transition:
+    background 1.5s,
+    opacity 1.5s;
+}
+
+#timeTint.evening {
+  opacity: .24;
+
+  background:
+    linear-gradient(
+      rgba(255, 137, 71, .32),
+      rgba(95, 57, 130, .18)
+    );
+}
+
+#timeTint.night {
+  opacity: .42;
+
+  background:
+    rgba(
+      24,
+      31,
+      83,
+      .62
+    );
+}
 
 
-function hashNumber(
-  text
-){
+/* LAYERS */
 
-  let h=2166136261;
+#kingdomBuildings,
+#kingdomResidents {
+  position: absolute;
+  inset: 0;
+}
 
-  for(
-    let i=0;
-    i<text.length;
-    i++
-  ){
+#kingdomBuildings {
+  z-index: 10;
+  pointer-events: none;
+}
 
-    h^=
-    text.charCodeAt(i);
+#kingdomResidents {
+  z-index: 20;
+  pointer-events: none;
+}
 
-    h=
-    Math.imul(
-      h,
-      16777619
+
+/* KINGDOM LABEL */
+
+.kingdom-title-card {
+  position: absolute;
+
+  z-index: 40;
+
+  left: 720px;
+  top: 440px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 14px;
+
+  border: 3px solid rgba(91, 56, 34, .7);
+  border-radius: 18px;
+
+  background: rgba(255, 246, 218, .92);
+
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.18);
+}
+
+.kingdom-title-card strong {
+  font-size: 20px;
+  color: #6b462b;
+}
+
+.kingdom-title-card span {
+  font-size: 13px;
+  color: #8b6e53;
+}
+
+
+/* FLOATING BUTTONS */
+
+.floating-quest,
+.floating-build {
+  position: absolute;
+
+  z-index: 60;
+
+  border: 4px solid #624029;
+  border-radius: 18px;
+
+  padding: 13px 18px;
+
+  color: #4e351f;
+  font-weight: 1000;
+
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.2);
+}
+
+.floating-quest {
+  left: 340px;
+  top: 760px;
+
+  background: #fff3b6;
+}
+
+.floating-build {
+  right: 310px;
+  top: 760px;
+
+  background: #f5cf5e;
+}
+
+
+/* =====================================================
+   HUD
+===================================================== */
+
+.hud {
+  position: fixed;
+
+  z-index: 150;
+
+  pointer-events: none;
+}
+
+.top-hud {
+  top: 12px;
+  left: 14px;
+  right: 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.hud button,
+.hud .resource-pill {
+  pointer-events: auto;
+}
+
+.profile-pill,
+.resource-pill,
+.hud-button,
+.ticket-pill {
+  min-height: 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border:
+    2px solid rgba(255,255,255,.42);
+
+  border-radius: 18px;
+
+  background:
+    rgba(
+      26,
+      40,
+      73,
+      .9
     );
 
-  }
+  color: white;
 
-  return Math.abs(
-    h>>>0
-  );
+  box-shadow:
+    0 6px 18px rgba(10,17,33,.22);
 
+  font-weight: 900;
+}
+
+.profile-pill {
+  padding: 0 16px;
+}
+
+.resource-pill {
+  min-width: 90px;
+
+  padding: 0 14px;
+}
+
+.hud-button {
+  width: 44px;
+  border-radius: 50%;
+}
+
+.hud-spacer {
+  flex: 1;
 }
 
 
-function cookiePosition(
-  role
-){
+/* =====================================================
+   KINGDOM LAUNCHERS
+===================================================== */
 
-  const r=
-  role.toLowerCase();
+.kingdom-launchers {
+  position: fixed;
 
+  z-index: 140;
 
-  if(
-    r.includes("summoner")||
-    r.includes("support")||
-    r.includes("healer")
-  ){
+  left: 50%;
+  bottom: 16px;
 
-    return "REAR";
+  transform: translateX(-50%);
 
-  }
+  display: flex;
 
+  gap: 12px;
+}
 
-  if(
-    r.includes("defender")||
-    r.includes("charge")||
-    r.includes("all-rounder")
-  ){
+.kingdom-launchers button {
+  min-width: 118px;
 
-    return "FRONT";
+  padding: 12px 18px;
 
-  }
+  display: flex;
 
+  gap: 8px;
 
-  return "MIDDLE";
+  align-items: center;
+  justify-content: center;
 
+  border:
+    3px solid rgba(255,255,255,.35);
+
+  border-radius: 20px;
+
+  background:
+    rgba(
+      26,
+      40,
+      73,
+      .94
+    );
+
+  color: white;
+
+  box-shadow: var(--shadow);
+
+  font-weight: 1000;
+}
+
+.kingdom-launchers span {
+  font-size: 13px;
+
+  letter-spacing: .4px;
 }
 
 
-function cookieExpression(
-  cookie
-){
+/* =====================================================
+   BUILD DRAWER
+===================================================== */
 
-  const [
-    name,
-    rarity
-  ]=cookie;
+.build-drawer {
+  position: fixed;
 
+  z-index: 240;
 
-  if(
-    rarity==="BEAST"
-  ){
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
 
-    const beastFaces=[
-      "stern",
-      "smug",
-      "mischievous",
-      "determined"
-    ];
+  padding: 14px;
 
-    return beastFaces[
-      hashNumber(name)%
-      beastFaces.length
-    ];
+  border: 3px solid #6a482e;
+  border-radius: 24px;
 
-  }
+  background:
+    rgba(
+      255,
+      247,
+      223,
+      .97
+    );
 
+  box-shadow:
+    0 18px 55px rgba(15,22,40,.35);
 
-  if(
-    rarity==="ANCIENT"
-  ){
+  transform:
+    translateY(
+      calc(100% + 30px)
+    );
 
-    const ancientFaces=[
-      "serene",
-      "gentle",
-      "focused",
-      "brave"
-    ];
+  transition:
+    transform .28s ease;
+}
 
-    return ancientFaces[
-      hashNumber(name)%
-      ancientFaces.length
-    ];
+.build-drawer.open {
+  transform: translateY(0);
+}
 
-  }
+.build-drawer-head {
+  display: flex;
 
+  align-items: center;
+  justify-content: space-between;
 
-  return EXPRESSIONS[
-    hashNumber(name)%
-    EXPRESSIONS.length
-  ];
+  gap: 16px;
+}
 
+.build-drawer-head strong {
+  color: var(--navy);
+
+  font-size: 18px;
+}
+
+.build-drawer-head small {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #78644f;
+}
+
+.build-drawer-head button,
+.build-controls button {
+  border: 0;
+
+  border-radius: 12px;
+
+  padding: 9px 13px;
+
+  background: var(--navy);
+
+  color: white;
+
+  font-weight: 900;
+}
+
+.build-tabs {
+  display: flex;
+
+  gap: 7px;
+
+  margin: 12px 0;
+}
+
+.build-tabs button {
+  padding: 7px 10px;
+
+  border: 1px solid #ceb88c;
+  border-radius: 10px;
+
+  background: #f6ead0;
+
+  color: #7e684f;
+
+  font-weight: 800;
+}
+
+.build-tabs .active {
+  background: var(--gold);
+
+  color: #543b1e;
+}
+
+.build-items {
+  display: flex;
+
+  gap: 10px;
+}
+
+.build-item {
+  width: 230px;
+
+  display: flex;
+
+  gap: 12px;
+
+  align-items: center;
+
+  padding: 11px;
+
+  border: 2px solid #c59d57;
+  border-radius: 16px;
+
+  background: #fffaf0;
+
+  text-align: left;
+
+  touch-action: none;
+}
+
+.build-item-art {
+  font-size: 34px;
+}
+
+.build-item b,
+.build-item small,
+.build-item em {
+  display: block;
+}
+
+.build-item small {
+  color: #7c6a58;
+
+  margin: 3px 0;
+}
+
+.build-item em {
+  color: #a16c14;
+
+  font-style: normal;
+
+  font-weight: 900;
+}
+
+.build-controls {
+  position: absolute;
+
+  right: 14px;
+  bottom: 14px;
+
+  display: flex;
+
+  gap: 8px;
 }
 
 
-function expressionSVG(
-  cookie,
-  outline
-){
-
-  const exp=
-  cookieExpression(cookie);
-
-  const seed=
-  hashNumber(cookie[0]);
-  const eyeY =
-    78 +
-    (seed % 4) -
-    2;
-
-  const eyeSep =
-    17 +
-    (seed % 5);
-
-  const lx =
-    110 - eyeSep;
-
-  const rx =
-    110 + eyeSep;
-
-
-  const cheek = `
-    <ellipse
-      cx="81"
-      cy="96"
-      rx="8"
-      ry="5"
-      fill="#ef8a87"
-      opacity=".62"
-    />
-
-    <ellipse
-      cx="139"
-      cy="96"
-      rx="8"
-      ry="5"
-      fill="#ef8a87"
-      opacity=".62"
-    />
-  `;
-
-
-  const openEyes = `
-    <ellipse
-      cx="${lx}"
-      cy="${eyeY}"
-      rx="6"
-      ry="9"
-      fill="${outline}"
-    />
-
-    <ellipse
-      cx="${rx}"
-      cy="${eyeY}"
-      rx="6"
-      ry="9"
-      fill="${outline}"
-    />
-
-    <circle
-      cx="${lx - 2}"
-      cy="${eyeY - 3}"
-      r="2.2"
-      fill="#fff"
-    />
-
-    <circle
-      cx="${rx - 2}"
-      cy="${eyeY - 3}"
-      r="2.2"
-      fill="#fff"
-    />
-  `;
-
-
-  const happyEyes = `
-    <path
-      d="M${lx - 7} ${eyeY} Q${lx} ${eyeY - 9} ${lx + 7} ${eyeY}"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-
-    <path
-      d="M${rx - 7} ${eyeY} Q${rx} ${eyeY - 9} ${rx + 7} ${eyeY}"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const sleepyEyes = `
-    <path
-      d="M${lx - 7} ${eyeY} Q${lx} ${eyeY + 3} ${lx + 7} ${eyeY}"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-
-    <path
-      d="M${rx - 7} ${eyeY} Q${rx} ${eyeY + 3} ${rx + 7} ${eyeY}"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const brows = (a, b) => `
-    <path
-      d="M${lx - 8} ${eyeY - 15} l16 ${a}"
-      stroke="${outline}"
-      stroke-width="4"
-      stroke-linecap="round"
-    />
-
-    <path
-      d="M${rx - 8} ${eyeY - 15} l16 ${b}"
-      stroke="${outline}"
-      stroke-width="4"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const smile = `
-    <path
-      d="M97 98 Q110 111 123 98"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const smallSmile = `
-    <path
-      d="M102 100 Q110 106 118 100"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="4"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const openSmile = `
-    <path
-      d="M98 98 Q110 116 122 98 Q110 105 98 98Z"
-      fill="#7e3a32"
-      stroke="${outline}"
-      stroke-width="4"
-    />
-  `;
-
-
-  const smirk = `
-    <path
-      d="M101 101 Q113 107 123 98"
-      fill="none"
-      stroke="${outline}"
-      stroke-width="5"
-      stroke-linecap="round"
-    />
-  `;
-
-
-  const oMouth = `
-    <ellipse
-      cx="110"
-      cy="102"
-      rx="6"
-      ry="8"
-      fill="#7e3a32"
-      stroke="${outline}"
-      stroke-width="3"
-    />
-  `;
-
-
-  switch (exp) {
-
-    case "cheerful":
-
-      return (
-        happyEyes +
-        cheek +
-        openSmile
-      );
-
-
-    case "determined":
-
-      return (
-        openEyes +
-        brows(5, -5) +
-        `
-        <path
-          d="M101 103 Q110 98 119 103"
-          fill="none"
-          stroke="${outline}"
-          stroke-width="5"
-          stroke-linecap="round"
-        />
-        `
-      );
-
-
-    case "curious":
-
-      return (
-        openEyes +
-        brows(-2, 5) +
-        smallSmile
-      );
-
-
-    case "serene":
-
-      return (
-        sleepyEyes +
-        cheek +
-        smallSmile
-      );
-
-
-    case "mischievous":
-
-      return (
-        openEyes +
-        brows(4, -1) +
-        smirk
-      );
-
-
-    case "confident":
-
-      return (
-        openEyes +
-        brows(2, -2) +
-        smirk
-      );
-
-
-    case "gentle":
-
-      return (
-        happyEyes +
-        cheek +
-        smallSmile
-      );
-
-
-    case "focused":
-
-      return (
-        openEyes +
-        brows(4, -4) +
-        `
-        <path
-          d="M103 102 h14"
-          stroke="${outline}"
-          stroke-width="4"
-          stroke-linecap="round"
-        />
-        `
-      );
-
-
-    case "wink":
-
-      return `
-        <path
-          d="M${lx - 7} ${eyeY} Q${lx} ${eyeY + 4} ${lx + 7} ${eyeY}"
-          fill="none"
-          stroke="${outline}"
-          stroke-width="5"
-          stroke-linecap="round"
-        />
-
-        <ellipse
-          cx="${rx}"
-          cy="${eyeY}"
-          rx="6"
-          ry="9"
-          fill="${outline}"
-        />
-
-        <circle
-          cx="${rx - 2}"
-          cy="${eyeY - 3}"
-          r="2.2"
-          fill="#fff"
-        />
-
-        ${cheek}
-
-        ${smile}
-      `;
-
-
-    case "surprised":
-
-      return (
-        openEyes +
-        brows(-3, 3) +
-        oMouth
-      );
-
-
-    case "sleepy":
-
-      return (
-        sleepyEyes +
-        `
-        <path
-          d="M103 104 Q110 100 117 104"
-          fill="none"
-          stroke="${outline}"
-          stroke-width="4"
-        />
-        `
-      );
-
-
-    case "brave":
-
-      return (
-        openEyes +
-        brows(3, -3) +
-        smile
-      );
-
-
-    case "smug":
-
-      return (
-        sleepyEyes +
-        smirk
-      );
-
-
-    case "dreamy":
-
-      return (
-        happyEyes +
-        cheek +
-        `
-        <path
-          d="M101 101 Q110 108 119 101"
-          fill="none"
-          stroke="${outline}"
-          stroke-width="4"
-        />
-        `
-      );
-
-
-    case "stern":
-
-      return (
-        openEyes +
-        brows(6, -6) +
-        `
-        <path
-          d="M102 104 h16"
-          stroke="${outline}"
-          stroke-width="5"
-          stroke-linecap="round"
-        />
-        `
-      );
-
-
-    default:
-
-      return (
-        openEyes +
-        cheek +
-        smile
-      );
+/* =====================================================
+   BUILD GHOST
+===================================================== */
 
+#buildGhost {
+  position: fixed;
+
+  z-index: 500;
+
+  width: 88px;
+  height: 88px;
+
+  display: none;
+
+  pointer-events: none;
+
+  transform:
+    translate(-50%, -50%)
+    rotate(
+      var(--ghostRotation, 0deg)
+    );
+
+  transform-origin: center;
+}
+
+#buildGhost.visible {
+  display: block;
+}
+
+.ghost-house {
+  position: absolute;
+
+  left: 10px;
+  top: 3px;
+
+  width: 68px;
+  height: 60px;
+
+  display: grid;
+
+  place-items: center;
+
+  font-size: 46px;
+
+  filter:
+    drop-shadow(
+      0 6px 6px
+      rgba(0,0,0,.25)
+    );
+}
+
+#ghostFootprint {
+  position: absolute;
+
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+
+  height: 29px;
+
+  border: 4px solid var(--green);
+  border-radius: 50%;
+
+  background:
+    rgba(
+      93,
+      185,
+      107,
+      .24
+    );
+}
+
+#buildGhost.invalid #ghostFootprint {
+  border-color: var(--red);
+
+  background:
+    rgba(
+      217,
+      90,
+      90,
+      .25
+    );
+}
+
+
+/* =====================================================
+   HOUSES
+===================================================== */
+
+.kingdom-house {
+  position: absolute;
+
+  width: 86px;
+  height: 90px;
+
+  transform:
+    translate(-50%, -55%)
+    rotate(
+      var(--houseRotation, 0deg)
+    );
+
+  transform-origin:
+    center bottom;
+
+  pointer-events: auto;
+
+  border: 0;
+
+  background: transparent;
+
+  padding: 0;
+}
+
+.kingdom-house-art {
+  display: grid;
+
+  place-items: center;
+
+  width: 74px;
+  height: 64px;
+
+  margin: auto;
+
+  border:
+    3px solid rgba(98,64,41,.76);
+
+  border-radius:
+    22px
+    22px
+    12px
+    12px;
+
+  background:
+    linear-gradient(
+      #ffd985,
+      #ecaa5b
+    );
+
+  box-shadow:
+    0 7px 12px rgba(0,0,0,.2);
+
+  font-size: 38px;
+
+  transition:
+    transform .2s;
+}
+
+.kingdom-house:hover
+.kingdom-house-art {
+  transform:
+    translateY(-5px)
+    scale(1.06);
+}
+
+.kingdom-house-label {
+  margin-top: 2px;
+
+  padding: 2px 5px;
+
+  display: inline-block;
+
+  border-radius: 8px;
+
+  background:
+    rgba(
+      33,
+      41,
+      61,
+      .78
+    );
+
+  color: white;
+
+  font-size: 9px;
+
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.kingdom-house.move-target
+.kingdom-house-art {
+  outline:
+    5px solid
+    #6fc77d;
+}
+
+
+/* =====================================================
+   KINGDOM COOKIES
+===================================================== */
+
+.kingdom-cookie {
+  position: absolute;
+
+  width: 72px;
+  height: 86px;
+
+  transform:
+    translate(-50%, -80%);
+
+  transition:
+    left 3.6s ease-in-out,
+    top 3.6s ease-in-out;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+
+  transform-origin:
+    center bottom;
+}
+
+.kingdom-cookie .cookie-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.kingdom-cookie.walk-left
+.cookie-avatar {
+  transform:
+    scaleX(-1);
+}
+
+.kingdom-cookie.idle
+.cookie-avatar {
+  animation:
+    cookieIdle
+    1.7s
+    ease-in-out
+    infinite;
+}
+
+.kingdom-cookie.sleeping
+.cookie-avatar {
+  opacity: .86;
+
+  animation:
+    cookieSleep
+    2.2s
+    ease-in-out
+    infinite;
+}
+
+@keyframes cookieIdle {
+
+  50% {
+    transform:
+      translateY(-3px);
   }
 
 }
 
+@keyframes cookieSleep {
 
-/* =========================================================
-   RARITY SYMBOL
-========================================================= */
-
-function rarityOrnament(rarity) {
-
-  return (
-    {
-      "RARE": "✦",
-      "EPIC": "◆",
-      "SUPER EPIC": "✧",
-      "LEGENDARY": "✹",
-      "ANCIENT": "♛",
-      "BEAST": "☾"
-    }
-  )[rarity] || "✦";
+  50% {
+    transform:
+      translateY(2px)
+      rotate(2deg);
+  }
 
 }
 
+.cookie-name {
+  position: absolute;
 
-/* =========================================================
-   COOKIE REVEAL DIALOGUE
-========================================================= */
+  left: 50%;
+  bottom: -12px;
 
-function revealLine(cookie) {
+  transform:
+    translateX(-50%);
 
-  const specials = {
+  display: none;
 
-    "Coin Cookie":
-      "Small beginnings can guard the greatest dreams.",
+  padding: 2px 7px;
 
-    "Dollar Cookie":
-      "Come on. We have a kingdom to build!",
+  border-radius: 9px;
 
-    "Investor Cookie":
-      "Give it time. Even tiny seeds remember how to grow.",
+  background:
+    rgba(
+      24,
+      31,
+      52,
+      .86
+    );
 
-    "Lucky Cookie":
-      "Fortune favors the Cookie who still takes the first step.",
+  color: white;
 
-    "Equilibra Cookie":
-      "Prosperity without balance is only another kind of hunger.",
+  font-size: 8px;
 
-    "Sapheon Cookie":
-      "Truth does not need to shout. It only needs to endure.",
+  font-weight: 900;
 
-    "Florentia Cookie":
-      "What we nurture today becomes shelter tomorrow.",
+  white-space: nowrap;
+}
 
-    "Liberis Cookie":
-      "No chain is stronger than a Cookie who remembers freedom.",
+.kingdom-cookie:hover
+.cookie-name {
+  display: block;
+}
 
-    "Memoria Cookie":
-      "A kingdom survives as long as someone remembers why it mattered.",
+.cookie-work-icon {
+  position: absolute;
 
-    "Greed Cookie":
-      "Enough? What a tiny, frightened word.",
+  right: -3px;
+  top: 1px;
 
-    "Deception Cookie":
-      "Truth is predictable. Shall we try something more interesting?",
+  width: 23px;
+  height: 23px;
 
-    "Ruin Cookie":
-      "If it can be built, it can be broken beautifully.",
+  display: grid;
 
-    "Debt Cookie":
-      "Every promise has a weight. I simply make sure you feel it.",
+  place-items: center;
 
-    "Oblivion Cookie":
-      "Close your eyes. Soon there will be nothing left to remember."
+  border: 2px solid #62442c;
 
-  };
+  border-radius: 50%;
 
+  background: white;
 
-  if (specials[cookie[0]]) {
+  font-size: 12px;
+}
 
-    return specials[cookie[0]];
+.cookie-speech {
+  position: absolute;
 
-  }
+  left: 50%;
+  bottom: 82px;
 
+  transform:
+    translateX(-50%)
+    translateY(5px);
 
-  const lines = [
+  max-width: 155px;
 
-    `${cookie[0].replace(" Cookie", "")} is here. Let's make this chance count.`,
+  width: max-content;
 
-    "One good choice can change the road ahead.",
+  padding: 7px 9px;
 
-    "I'm ready. Show me where Prospera needs me.",
+  border: 2px solid #68462e;
 
-    "A brighter future? Sounds like something worth fighting for.",
+  border-radius: 12px;
 
-    "We don't need perfect luck. We need a good next step.",
+  background: #fffdf6;
 
-    "Then let's begin with what we have."
+  color: #4e3828;
 
-  ];
+  font-size: 9px;
 
+  font-weight: 800;
 
-  return lines[
-    hashNumber(cookie[0]) %
-    lines.length
-  ];
+  text-align: center;
 
+  box-shadow:
+    0 5px 12px rgba(0,0,0,.16);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity .2s,
+    transform .2s;
+}
+
+.cookie-speech.show {
+  opacity: 1;
+
+  transform:
+    translateX(-50%)
+    translateY(-2px);
 }
 
 
-/* =========================================================
-   FULL BODY CHIBI COOKIE
-========================================================= */
+/* =====================================================
+   COOKIE ART
+===================================================== */
 
-function fullBodySVG(
-  cookie,
-  small = false
-) {
+.cookie-avatar {
+  position: relative;
 
-  const [
-    name,
-    rarity,
-    role,
-    element,
-    motif
-  ] = cookie;
+  display: inline-block;
 
+  width: 100px;
+  height: 118px;
 
-  const primary =
-    hashColor(
-      name,
-      11
+  filter:
+    drop-shadow(
+      0 7px 5px
+      rgba(0,0,0,.18)
     );
+}
 
+.cookie-head {
+  position: absolute;
 
-  const secondary =
-    hashColor(
-      name,
-      149
+  left: 50%;
+  top: 8px;
+
+  width: 62px;
+  height: 62px;
+
+  transform:
+    translateX(-50%);
+
+  border: 4px solid #643d24;
+
+  border-radius:
+    46%
+    48%
+    45%
+    50%;
+
+  background: #d99555;
+}
+
+.cookie-frosting {
+  position: absolute;
+
+  left: 50%;
+  top: -8px;
+
+  width: 58px;
+  height: 27px;
+
+  transform:
+    translateX(-50%);
+
+  border: 4px solid #643d24;
+  border-bottom-width: 2px;
+
+  border-radius:
+    50%
+    50%
+    40%
+    40%;
+
+  background:
+    var(--cookieFrosting);
+}
+
+.cookie-eye {
+  position: absolute;
+
+  top: 28px;
+
+  width: 6px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #4f2d1d;
+}
+
+.cookie-eye.left {
+  left: 16px;
+}
+
+.cookie-eye.right {
+  right: 16px;
+}
+
+.cookie-mouth {
+  position: absolute;
+
+  left: 50%;
+  top: 43px;
+
+  width: 17px;
+  height: 8px;
+
+  transform:
+    translateX(-50%);
+
+  border-bottom:
+    3px solid #633725;
+
+  border-radius: 50%;
+}
+
+.cookie-body {
+  position: absolute;
+
+  left: 50%;
+  top: 61px;
+
+  width: 52px;
+  height: 43px;
+
+  transform:
+    translateX(-50%);
+
+  border: 4px solid #643d24;
+
+  border-radius:
+    15px
+    15px
+    20px
+    20px;
+
+  background:
+    linear-gradient(
+      var(--cookiePrimary),
+      var(--cookieSecondary)
     );
+}
 
+.cookie-motif {
+  position: absolute;
 
-  const frosting =
-    hashColor(
-      name,
-      239
-    );
+  left: 50%;
+  top: 12px;
 
+  transform:
+    translateX(-50%);
 
-  const skin =
-    "#d9904f";
+  color: #fff8c7;
 
+  font-size: 16px;
 
-  const outline =
-    "#5c351e";
+  font-weight: 1000;
 
+  text-shadow:
+    0 2px 0 rgba(82,49,28,.5);
+}
 
-  const beast =
-    rarity === "BEAST";
+.cookie-arm,
+.cookie-leg {
+  position: absolute;
 
+  background: #d99555;
 
-  const ancient =
-    rarity === "ANCIENT";
+  border: 3px solid #643d24;
 
+  border-radius: 20px;
+}
 
-  const legendary =
-    rarity === "LEGENDARY";
+.cookie-arm {
+  width: 11px;
+  height: 34px;
 
+  top: 67px;
+}
 
-  const position =
-    cookiePosition(
-      role
-    );
+.cookie-arm.left {
+  left: 14px;
 
+  transform:
+    rotate(24deg);
+}
 
-  const expression =
-    cookieExpression(
-      cookie
-    );
+.cookie-arm.right {
+  right: 14px;
 
+  transform:
+    rotate(-24deg);
+}
 
-  const roleLower =
-    role.toLowerCase();
+.cookie-leg {
+  width: 12px;
+  height: 27px;
 
+  top: 95px;
+}
 
-  const accessory =
-    motifSVG(
-      motif,
+.cookie-leg.left {
+  left: 33px;
 
-      beast
-        ? "#c294e6"
-        : ancient
-        ? "#ffe47d"
-        : legendary
-        ? "#8ff0e1"
-        : "#fff2b8"
-    );
+  transform:
+    rotate(5deg);
+}
 
+.cookie-leg.right {
+  right: 33px;
 
-  const cape =
-    ancient ||
-    legendary ||
-    rarity === "SUPER EPIC" ||
-    beast;
+  transform:
+    rotate(-5deg);
+}
 
+.rarity-crown {
+  position: absolute;
 
-  const id =
-    name.replace(
-      /\W/g,
-      ""
-    );
+  left: 50%;
+  top: -12px;
 
+  transform:
+    translateX(-50%);
 
-  const pose = {
+  z-index: 4;
 
-    FRONT: {
-
-      g:
-        "translate(-3 4) rotate(-2 110 150)",
-
-      leftArm:
-        "M78 136 Q49 132 36 154",
-
-      rightArm:
-        "M142 136 Q166 129 181 151",
-
-      leftLeg:
-        "M91 181 L78 216",
-
-      rightLeg:
-        "M128 183 L140 215",
-
-      shoeL:
-        [73, 220, 21, 10],
-
-      shoeR:
-        [146, 218, 21, 10]
-
-    },
-
-
-    MIDDLE: {
-
-      g:
-        "translate(0 0) rotate(2 110 150)",
-
-      leftArm:
-        "M78 136 Q51 146 43 171",
-
-      rightArm:
-        "M142 136 Q167 143 180 163",
-
-      leftLeg:
-        "M92 183 L88 218",
-
-      rightLeg:
-        "M128 183 L135 215",
-
-      shoeL:
-        [83, 223, 20, 10],
-
-      shoeR:
-        [140, 220, 20, 10]
-
-    },
-
-
-    REAR: {
-
-      g:
-        "translate(2 0)",
-
-      leftArm:
-        "M79 136 Q61 151 55 169",
-
-      rightArm:
-        "M141 136 Q153 121 169 114",
-
-      leftLeg:
-        "M95 183 L94 217",
-
-      rightLeg:
-        "M126 183 L126 217",
-
-      shoeL:
-        [90, 222, 19, 10],
-
-      shoeR:
-        [130, 222, 19, 10]
-
-    }
-
-  }[position];
-
-
-  const headShape =
-    beast
-
-      ?
-
-      `
-      <path
-        d="
-          M74 46
-          Q110 20 146 46
-          Q163 71 151 103
-          Q143 124 110 129
-          Q77 124 69 103
-          Q57 71 74 46
-          Z
-        "
-        fill="${skin}"
-        stroke="${outline}"
-        stroke-width="6"
-      />
-      `
-
-      :
-
-      `
-      <circle
-        cx="110"
-        cy="78"
-        r="48"
-        fill="${skin}"
-        stroke="${outline}"
-        stroke-width="6"
-      />
-      `;
-
-
-  const horns =
-    beast
-
-      ?
-
-      `
-      <path
-        d="
-          M77 48
-          Q56 35 63 16
-          Q79 30 88 43
-
-          M143 48
-          Q164 35 157 16
-          Q141 30 132 43
-        "
-        fill="${secondary}"
-        stroke="${outline}"
-        stroke-width="6"
-        stroke-linejoin="round"
-      />
-      `
-
-      :
-
-      "";
-
-
-  const crown =
-    ancient
-
-      ?
-
-      `
-      <path
-        d="
-          M83 37
-          L91 16
-          L106 31
-          L120 11
-          L132 31
-          L148 17
-          L145 41
-          Z
-        "
-        fill="#ffe477"
-        stroke="${outline}"
-        stroke-width="5"
-        stroke-linejoin="round"
-      />
-      `
-
-      :
-
-      "";
-
-
-  const halo =
-    legendary
-
-      ?
-
-      `
-      <ellipse
-        cx="110"
-        cy="28"
-        rx="43"
-        ry="10"
-        fill="none"
-        stroke="#fff2a0"
-        stroke-width="6"
-      />
-      `
-
-      :
-
-      "";
-
-
-  const capeSvg =
-    cape
-
-      ?
-
-      `
-      <path
-        d="
-          M76 128
-          Q50 156 63 209
-          Q85 197 110 188
-          Q135 197 157 209
-          Q170 156 144 128
-          Z
-        "
-        fill="${secondary}"
-        stroke="${outline}"
-        stroke-width="6"
-      />
-      `
-
-      :
-
-      "";
-
-
-  let prop = "";
-
-
-  if (position === "FRONT") {
-
-    prop = `
-      <path
-        d="
-          M174 131
-          Q204 124 204 155
-          V190
-          Q188 205 170 211
-          Q151 204 139 188
-          V154
-          Q143 129 174 131
-          Z
-        "
-        fill="${secondary}"
-        stroke="${outline}"
-        stroke-width="6"
-      />
-
-      <path
-        d="
-          M171 144v52
-          M150 169h42
-        "
-        stroke="#fff5c7"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity=".8"
-      />
-    `;
-
-  }
-
-  else if (position === "MIDDLE") {
-
-    prop =
-      roleLower.includes("magic") ||
-      roleLower.includes("bomber")
-
-        ?
-
-        `
-        <circle
-          cx="179"
-          cy="126"
-          r="26"
-          fill="${secondary}"
-          stroke="${outline}"
-          stroke-width="6"
-        />
-
-        <path
-          d="
-            M179 112v28
-            M165 126h28
-          "
-          stroke="#fff7cf"
-          stroke-width="5"
-          stroke-linecap="round"
-        />
-        `
-
-        :
-
-        `
-        <path
-          d="
-            M164 139L202 94
-            M187 92l18 17
-            M156 145l15 15
-          "
-          fill="none"
-          stroke="${outline}"
-          stroke-width="7"
-          stroke-linecap="round"
-        />
-        `;
-
-  }
-
-  else {
-
-    prop =
-      roleLower.includes("healer")
-
-        ?
-
-        `
-        <circle
-          cx="174"
-          cy="117"
-          r="28"
-          fill="${secondary}"
-          stroke="${outline}"
-          stroke-width="6"
-        />
-
-        <path
-          d="
-            M174 101v32
-            M158 117h32
-          "
-          stroke="#fff8b0"
-          stroke-width="8"
-          stroke-linecap="round"
-        />
-        `
-
-        :
-
-        `
-        <path
-          d="M174 109v92"
-          stroke="${outline}"
-          stroke-width="7"
-          stroke-linecap="round"
-        />
-
-        <circle
-          cx="174"
-          cy="101"
-          r="20"
-          fill="${secondary}"
-          stroke="${outline}"
-          stroke-width="6"
-        />
-        `;
-
-  }
-
-
-  return `
-
-  <svg
-    class="full-cookie-svg ${small ? "mini-cookie-svg" : ""}"
-    viewBox="0 0 220 250"
-    role="img"
-    aria-label="${name}, ${position.toLowerCase()} position, ${expression} expression"
-  >
-
-    <defs>
-
-      <linearGradient
-        id="body-${id}"
-        x1="0"
-        y1="0"
-        x2="0"
-        y2="1"
-      >
-
-        <stop
-          offset="0"
-          stop-color="${primary}"
-        />
-
-        <stop
-          offset="1"
-          stop-color="${secondary}"
-        />
-
-      </linearGradient>
-
-    </defs>
-
-
-    <g transform="${pose.g}">
-
-      ${halo}
-
-      ${capeSvg}
-
-      ${horns}
-
-      ${crown}
-
-      ${headShape}
-
-
-      <path
-        d="
-          M73 62
-          Q84 34 109 32
-          Q135 34 148 61
-          Q134 51 126 58
-          Q117 43 109 55
-          Q99 42 91 57
-          Q82 49 73 62
-          Z
-        "
-        fill="${frosting}"
-        stroke="${outline}"
-        stroke-width="5"
-        stroke-linejoin="round"
-      />
-
-
-      ${expressionSVG(cookie, outline)}
-
-
-      <path
-        d="
-          M79 122
-          Q110 108 141 122
-          L151 183
-          Q110 201 69 183
-          Z
-        "
-        fill="url(#body-${id})"
-        stroke="${outline}"
-        stroke-width="6"
-      />
-
-
-      <g
-        transform="
-          translate(110 151)
-          scale(.68)
-        "
-      >
-
-        ${accessory}
-
-      </g>
-
-
-      <path
-        d="${pose.leftArm}"
-        fill="none"
-        stroke="${skin}"
-        stroke-width="17"
-        stroke-linecap="round"
-      />
-
-
-      <path
-        d="${pose.rightArm}"
-        fill="none"
-        stroke="${skin}"
-        stroke-width="17"
-        stroke-linecap="round"
-      />
-
-
-      <circle
-        cx="${
-          position === "FRONT"
-            ? 36
-            : position === "MIDDLE"
-            ? 43
-            : 55
-        }"
-        cy="${
-          position === "FRONT"
-            ? 154
-            : position === "MIDDLE"
-            ? 171
-            : 169
-        }"
-        r="10"
-        fill="${skin}"
-        stroke="${outline}"
-        stroke-width="5"
-      />
-
-
-      <circle
-        cx="${
-          position === "FRONT"
-            ? 181
-            : position === "MIDDLE"
-            ? 180
-            : 169
-        }"
-        cy="${
-          position === "FRONT"
-            ? 151
-            : position === "MIDDLE"
-            ? 163
-            : 114
-        }"
-        r="10"
-        fill="${skin}"
-        stroke="${outline}"
-        stroke-width="5"
-      />
-
-
-      <path
-        d="${pose.leftLeg}"
-        stroke="${skin}"
-        stroke-width="17"
-        stroke-linecap="round"
-      />
-
-
-      <path
-        d="${pose.rightLeg}"
-        stroke="${skin}"
-        stroke-width="17"
-        stroke-linecap="round"
-      />
-
-
-      <ellipse
-        cx="${pose.shoeL[0]}"
-        cy="${pose.shoeL[1]}"
-        rx="${pose.shoeL[2]}"
-        ry="${pose.shoeL[3]}"
-        fill="${secondary}"
-        stroke="${outline}"
-        stroke-width="5"
-      />
-
-
-      <ellipse
-        cx="${pose.shoeR[0]}"
-        cy="${pose.shoeR[1]}"
-        rx="${pose.shoeR[2]}"
-        ry="${pose.shoeR[3]}"
-        fill="${secondary}"
-        stroke="${outline}"
-        stroke-width="5"
-      />
-
-
-      ${prop}
-
-    </g>
-
-  </svg>
-
-  `;
-
+  font-size: 22px;
 }
 
 
-/* =========================================================
-   FIT MAP TO SCREEN
-========================================================= */
+/* =====================================================
+   OTHER SCREENS
+===================================================== */
 
-function fitScene() {
+.panel-screen,
+.gacha-screen {
+  overflow-y: auto;
 
-  const scale =
-    Math.min(
-      innerWidth / 1536,
-      innerHeight / 1024
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      #435f95,
+      #182744 55%,
+      #111a2c
     );
 
+  color: white;
+}
 
-  scene.style.setProperty(
-    "--scale",
-    scale
-  );
+.screen-header {
+  position: sticky;
 
+  z-index: 100;
+
+  top: 0;
+
+  min-height: 70px;
+
+  padding: 12px 18px;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  background:
+    rgba(
+      16,
+      26,
+      47,
+      .94
+    );
+
+  border-bottom:
+    1px solid rgba(255,255,255,.12);
+}
+
+.screen-header h1 {
+  margin: 0;
+
+  font-size: 22px;
+
+  letter-spacing: 1px;
+}
+
+.screen-header > :last-child {
+  justify-self: end;
+}
+
+.back-button {
+  justify-self: start;
+
+  padding: 10px 14px;
+
+  border:
+    1px solid rgba(255,255,255,.2);
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.09);
+
+  color: white;
+
+  font-weight: 900;
 }
 
 
-fitScene();
+/* =====================================================
+   ADVENTURE
+===================================================== */
 
+.adventure-hub {
+  width:
+    min(
+      980px,
+      94vw
+    );
 
-addEventListener(
-  "resize",
-  fitScene
-);
+  margin:
+    30px
+    auto
+    80px;
 
+  display: grid;
 
-/* =========================================================
-   SAVE GAME
-========================================================= */
+  grid-template-columns:
+    repeat(
+      2,
+      1fr
+    );
 
-function save() {
+  gap: 18px;
+}
 
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify(saveData)
-  );
+.mode-card {
+  min-height: 190px;
 
+  padding: 25px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+  justify-content: flex-end;
+
+  border:
+    2px solid rgba(255,255,255,.18);
+
+  border-radius: 26px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.13),
+      rgba(255,255,255,.04)
+    );
+
+  color: white;
+
+  text-align: left;
+
+  box-shadow:
+    var(--shadow);
+}
+
+.mode-card.hero-mode {
+  grid-column:
+    1 / -1;
+
+  min-height: 240px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #5b85bd,
+      #2d4e80
+    );
+}
+
+.mode-icon {
+  font-size: 48px;
+
+  margin-bottom: 15px;
+}
+
+.mode-card b {
+  font-size: 23px;
+}
+
+.mode-card small {
+  margin-top: 7px;
+
+  color: #d9e5ff;
 }
 
 
-/* =========================================================
-   TOAST MESSAGE
-========================================================= */
+/* =====================================================
+   WORLD
+===================================================== */
 
-function showToast(msg) {
-
-  toast.textContent =
-    msg;
-
-
-  toast.classList.add(
-    "show"
-  );
-
-
-  clearTimeout(
-    showToast.t
-  );
-
-
-  showToast.t =
-    setTimeout(
-      () => {
-
-        toast.classList.remove(
-          "show"
-        );
-
-      },
-      1600
+.world-layout {
+  width:
+    min(
+      1180px,
+      95vw
     );
 
+  margin:
+    24px
+    auto
+    70px;
+}
+
+.world-map-card {
+  position: relative;
+
+  height: 310px;
+
+  overflow: hidden;
+
+  border:
+    2px solid rgba(255,255,255,.18);
+
+  border-radius: 26px;
+
+  box-shadow:
+    var(--shadow);
+}
+
+.world-map-card img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.world-map-caption {
+  position: absolute;
+
+  left: 20px;
+  bottom: 18px;
+
+  padding: 10px 14px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(20,31,55,.88);
+
+  font-weight: 900;
+}
+
+.stage-route-wrap {
+  margin-top: 18px;
+
+  padding: 20px;
+
+  border-radius: 24px;
+
+  background:
+    rgba(255,255,255,.08);
+}
+
+.stage-route-title h2 {
+  margin: 0;
+}
+
+.stage-route-title p {
+  margin:
+    4px
+    0
+    18px;
+
+  color: #c9d6ee;
+}
+
+.stage-route {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.stage-node {
+  width: 74px;
+  height: 74px;
+
+  border: 3px solid #d3ddef;
+  border-radius: 50%;
+
+  background: #31486e;
+
+  color: white;
+
+  font-weight: 1000;
+}
+
+.stage-node.done {
+  background: #6a9b64;
+
+  border-color: #dff0a8;
+}
+
+.stage-node.boss {
+  background: #7f4151;
+
+  border-color: #ffd78e;
 }
 
 
-/* =========================================================
-   OPEN STORY WORLD
-========================================================= */
+/* =====================================================
+   STAGE
+===================================================== */
 
-function openWorld(btn) {
-
-  const name =
-    btn.dataset.name;
-
-
-  const id =
-    btn.dataset.id;
-
-
-  const stages =
-    Number(
-      btn.dataset.stages ||
-      30
+.stage-detail-card {
+  width:
+    min(
+      760px,
+      92vw
     );
 
+  margin:
+    45px
+    auto
+    90px;
 
-  panelTitle.textContent =
-    name;
+  padding: 28px;
 
+  border-radius: 28px;
 
-  panelText.textContent =
-    descriptions[name] ||
-    "Explore this part of Money Kingdom.";
+  background:
+    rgba(255,255,255,.09);
 
+  box-shadow:
+    var(--shadow);
+}
 
-  panelBody.innerHTML =
-    "";
+.enemy-preview {
+  padding: 35px;
 
+  margin-bottom: 20px;
 
-  const grid =
-    document.createElement(
-      "div"
+  border-radius: 20px;
+
+  background:
+    rgba(0,0,0,.15);
+
+  text-align: center;
+
+  font-size: 50px;
+}
+
+.stage-stat,
+.reward-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding:
+    13px
+    0;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.12);
+}
+
+.team-preview {
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+  margin:
+    15px
+    0
+    24px;
+}
+
+.team-mini {
+  width: 88px;
+
+  padding: 8px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(255,255,255,.08);
+
+  text-align: center;
+
+  font-size: 9px;
+}
+
+.team-mini .cookie-avatar {
+  width: 64px;
+  height: 74px;
+}
+
+.stage-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+}
+
+.primary-action,
+.secondary-action {
+  padding: 12px 18px;
+
+  border: 0;
+  border-radius: 14px;
+
+  font-weight: 1000;
+}
+
+.primary-action {
+  background:
+    linear-gradient(
+      #f7d365,
+      #e8a938
     );
 
+  color: #52380f;
+}
 
-  grid.className =
-    "stage-grid";
+.secondary-action {
+  background: #314b77;
 
-
-  for (
-    let i = 1;
-    i <= stages;
-    i++
-  ) {
-
-    const key =
-      id +
-      ":" +
-      i;
-
-
-    const done =
-      Boolean(
-        saveData.stages[key]
-      );
-
-
-    const b =
-      document.createElement(
-        "button"
-      );
-
-
-    const type =
-      i === 10
-
-        ? "Mini Boss"
-
-        : i === 20
-
-        ? "Story Reveal"
-
-        : i === 30
-
-        ? "World Boss"
-
-        : "Adventure";
-
-
-    b.className =
-      "stage" +
-      (
-        done
-          ? " done"
-          : ""
-      );
-
-
-    b.innerHTML = `
-      <b>
-        Stage ${i}
-      </b>
-
-      <br>
-
-      <small>
-        ${type}
-      </small>
-
-      <br>
-
-      <small>
-        ${
-          done
-            ? "⭐⭐⭐"
-            : "☆ ☆ ☆"
-        }
-      </small>
-    `;
-
-
-    b.onclick =
-      () => {
-
-        saveData.stages[key] =
-          true;
-
-
-        save();
-
-
-        b.classList.add(
-          "done"
-        );
-
-
-        b.innerHTML = `
-          <b>
-            Stage ${i}
-          </b>
-
-          <br>
-
-          <small>
-            ${type}
-          </small>
-
-          <br>
-
-          <small>
-            ⭐⭐⭐
-          </small>
-        `;
-
-
-        showToast(
-          `${name} Stage ${i} cleared!`
-        );
-
-      };
-
-
-    grid.appendChild(
-      b
-    );
-
-  }
-
-
-  panelBody.appendChild(
-    grid
-  );
-
-
-  panel.classList.add(
-    "open"
-  );
-
+  color: white;
 }
 
 
-/* =========================================================
-   BEAST AREA
-========================================================= */
+/* =====================================================
+   COOKIE COLLECTION
+===================================================== */
 
-function openBeasts(name) {
-
-  panelTitle.textContent =
-    name;
-
-
-  panelText.innerHTML = `
-    The five Beast prisons
-    each contain
-    <b>100 stages</b>
-    and hold the fallen
-    wonders of the world.
-  `;
-
-
-  panelBody.innerHTML =
-    "";
-
-
-  const g =
-    document.createElement(
-      "div"
+.cookies-layout {
+  width:
+    min(
+      1300px,
+      96vw
     );
 
+  margin:
+    24px
+    auto
+    70px;
 
-  g.className =
-    "stage-grid";
+  display: grid;
 
+  grid-template-columns:
+    340px
+    1fr;
 
-  [
-    "Greed",
-    "Deception",
-    "Ruin",
-    "Debt",
-    "Oblivion"
-  ]
+  gap: 20px;
+}
 
-  .forEach(
-    x => {
+.cookie-detail {
+  min-height: 560px;
 
-      const b =
-        document.createElement(
-          "button"
-        );
+  padding: 20px;
 
+  border:
+    2px solid rgba(255,255,255,.14);
 
-      b.className =
-        "stage";
+  border-radius: 24px;
 
+  background:
+    rgba(255,255,255,.08);
 
-      b.innerHTML = `
-        <b>
-          ${x}
-        </b>
+  text-align: center;
+}
 
-        <br>
+.cookie-detail .cookie-avatar {
+  width: 190px;
+  height: 220px;
 
-        <small>
-          100 Stages
-        </small>
-      `;
+  margin:
+    12px
+    auto;
+}
 
+.cookie-detail h2 {
+  margin:
+    2px
+    0
+    5px;
+}
 
-      b.onclick =
-        () => {
+.detail-rarity {
+  font-weight: 1000;
 
-          showToast(
-            `${x} prison selected`
-          );
+  color: #ffe191;
+}
 
-        };
+.detail-meta {
+  margin:
+    12px
+    0;
 
+  color: #d7e2f7;
+}
 
-      g.appendChild(
-        b
-      );
+.detail-lore {
+  padding: 12px;
 
-    }
-  );
+  border-radius: 14px;
 
+  background:
+    rgba(0,0,0,.15);
 
-  panelBody.appendChild(
-    g
-  );
+  color: #dfe8f7;
 
+  line-height: 1.5;
+}
 
-  panel.classList.add(
-    "open"
-  );
+.cookie-browser {
+  min-width: 0;
+}
 
+.cookie-toolbar {
+  display: flex;
+
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+.cookie-toolbar input,
+.cookie-toolbar select {
+  min-height: 42px;
+
+  border:
+    1px solid rgba(255,255,255,.18);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.09);
+
+  color: white;
+
+  padding:
+    0
+    12px;
+}
+
+.cookie-toolbar input {
+  flex: 1;
+}
+
+.cookie-toolbar select option {
+  color: #111;
+}
+
+.cookie-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(
+        145px,
+        1fr
+      )
+    );
+
+  gap: 12px;
+}
+
+.cookie-card {
+  position: relative;
+
+  min-height: 205px;
+
+  padding: 10px;
+
+  border:
+    2px solid rgba(255,255,255,.14);
+
+  border-radius: 18px;
+
+  background:
+    rgba(255,255,255,.07);
+
+  color: white;
+
+  text-align: center;
+}
+
+.cookie-card.owned {
+  border-color:
+    rgba(
+      255,
+      220,
+      120,
+      .6
+    );
+}
+
+.cookie-card.locked .cookie-avatar {
+  filter:
+    grayscale(.75)
+    brightness(.55);
+}
+
+.cookie-card .cookie-avatar {
+  width: 96px;
+  height: 112px;
+
+  margin: auto;
+}
+
+.cookie-card b {
+  display: block;
+
+  font-size: 12px;
+}
+
+.cookie-card small {
+  color: #c8d6ef;
+}
+
+.cookie-status {
+  position: absolute;
+
+  left: 9px;
+  right: 9px;
+  bottom: 8px;
+
+  padding: 4px 7px;
+
+  border-radius: 8px;
+
+  background:
+    rgba(9,16,28,.55);
+
+  font-size: 9px;
+
+  font-weight: 900;
 }
 
 
-/* =========================================================
-   OWNERSHIP FILTERS
-========================================================= */
+/* =====================================================
+   GACHA
+===================================================== */
 
-function renderOwnershipTabs() {
-
-  const tabs = [
-    "ALL",
-    "OWNED",
-    "NOT OBTAINED"
-  ];
-
-
-  ownershipTabs.innerHTML =
-    "";
-
-
-  tabs.forEach(
-    t => {
-
-      const b =
-        document.createElement(
-          "button"
-        );
-
-
-      b.className =
-        "seg-btn" +
-        (
-          ownershipFilter === t
-            ? " active"
-            : ""
-        );
-
-
-      b.textContent =
-        t;
-
-
-      b.onclick =
-        () => {
-
-          ownershipFilter =
-            t;
-
-
-          renderOwnershipTabs();
-
-
-          renderCookieCollection();
-
-        };
-
-
-      ownershipTabs.appendChild(
-        b
-      );
-
-    }
-  );
-
+.gacha-screen {
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      #4c5e8d,
+      #1b2744 50%,
+      #0c1428
+    );
 }
 
-
-/* =========================================================
-   RARITY FILTERS
-========================================================= */
-
-function renderRarityFilters() {
-
-  const list = [
-    "ALL",
-    "RARE",
-    "EPIC",
-    "SUPER EPIC",
-    "LEGENDARY",
-    "ANCIENT",
-    "BEAST"
-  ];
-
-
-  rarityFilters.innerHTML =
-    "";
-
-
-  list.forEach(
-    t => {
-
-      const b =
-        document.createElement(
-          "button"
-        );
-
-
-      b.className =
-        "rarity-btn" +
-        (
-          rarityFilter === t
-            ? " active"
-            : ""
-        );
-
-
-      b.textContent =
-        t;
-
-
-      b.onclick =
-        () => {
-
-          rarityFilter =
-            t;
-
-
-          renderRarityFilters();
-
-
-          renderCookieCollection();
-
-        };
-
-
-      rarityFilters.appendChild(
-        b
-      );
-
-    }
-  );
-
+.translucent-header {
+  background:
+    rgba(12,20,40,.65);
 }
 
-
-/* =========================================================
-   FILTER COOKIE LIST
-========================================================= */
-
-function filteredCookies() {
-
-  const term =
-    (
-      cookieSearch.value ||
-      ""
-    )
-    .trim()
-    .toLowerCase();
-
-
-  let list =
-    [...cookies];
-
-
-  if (
-    ownershipFilter ===
-    "OWNED"
-  ) {
-
-    list =
-      list.filter(
-        c =>
-          saveData.ownedCookies.includes(
-            c[0]
-          )
-      );
-
-  }
-
-
-  if (
-    ownershipFilter ===
-    "NOT OBTAINED"
-  ) {
-
-    list =
-      list.filter(
-        c =>
-          !saveData.ownedCookies.includes(
-            c[0]
-          )
-      );
-
-  }
-
-
-  if (
-    rarityFilter !==
-    "ALL"
-  ) {
-
-    list =
-      list.filter(
-        c =>
-          c[1] === rarityFilter
-      );
-
-  }
-
-
-  if (term) {
-
-    list =
-      list.filter(
-        c =>
-          c[0]
-            .toLowerCase()
-            .includes(term)
-      );
-
-  }
-
-
-  const sortMode =
-    sortSelect.value;
-
-
-  if (
-    sortMode ===
-    "name"
-  ) {
-
-    list.sort(
-      (a, b) =>
-        a[0].localeCompare(
-          b[0]
-        )
+.gacha-lobby {
+  min-height:
+    calc(
+      100vh - 72px
     );
 
-  }
+  display: flex;
 
+  flex-direction: column;
 
-  if (
-    sortMode ===
-    "owned"
-  ) {
+  align-items: center;
+  justify-content: center;
 
-    list.sort(
-      (a, b) =>
+  padding:
+    35px
+    18px
+    70px;
 
-        Number(
-          saveData.ownedCookies.includes(
-            b[0]
-          )
-        )
-
-        -
-
-        Number(
-          saveData.ownedCookies.includes(
-            a[0]
-          )
-        )
-
-        ||
-
-        a[0].localeCompare(
-          b[0]
-        )
-    );
-
-  }
-
-
-  if (
-    sortMode ===
-    "rarity"
-  ) {
-
-    const order = {
-      "BEAST": 0,
-      "ANCIENT": 1,
-      "LEGENDARY": 2,
-      "SUPER EPIC": 3,
-      "EPIC": 4,
-      "RARE": 5
-    };
-
-
-    list.sort(
-      (a, b) =>
-
-        (
-          order[a[1]] ??
-          99
-        )
-
-        -
-
-        (
-          order[b[1]] ??
-          99
-        )
-
-        ||
-
-        a[0].localeCompare(
-          b[0]
-        )
-    );
-
-  }
-
-
-  return list;
-
+  text-align: center;
 }
 
+.fortune-tree {
+  position: relative;
 
-/* =========================================================
-   SELECTED COOKIE DETAIL
-========================================================= */
+  width: 280px;
+  height: 300px;
 
-function renderCookieDetail(cookie) {
-
-  const owned =
-    saveData.ownedCookies.includes(
-      cookie[0]
-    );
-
-
-  const rc =
-    rarityClassMap[
-      cookie[1]
-    ];
-
-
-  const position =
-    cookiePosition(
-      cookie[2]
-    );
-
-
-  const expression =
-    cookieExpression(
-      cookie
-    );
-
-
-  cookieDetail.innerHTML = `
-
-    <div
-      class="detail-portrait-wrap ${rc}"
-    >
-
-      ${
-        fullBodySVG(
-          cookie,
-          false
-        )
-      }
-
-    </div>
-
-
-    <div
-      class="detail-rarity ${rc}"
-    >
-
-      ${
-        rarityOrnament(
-          cookie[1]
-        )
-      }
-
-      ${cookie[1]}
-
-    </div>
-
-
-    <div
-      class="detail-name"
-    >
-
-      ${cookie[0]}
-
-    </div>
-
-
-    <div
-      class="detail-meta"
-    >
-
-      <b>Role:</b>
-      ${cookie[2]}
-
-      <br>
-
-      <b>Element:</b>
-      ${cookie[3]}
-
-      <br>
-
-      <b>Position:</b>
-      ${position}
-
-      <br>
-
-      <b>Expression:</b>
-      ${expression}
-
-    </div>
-
-
-    <div
-      class="
-        detail-status
-        ${
-          owned
-            ? ""
-            : "locked"
-        }
-      "
-    >
-
-      ${
-        owned
-
-          ? "Owned • Ready for Adventure"
-
-          : "Not Obtained • Visible in Collection"
-      }
-
-    </div>
-
-
-    <div
-      class="detail-lore"
-    >
-
-      ${cookie[5]}
-
-    </div>
-
-  `;
-
-}
-/* =========================================================
-   COOKIE COLLECTION GRID
-========================================================= */
-
-function renderCookieCollection() {
-
-  const list =
-    filteredCookies();
-
-
-  const ownedCount =
-    document.getElementById(
-      "ownedCount"
-    );
-
-
-  const totalCount =
-    document.getElementById(
-      "totalCount"
-    );
-
-
-  const gridCount =
-    document.getElementById(
-      "gridCount"
-    );
-
-
-  if (ownedCount) {
-
-    ownedCount.textContent =
-      saveData.ownedCookies.length;
-
-  }
-
-
-  if (totalCount) {
-
-    totalCount.textContent =
-      cookies.length;
-
-  }
-
-
-  if (gridCount) {
-
-    gridCount.textContent =
-      `${list.length} Cookies`;
-
-  }
-
-
-  if (
-    !list.find(
-      c =>
-        c[0] ===
-        selectedCookieName
-    )
-    &&
-    list.length
-  ) {
-
-    selectedCookieName =
-      list[0][0];
-
-  }
-
-
-  const selected =
-    list.find(
-      c =>
-        c[0] ===
-        selectedCookieName
-    )
-    ||
-    cookies[0];
-
-
-  renderCookieDetail(
-    selected
-  );
-
-
-  cookieGrid.innerHTML =
-    "";
-
-
-  list.forEach(
-    cookie => {
-
-      const owned =
-        saveData.ownedCookies.includes(
-          cookie[0]
-        );
-
-
-      const rc =
-        rarityClassMap[
-          cookie[1]
-        ];
-
-
-      const position =
-        cookiePosition(
-          cookie[2]
-        );
-
-
-      const expression =
-        cookieExpression(
-          cookie
-        );
-
-
-      const card =
-        document.createElement(
-          "article"
-        );
-
-
-      card.className = `
-        cookie-card
-        ${
-          owned
-            ? ""
-            : "unowned"
-        }
-        ${
-          selectedCookieName === cookie[0]
-            ? "selected"
-            : ""
-        }
-      `;
-
-
-      card.innerHTML = `
-
-        ${
-          owned
-            ? ""
-            : `
-              <div
-                class="not-obtained"
-              >
-                NOT OBTAINED
-              </div>
-            `
-        }
-
-
-        <div
-          class="rarity-crest ${rc}"
-          title="${cookie[1]}"
-        >
-
-          ${
-            rarityOrnament(
-              cookie[1]
-            )
-          }
-
-        </div>
-
-
-        <div
-          class="cookie-frame ${rc}"
-        >
-
-          ${
-            fullBodySVG(
-              cookie,
-              true
-            )
-          }
-
-        </div>
-
-
-        <div
-          class="cookie-name"
-        >
-
-          ${cookie[0]}
-
-        </div>
-
-
-        <div
-          class="cookie-role"
-        >
-
-          ${cookie[2]}
-
-        </div>
-
-
-        <div
-          class="cookie-badges"
-        >
-
-          <span
-            class="badge rarity ${rc}"
-          >
-
-            ${cookie[1]}
-
-          </span>
-
-
-          <span
-            class="badge state"
-          >
-
-            ${position}
-
-          </span>
-
-        </div>
-
-
-        <div
-          class="cookie-badges"
-        >
-
-          <span
-            class="badge state"
-          >
-
-            ${expression}
-
-          </span>
-
-
-          <span
-            class="badge state"
-          >
-
-            ${
-              owned
-                ? "Owned"
-                : "Locked"
-            }
-
-          </span>
-
-        </div>
-
-      `;
-
-
-      card.addEventListener(
-        "click",
-        () => {
-
-          selectedCookieName =
-            cookie[0];
-
-
-          renderCookieCollection();
-
-
-          showToast(
-            owned
-              ? `${cookie[0]} selected`
-              : `${cookie[0]} has not been obtained yet`
-          );
-
-        }
-      );
-
-
-      card.addEventListener(
-        "dblclick",
-        () => {
-
-          openGachaReveal(
-            cookie,
-            false
-          );
-
-        }
-      );
-
-
-      cookieGrid.appendChild(
-        card
-      );
-
-    }
-  );
-
+  margin-bottom: 5px;
 }
 
+.fortune-glow {
+  position: absolute;
 
-/* =========================================================
-   GACHA / TREE OF FORTUNE
-========================================================= */
+  left: 50%;
+  top: 38%;
 
-let gachaTimers =
-  [];
+  width: 220px;
+  height: 220px;
 
+  transform:
+    translate(-50%, -50%);
 
-/* CLEAR OLD ANIMATION TIMERS */
+  border-radius: 50%;
 
-function clearGachaTimers() {
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,231,126,.75),
+      rgba(255,231,126,0)
+    );
 
-  gachaTimers.forEach(
-    timer => {
-
-      clearTimeout(
-        timer
-      );
-
-    }
-  );
-
-
-  gachaTimers =
-    [];
-
+  animation:
+    pulseGlow
+    2s
+    ease-in-out
+    infinite;
 }
 
+@keyframes pulseGlow {
 
-/* =========================================================
-   RANDOM SUMMON
-========================================================= */
+  50% {
 
-function pickRandomCookie() {
+    transform:
+      translate(-50%, -50%)
+      scale(1.12);
 
-  const weights = {
-
-    "RARE":
-      45,
-
-    "EPIC":
-      34,
-
-    "SUPER EPIC":
-      10,
-
-    "LEGENDARY":
-      6,
-
-    "ANCIENT":
-      4,
-
-    "BEAST":
-      1
-
-  };
-
-
-  const pool =
-    [];
-
-
-  cookies.forEach(
-    cookie => {
-
-      const amount =
-        weights[
-          cookie[1]
-        ]
-        ||
-        1;
-
-
-      for (
-        let i = 0;
-        i < amount;
-        i++
-      ) {
-
-        pool.push(
-          cookie
-        );
-
-      }
-
-    }
-  );
-
-
-  return pool[
-    Math.floor(
-      Math.random() *
-      pool.length
-    )
-  ];
-
-}
-
-
-/* =========================================================
-   CREATE GACHA UI
-========================================================= */
-
-function ensureGachaUI() {
-
-  if (
-    document.getElementById(
-      "gachaPanel"
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  const gachaPanel =
-    document.createElement(
-      "div"
-    );
-
-
-  gachaPanel.id =
-    "gachaPanel";
-
-
-  gachaPanel.className =
-    "overlay gacha-overlay";
-
-
-  gachaPanel.innerHTML = `
-
-    <div
-      class="gacha-card"
-      id="gachaCard"
-    >
-
-      <button
-        class="close gacha-close"
-        id="closeGacha"
-        aria-label="Close summon screen"
-      >
-        ✕
-      </button>
-
-
-      <div
-        class="gacha-stage"
-        id="gachaStage"
-      >
-
-
-        <div
-          class="gacha-rings"
-        >
-
-          <i></i>
-          <i></i>
-          <i></i>
-
-        </div>
-
-
-        <div
-          class="gacha-tree"
-        >
-
-          <div
-            class="tree-crown"
-          ></div>
-
-
-          <div
-            class="tree-trunk"
-          ></div>
-
-
-          <div
-            class="tree-seed"
-          >
-            ✦
-          </div>
-
-        </div>
-
-
-        <div
-          class="gacha-particles"
-          id="gachaParticles"
-        ></div>
-
-
-        <div
-          class="gacha-silhouette"
-          id="gachaSilhouette"
-        ></div>
-
-
-        <div
-          class="gacha-character"
-          id="gachaCharacter"
-        ></div>
-
-
-        <div
-          class="gacha-flash"
-        ></div>
-
-      </div>
-
-
-      <div
-        class="gacha-copy"
-      >
-
-        <div
-          class="gacha-kicker"
-          id="gachaKicker"
-        >
-          THE TREE OF FORTUNE STIRS...
-        </div>
-
-
-        <div
-          class="gacha-rarity"
-          id="gachaRarity"
-        >
-          FORTUNE SUMMON
-        </div>
-
-
-        <h2
-          id="gachaName"
-        >
-          A Golden Seed is glowing...
-        </h2>
-
-
-        <div
-          class="gacha-tags"
-          id="gachaTags"
-        ></div>
-
-
-        <p
-          class="gacha-quote"
-          id="gachaQuote"
-        >
-          The Tree of Fortune is calling someone to Prospera.
-        </p>
-
-      </div>
-
-
-      <div
-        class="gacha-actions"
-      >
-
-        <button
-          class="gacha-primary"
-          id="summonAgain"
-        >
-          Summon Again
-        </button>
-
-
-        <button
-          class="gacha-secondary"
-          id="closeGachaContinue"
-        >
-          Continue
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  document.body.appendChild(
-    gachaPanel
-  );
-
-
-  document
-    .getElementById(
-      "closeGacha"
-    )
-    .addEventListener(
-      "click",
-      closeGacha
-    );
-
-
-  document
-    .getElementById(
-      "closeGachaContinue"
-    )
-    .addEventListener(
-      "click",
-      closeGacha
-    );
-
-
-  document
-    .getElementById(
-      "summonAgain"
-    )
-    .addEventListener(
-      "click",
-      () => {
-
-        openGachaReveal(
-          pickRandomCookie(),
-          true
-        );
-
-      }
-    );
-
-
-  gachaPanel.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target ===
-        gachaPanel
-      ) {
-
-        closeGacha();
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CLOSE GACHA
-========================================================= */
-
-function closeGacha() {
-
-  clearGachaTimers();
-
-
-  const gp =
-    document.getElementById(
-      "gachaPanel"
-    );
-
-
-  if (gp) {
-
-    gp.classList.remove(
-      "open"
-    );
+    opacity: .7;
 
   }
 
 }
 
+.fortune-leaves {
+  position: absolute;
 
-/* =========================================================
-   GACHA PARTICLES
-========================================================= */
+  left: 50%;
+  top: 20px;
 
-function makeParticles(
-  rarity
-) {
+  transform:
+    translateX(-50%);
 
-  const holder =
-    document.getElementById(
-      "gachaParticles"
+  font-size: 100px;
+
+  line-height: .85;
+
+  filter:
+    drop-shadow(
+      0 10px 20px
+      rgba(0,0,0,.32)
+    );
+}
+
+.fortune-trunk {
+  position: absolute;
+
+  left: 50%;
+  bottom: 22px;
+
+  width: 45px;
+  height: 100px;
+
+  transform:
+    translateX(-50%);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      #92613b,
+      #5e3d28
+    );
+}
+
+.gacha-lobby h2 {
+  margin:
+    0
+    0
+    7px;
+}
+
+.gacha-lobby p {
+  max-width: 650px;
+
+  color: #cedaf0;
+}
+
+.gacha-buttons {
+  display: flex;
+
+  gap: 14px;
+
+  margin:
+    18px
+    0;
+}
+
+.gacha-buttons button {
+  min-width: 180px;
+
+  padding:
+    14px
+    20px;
+
+  border:
+    2px solid #f9df8a;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      #f3c95d,
+      #c9912f
     );
 
+  color: #452d0e;
 
-  if (!holder) {
+  font-weight: 1000;
+}
 
-    return;
+.gacha-buttons small {
+  display: block;
 
+  margin-top: 3px;
+}
+
+.summon-results {
+  width:
+    min(
+      980px,
+      95vw
+    );
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        110px,
+        1fr
+      )
+    );
+
+  gap: 10px;
+
+  margin-top: 15px;
+}
+
+.summon-card {
+  padding: 9px;
+
+  border:
+    2px solid rgba(255,255,255,.16);
+
+  border-radius: 16px;
+
+  background:
+    rgba(255,255,255,.08);
+
+  color: white;
+}
+
+.summon-card.new {
+  border-color: #ffe17f;
+
+  box-shadow:
+    0 0 25px rgba(255,215,105,.2);
+}
+
+.summon-card .cookie-avatar {
+  width: 80px;
+  height: 92px;
+}
+
+.summon-card b {
+  display: block;
+
+  font-size: 11px;
+}
+
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+.modal-layer {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  display: none;
+
+  place-items: center;
+
+  padding: 18px;
+
+  background:
+    rgba(
+      8,
+      14,
+      29,
+      .68
+    );
+}
+
+.modal-layer.open {
+  display: grid;
+}
+
+.modal-card {
+  position: relative;
+
+  width:
+    min(
+      500px,
+      92vw
+    );
+
+  max-height: 82vh;
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  border: 4px solid #735039;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      #fff9e8,
+      #f1dfba
+    );
+
+  color: #4a3525;
+
+  box-shadow:
+    0 20px 70px rgba(0,0,0,.42);
+}
+
+.modal-close {
+  position: absolute;
+
+  right: 12px;
+  top: 12px;
+
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #65442f;
+
+  color: white;
+}
+
+.home-summary {
+  display: flex;
+
+  gap: 10px;
+
+  margin:
+    10px
+    0
+    18px;
+}
+
+.home-summary span {
+  padding:
+    6px
+    9px;
+
+  border-radius: 10px;
+
+  background: #f4e2ba;
+
+  font-weight: 800;
+}
+
+.home-resident-list {
+  display: grid;
+
+  gap: 8px;
+
+  margin:
+    15px
+    0;
+}
+
+.home-resident {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding:
+    9px
+    10px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.7);
+}
+
+.home-resident button {
+  border: 0;
+
+  border-radius: 9px;
+
+  padding:
+    6px
+    9px;
+
+  background: #79553b;
+
+  color: white;
+
+  font-weight: 800;
+}
+
+.empty-house-slot {
+  padding: 9px;
+
+  border:
+    2px dashed rgba(86,58,39,.27);
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  color: #8c765e;
+}
+
+.quest-card {
+  padding: 16px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(255,255,255,.7);
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+#toast {
+  position: fixed;
+
+  z-index: 4000;
+
+  left: 50%;
+  top: 90px;
+
+  transform:
+    translate(-50%, -15px);
+
+  padding:
+    10px
+    15px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(
+      20,
+      30,
+      54,
+      .94
+    );
+
+  color: white;
+
+  font-weight: 900;
+
+  box-shadow:
+    var(--shadow);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity .2s,
+    transform .2s;
+}
+
+#toast.show {
+  opacity: 1;
+
+  transform:
+    translate(-50%, 0);
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 820px) {
+
+  .cookies-layout {
+    grid-template-columns: 1fr;
   }
 
-
-  holder.innerHTML =
-    "";
-
-
-  let count =
-    28;
-
-
-  if (
-    rarity ===
-    "LEGENDARY"
-  ) {
-
-    count =
-      40;
-
+  .cookie-detail {
+    min-height: 0;
   }
 
-
-  if (
-    rarity ===
-    "ANCIENT"
-    ||
-    rarity ===
-    "BEAST"
-  ) {
-
-    count =
-      50;
-
+  .adventure-hub {
+    grid-template-columns: 1fr;
   }
 
-
-  for (
-    let i = 0;
-    i < count;
-    i++
-  ) {
-
-    const spark =
-      document.createElement(
-        "span"
-      );
-
-
-    spark.style.setProperty(
-      "--x",
-
-      `${
-        Math.round(
-          (
-            Math.random() -
-            0.5
-          )
-          *
-          520
-        )
-      }px`
-    );
-
-
-    spark.style.setProperty(
-      "--y",
-
-      `${
-        Math.round(
-          (
-            Math.random() -
-            0.5
-          )
-          *
-          360
-        )
-      }px`
-    );
-
-
-    spark.style.setProperty(
-      "--delay",
-
-      `${
-        (
-          Math.random() *
-          0.8
-        )
-        .toFixed(2)
-      }s`
-    );
-
-
-    spark.style.setProperty(
-      "--size",
-
-      `${
-        4 +
-        Math.random() *
-        9
-      }px`
-    );
-
-
-    holder.appendChild(
-      spark
-    );
-
+  .mode-card.hero-mode {
+    grid-column: auto;
   }
 
-}
+  .kingdom-launchers button {
+    min-width: 92px;
 
-
-/* =========================================================
-   OPEN COOKIE REVEAL
-========================================================= */
-
-function openGachaReveal(
-  cookie,
-  summoned = true
-) {
-
-  ensureGachaUI();
-
-
-  clearGachaTimers();
-
-
-  const gp =
-    document.getElementById(
-      "gachaPanel"
-    );
-
-
-  const card =
-    document.getElementById(
-      "gachaCard"
-    );
-
-
-  const rc =
-    rarityClassMap[
-      cookie[1]
-    ];
-
-
-  const position =
-    cookiePosition(
-      cookie[2]
-    );
-
-
-  const expression =
-    cookieExpression(
-      cookie
-    );
-
-
-  card.className =
-    `gacha-card gacha-${rc}`;
-
-
-  gp.classList.add(
-    "open"
-  );
-
-
-  gp.classList.remove(
-    "is-charging"
-  );
-
-
-  gp.classList.remove(
-    "is-revealed"
-  );
-
-
-  const character =
-    document.getElementById(
-      "gachaCharacter"
-    );
-
-
-  const silhouette =
-    document.getElementById(
-      "gachaSilhouette"
-    );
-
-
-  character.innerHTML =
-    fullBodySVG(
-      cookie,
-      false
-    );
-
-
-  silhouette.innerHTML =
-    fullBodySVG(
-      cookie,
-      false
-    );
-
-
-  document
-    .getElementById(
-      "gachaKicker"
-    )
-    .textContent =
-
-      summoned
-
-        ? "THE TREE OF FORTUNE STIRS..."
-
-        : "COOKIE MEMORY REVEAL";
-
-
-  document
-    .getElementById(
-      "gachaRarity"
-    )
-    .textContent =
-      "FORTUNE SUMMON";
-
-
-  document
-    .getElementById(
-      "gachaName"
-    )
-    .textContent =
-      "A Golden Seed is glowing...";
-
-
-  document
-    .getElementById(
-      "gachaTags"
-    )
-    .innerHTML =
-      "";
-
-
-  document
-    .getElementById(
-      "gachaQuote"
-    )
-    .textContent =
-      "The light is getting stronger...";
-
-
-  makeParticles(
-    cookie[1]
-  );
-
-
-  /* START CHARGING */
-
-  gachaTimers.push(
-
-    setTimeout(
-      () => {
-
-        gp.classList.add(
-          "is-charging"
-        );
-
-      },
-
-      180
-    )
-
-  );
-
-
-  /* REVEAL COOKIE */
-
-  gachaTimers.push(
-
-    setTimeout(
-      () => {
-
-        gp.classList.add(
-          "is-revealed"
-        );
-
-
-        document
-          .getElementById(
-            "gachaKicker"
-          )
-          .textContent =
-
-            summoned
-
-              ? "A NEW COOKIE HAS ANSWERED"
-
-              : "COOKIE MEMORY";
-
-
-        document
-          .getElementById(
-            "gachaRarity"
-          )
-          .textContent =
-            `${
-              rarityOrnament(
-                cookie[1]
-              )
-            } ${cookie[1]}`;
-
-
-        document
-          .getElementById(
-            "gachaName"
-          )
-          .textContent =
-            cookie[0];
-
-
-        document
-          .getElementById(
-            "gachaTags"
-          )
-          .innerHTML = `
-
-            <span>
-              ${position}
-            </span>
-
-            <span>
-              ${cookie[2]}
-            </span>
-
-            <span>
-              ${cookie[3]}
-            </span>
-
-            <span>
-              ${expression}
-            </span>
-
-          `;
-
-
-        document
-          .getElementById(
-            "gachaQuote"
-          )
-          .textContent =
-            revealLine(
-              cookie
-            );
-
-
-        /* ADD COOKIE TO OWNED LIST */
-
-        if (
-          summoned
-          &&
-          !saveData.ownedCookies.includes(
-            cookie[0]
-          )
-        ) {
-
-          saveData.ownedCookies.push(
-            cookie[0]
-          );
-
-
-          save();
-
-
-          renderCookieCollection();
-
-
-          showToast(
-            `${cookie[0]} joined your kingdom!`
-          );
-
-        }
-
-        else if (
-          summoned
-        ) {
-
-          showToast(
-            `${cookie[0]} was summoned again!`
-          );
-
-        }
-
-      },
-
-      1100
-    )
-
-  );
-
-}
-
-
-/* =========================================================
-   KINGDOM RESIDENTS
-========================================================= */
-
-let residentTimers =
-  [];
-
-
-/* CLEAR MOVEMENT TIMERS */
-
-function clearResidents() {
-
-  residentTimers.forEach(
-    timer => {
-
-      clearInterval(
-        timer
-      );
-
-    }
-  );
-
-
-  residentTimers =
-    [];
-
-}
-
-
-/* =========================================================
-   SHOW OWNED COOKIES IN KINGDOM
-========================================================= */
-
-function renderResidents() {
-
-  clearResidents();
-
-
-  residentField.innerHTML =
-    "";
-
-
-  const owned =
-    cookies.filter(
-      cookie =>
-
-        saveData
-          .ownedCookies
-          .includes(
-            cookie[0]
-          )
-
-    );
-
-
-  owned.forEach(
-    (
-      cookie,
-      index
-    ) => {
-
-      const resident =
-        document.createElement(
-          "div"
-        );
-
-
-      resident.className =
-        "resident full-resident";
-
-
-      resident.innerHTML = `
-
-        ${
-          fullBodySVG(
-            cookie,
-            true
-          )
-        }
-
-
-        <div
-          class="resident-name"
-        >
-          ${cookie[0]}
-        </div>
-
-      `;
-
-
-      resident.style.left =
-        (
-          30 +
-          (
-            index *
-            110
-          )
-          %
-          850
-        )
-        +
-        "px";
-
-
-      resident.style.top =
-        (
-          280 +
-          (
-            index %
-            3
-          )
-          *
-          70
-        )
-        +
-        "px";
-
-
-      residentField.appendChild(
-        resident
-      );
-
-
-      resident.addEventListener(
-        "click",
-        () => {
-
-          showToast(
-            revealLine(
-              cookie
-            )
-          );
-
-        }
-      );
-
-
-      const timer =
-        setInterval(
-          () => {
-
-            const maxX =
-              Math.max(
-                120,
-                residentField.clientWidth -
-                110
-              );
-
-
-            const maxY =
-              Math.max(
-                320,
-                residentField.clientHeight -
-                120
-              );
-
-
-            resident.style.left =
-              (
-                20 +
-                Math.random() *
-                (
-                  maxX -
-                  20
-                )
-              )
-              +
-              "px";
-
-
-            resident.style.top =
-              (
-                245 +
-                Math.random() *
-                (
-                  maxY -
-                  245
-                )
-              )
-              +
-              "px";
-
-          },
-
-          2500 +
-          Math.random() *
-          1600
-
-        );
-
-
-      residentTimers.push(
-        timer
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   STORY WORLD BUTTONS
-========================================================= */
-
-document
-  .querySelectorAll(
-    ".world"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          openWorld(
-            button
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   BEAST BUTTONS
-========================================================= */
-
-document
-  .querySelectorAll(
-    ".beast"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          openBeasts(
-            button.dataset.name
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   MAIN ACTION BUTTONS
-========================================================= */
-
-document
-  .querySelectorAll(
-    ".action"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          const action =
-            button.dataset.action;
-
-
-          /* COOKIE COLLECTION */
-
-          if (
-            action ===
-            "cookies"
-          ) {
-
-            renderOwnershipTabs();
-
-            renderRarityFilters();
-
-            renderCookieCollection();
-
-
-            cookiePanel.classList.add(
-              "open"
-            );
-
-
-            return;
-
-          }
-
-
-          /* KINGDOM */
-
-          if (
-            action ===
-            "kingdom"
-          ) {
-
-            renderResidents();
-
-
-            kingdomPanel.classList.add(
-              "open"
-            );
-
-
-            return;
-
-          }
-
-
-          /* SUMMON */
-
-          if (
-            action ===
-            "summon"
-          ) {
-
-            openGachaReveal(
-              pickRandomCookie(),
-              true
-            );
-
-
-            return;
-
-          }
-
-
-          /* WORLD MAP */
-
-          if (
-            action ===
-            "map"
-          ) {
-
-            showToast(
-              "World Map"
-            );
-
-
-            return;
-
-          }
-
-
-          /* WONDERLANDS */
-
-          if (
-            action ===
-            "wonderlands"
-          ) {
-
-            showToast(
-              "The Wonder Gate is waiting..."
-            );
-
-
-            return;
-
-          }
-
-
-          /* PLACEHOLDER ACTION */
-
-          showToast(
-            button.dataset.name ||
-            action
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   SUMMON BUTTON INSIDE COLLECTION
-========================================================= */
-
-const summonOneButton =
-  document.getElementById(
-    "summonOneButton"
-  );
-
-
-if (
-  summonOneButton
-) {
-
-  summonOneButton.addEventListener(
-    "click",
-    () => {
-
-      openGachaReveal(
-        pickRandomCookie(),
-        true
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   MAP HOTSPOT TOOLTIPS
-========================================================= */
-
-document
-  .querySelectorAll(
-    ".hotspot"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "mouseenter",
-        () => {
-
-          tooltip.textContent =
-            button.dataset.name ||
-            "Open";
-
-
-          tooltip.style.display =
-            "block";
-
-        }
-      );
-
-
-      button.addEventListener(
-        "mousemove",
-        event => {
-
-          tooltip.style.left =
-            (
-              event.clientX +
-              14
-            )
-            +
-            "px";
-
-
-          tooltip.style.top =
-            (
-              event.clientY +
-              14
-            )
-            +
-            "px";
-
-        }
-      );
-
-
-      button.addEventListener(
-        "mouseleave",
-        () => {
-
-          tooltip.style.display =
-            "none";
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   COOKIE SEARCH
-========================================================= */
-
-cookieSearch.addEventListener(
-  "input",
-  renderCookieCollection
-);
-
-
-/* =========================================================
-   COOKIE SORT
-========================================================= */
-
-sortSelect.addEventListener(
-  "change",
-  renderCookieCollection
-);
-
-
-/* =========================================================
-   CLOSE STORY PANEL
-========================================================= */
-
-const closePanelButton =
-  document.getElementById(
-    "closePanel"
-  );
-
-
-if (
-  closePanelButton
-) {
-
-  closePanelButton.addEventListener(
-    "click",
-    () => {
-
-      panel.classList.remove(
-        "open"
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CLOSE COOKIE COLLECTION
-========================================================= */
-
-const closeCookiesButton =
-  document.getElementById(
-    "closeCookies"
-  );
-
-
-if (
-  closeCookiesButton
-) {
-
-  closeCookiesButton.addEventListener(
-    "click",
-    () => {
-
-      cookiePanel.classList.remove(
-        "open"
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CLOSE KINGDOM
-========================================================= */
-
-const closeKingdomButton =
-  document.getElementById(
-    "closeKingdom"
-  );
-
-
-if (
-  closeKingdomButton
-) {
-
-  closeKingdomButton.addEventListener(
-    "click",
-    () => {
-
-      kingdomPanel.classList.remove(
-        "open"
-      );
-
-
-      clearResidents();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CLICK BACKGROUND TO CLOSE PANELS
-========================================================= */
-
-[
-  panel,
-  cookiePanel,
-  kingdomPanel
-]
-
-.forEach(
-  overlay => {
-
-    if (!overlay) {
-
-      return;
-
-    }
-
-
-    overlay.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          overlay
-        ) {
-
-          overlay.classList.remove(
-            "open"
-          );
-
-
-          if (
-            overlay ===
-            kingdomPanel
-          ) {
-
-            clearResidents();
-
-          }
-
-        }
-
-      }
-    );
-
+    padding: 10px;
   }
-);
 
-
-/* =========================================================
-   ESCAPE KEY
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key !==
-      "Escape"
-    ) {
-
-      return;
-
-    }
-
-
-    panel.classList.remove(
-      "open"
-    );
-
-
-    cookiePanel.classList.remove(
-      "open"
-    );
-
-
-    kingdomPanel.classList.remove(
-      "open"
-    );
-
-
-    closeGacha();
-
-
-    clearResidents();
-
+  .kingdom-launchers span {
+    display: none;
   }
-);
 
+  .resource-pill {
+    min-width: 70px;
 
-/* =========================================================
-   MAP IMAGE CHECK
-
-   If money-kingdom-map.png is missing,
-   this shows an error message instead
-   of leaving you with only a blue screen.
-========================================================= */
-
-const mapImageElement =
-  document.getElementById(
-    "mapImage"
-  );
-
-
-const mapErrorElement =
-  document.getElementById(
-    "mapError"
-  );
-
-
-if (
-  mapImageElement &&
-  mapErrorElement
-) {
-
-  mapImageElement.addEventListener(
-    "load",
-    () => {
-
-      mapErrorElement.hidden =
-        true;
-
-    }
-  );
-
-
-  mapImageElement.addEventListener(
-    "error",
-    () => {
-
-      mapErrorElement.hidden =
-        false;
-
-    }
-  );
-
-
-  if (
-    mapImageElement.complete
-  ) {
-
-    if (
-      mapImageElement.naturalWidth >
-      0
-    ) {
-
-      mapErrorElement.hidden =
-        true;
-
-    }
-
-    else {
-
-      mapErrorElement.hidden =
-        false;
-
-    }
-
+    padding: 0 8px;
   }
 
 }
-
-
-/* =========================================================
-   INITIALIZE MONEY KINGDOM
-========================================================= */
-
-ensureGachaUI();
-
-
-renderOwnershipTabs();
-
-
-renderRarityFilters();
-
-
-renderCookieCollection();
-
-
-save();
-
-
-console.log(
-  "Money Kingdom loaded successfully."
-);
