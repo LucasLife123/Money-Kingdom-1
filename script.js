@@ -1,2291 +1,3077 @@
-:root {
-  --navy: #1d2a4b;
-  --navy-2: #263964;
-  --gold: #f6c95d;
-  --cream: #fff7df;
-  --paper: #f4e2ba;
-  --ink: #4d3828;
-  --green: #5db96b;
-  --red: #d95a5a;
-  --shadow: 0 16px 45px rgba(22, 28, 48, .28);
+const qs = (s, root = document) => root.querySelector(s);
+const qsa = (s, root = document) => [...root.querySelectorAll(s)];
+
+const SAVE_KEY = "moneyKingdomVisualV3";
+
+const SCENE_W = 1536;
+const SCENE_H = 1024;
+
+const HOUSE_COST = 2500;
+const HOUSE_CAPACITY = 4;
+
+/* =========================================================
+   COOKIE DATA
+========================================================= */
+
+const COOKIE_DATA = [
+  {
+    name: "Coin Cookie",
+    rarity: "RARE",
+    role: "Defender",
+    position: "Front",
+    element: "Earth",
+    level: 20,
+    power: 4500,
+    dough: "#cf8f59",
+    hair: "#f1cf67",
+    outfit: "#af7625",
+    outfit2: "#6c471b",
+    accent: "#e0a935",
+    badge: "#f3c14d",
+    prop: "coin"
+  },
+
+  {
+    name: "Dollar Cookie",
+    rarity: "EPIC",
+    role: "Attacker",
+    position: "Middle",
+    element: "Light",
+    level: 26,
+    power: 5900,
+    dough: "#d89b65",
+    hair: "#6ebd75",
+    outfit: "#2b7b58",
+    outfit2: "#174b40",
+    accent: "#315f46",
+    badge: "#f0c24f",
+    prop: "coin",
+    hat: true
+  },
+
+  {
+    name: "Budget Cookie",
+    rarity: "RARE",
+    role: "Support",
+    position: "Rear",
+    element: "Neutral",
+    level: 18,
+    power: 3900,
+    dough: "#d0925f",
+    hair: "#df735f",
+    outfit: "#7f4863",
+    outfit2: "#4c2e48",
+    accent: "#704253",
+    badge: "#eec86b",
+    prop: "book"
+  },
+
+  {
+    name: "Investor Cookie",
+    rarity: "EPIC",
+    role: "Support",
+    position: "Rear",
+    element: "Nature",
+    level: 24,
+    power: 5600,
+    dough: "#ce8f5b",
+    hair: "#314d6f",
+    outfit: "#304d71",
+    outfit2: "#1d304c",
+    accent: "#263e5f",
+    badge: "#7fce6b",
+    prop: "book"
+  },
+
+  {
+    name: "Banker Cookie",
+    rarity: "EPIC",
+    role: "Healer",
+    position: "Rear",
+    element: "Water",
+    level: 25,
+    power: 5700,
+    dough: "#bc8055",
+    hair: "#f3e6d7",
+    outfit: "#242d44",
+    outfit2: "#171e30",
+    accent: "#272334",
+    badge: "#e5ba50",
+    prop: "book",
+    hat: true
+  },
+
+  {
+    name: "Violin Cookie",
+    rarity: "EPIC",
+    role: "Support",
+    position: "Rear",
+    element: "Light",
+    level: 22,
+    power: 5100,
+    dough: "#d1915f",
+    hair: "#7c4aa8",
+    outfit: "#58326d",
+    outfit2: "#321e46",
+    accent: "#5f3678",
+    badge: "#d99bf0",
+    prop: "violin"
+  },
+
+  {
+    name: "Property Cookie",
+    rarity: "EPIC",
+    role: "Defender",
+    position: "Front",
+    element: "Earth",
+    level: 23,
+    power: 5400,
+    dough: "#d59a68",
+    hair: "#e96f71",
+    outfit: "#8f4d3c",
+    outfit2: "#5b302e",
+    accent: "#8d4738",
+    badge: "#e0c177",
+    prop: "hammer"
+  },
+
+  {
+    name: "Lucky Cookie",
+    rarity: "LEGENDARY",
+    role: "Support",
+    position: "Rear",
+    element: "Wind",
+    level: 30,
+    power: 8100,
+    dough: "#d89a62",
+    hair: "#afe36f",
+    outfit: "#277448",
+    outfit2: "#174b35",
+    accent: "#24673f",
+    badge: "#e7c84f",
+    prop: "clover",
+    hat: true
+  },
+
+  {
+    name: "Builder Cookie",
+    rarity: "RARE",
+    role: "Defender",
+    position: "Front",
+    element: "Earth",
+    level: 20,
+    power: 4300,
+    dough: "#ba794f",
+    hair: "#6e3d2f",
+    outfit: "#9d622d",
+    outfit2: "#5d3e27",
+    accent: "#dca543",
+    badge: "#e2b749",
+    prop: "hammer",
+    hat: true
+  },
+
+  {
+    name: "Health Cookie",
+    rarity: "RARE",
+    role: "Healer",
+    position: "Rear",
+    element: "Nature",
+    level: 18,
+    power: 3850,
+    dough: "#dc9b6c",
+    hair: "#f49cb8",
+    outfit: "#b64f78",
+    outfit2: "#713754",
+    accent: "#b24f74",
+    badge: "#f2b3c9",
+    prop: "book"
+  },
+
+  {
+    name: "Education Cookie",
+    rarity: "RARE",
+    role: "Support",
+    position: "Rear",
+    element: "Light",
+    level: 18,
+    power: 3950,
+    dough: "#c7895e",
+    hair: "#74bce7",
+    outfit: "#3c6b95",
+    outfit2: "#274b73",
+    accent: "#3a6090",
+    badge: "#f0d36b",
+    prop: "book"
+  },
+
+  {
+    name: "Charity Cookie",
+    rarity: "EPIC",
+    role: "Healer",
+    position: "Rear",
+    element: "Light",
+    level: 20,
+    power: 4700,
+    dough: "#d99c6b",
+    hair: "#f1c674",
+    outfit: "#b66076",
+    outfit2: "#714052",
+    accent: "#b75c71",
+    badge: "#ffd786",
+    prop: "clover"
+  },
+
+  {
+    name: "Savings Cookie",
+    rarity: "EPIC",
+    role: "Support",
+    position: "Middle",
+    element: "Water",
+    level: 21,
+    power: 4880,
+    dough: "#cc8b5b",
+    hair: "#79c7ca",
+    outfit: "#2a6e75",
+    outfit2: "#174a53",
+    accent: "#2d6570",
+    badge: "#94e4db",
+    prop: "coin"
+  },
+
+  {
+    name: "Merchant Cookie",
+    rarity: "EPIC",
+    role: "Attacker",
+    position: "Middle",
+    element: "Wind",
+    level: 20,
+    power: 4750,
+    dough: "#d39861",
+    hair: "#e6b858",
+    outfit: "#8a5e33",
+    outfit2: "#5d3f29",
+    accent: "#825430",
+    badge: "#ebc252",
+    prop: "coin",
+    hat: true
+  },
+
+  {
+    name: "Explorer Cookie",
+    rarity: "EPIC",
+    role: "Attacker",
+    position: "Front",
+    element: "Wind",
+    level: 19,
+    power: 4550,
+    dough: "#ca895b",
+    hair: "#704931",
+    outfit: "#476845",
+    outfit2: "#2b4934",
+    accent: "#4e6740",
+    badge: "#a5d26b",
+    prop: "book",
+    hat: true
+  },
+
+  {
+    name: "Equilibra Cookie",
+    rarity: "ANCIENT",
+    role: "Support",
+    position: "Middle",
+    element: "Neutral",
+    level: 40,
+    power: 12800,
+    dough: "#d79864",
+    hair: "#eee4cf",
+    outfit: "#d4b35a",
+    outfit2: "#6c5d3d",
+    accent: "#ede1b8",
+    badge: "#fff0a2",
+    prop: "coin"
+  },
+
+  {
+    name: "Greed Cookie",
+    rarity: "BEAST",
+    role: "Attacker",
+    position: "Front",
+    element: "Dark",
+    level: 40,
+    power: 13400,
+    dough: "#b47153",
+    hair: "#2c253b",
+    outfit: "#4f2141",
+    outfit2: "#1f1525",
+    accent: "#332039",
+    badge: "#e09b43",
+    prop: "coin",
+    hat: true
+  }
+];
+
+
+/* =========================================================
+   DEFAULT SAVE
+========================================================= */
+
+const DEFAULT_SAVE = {
+  playerLevel: 12,
+
+  coins: 25000,
+  gems: 1200,
+  wood: 340,
+  stone: 220,
+  tickets: 25,
+
+  ownedCookies: [
+    "Coin Cookie",
+    "Dollar Cookie",
+    "Budget Cookie",
+    "Investor Cookie",
+    "Banker Cookie",
+    "Violin Cookie",
+    "Property Cookie",
+    "Lucky Cookie",
+    "Builder Cookie",
+    "Health Cookie",
+    "Education Cookie",
+    "Charity Cookie"
+  ],
+
+  stages: {},
+
+  team: [
+    "Coin Cookie",
+    "Dollar Cookie",
+    "Investor Cookie",
+    "Banker Cookie",
+    "Violin Cookie"
+  ],
+
+  cookieHomes: {},
+
+  houses: [
+    {
+      id: "rose-cottage",
+      name: "Rose Cottage",
+      level: 1,
+      capacity: 4,
+      x: 1175,
+      y: 675,
+      rotation: 0,
+      residents: []
+    },
+
+    {
+      id: "sunny-cottage",
+      name: "Sunny Cottage",
+      level: 1,
+      capacity: 4,
+      x: 1308,
+      y: 716,
+      rotation: 0,
+      residents: []
+    }
+  ]
+};
+
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+let save = loadSave();
+
+let selectedCookie =
+  save.ownedCookies[0] || "Coin Cookie";
+
+let currentStage = 1;
+
+let buildMode = false;
+
+let placement = null;
+
+let kingdomPhase = "morning";
+
+let toastTimer = null;
+
+
+/* =========================================================
+   SAVE SYSTEM
+========================================================= */
+
+function loadSave() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(SAVE_KEY);
+
+    if (!raw) {
+      return structuredClone(DEFAULT_SAVE);
+    }
+
+    const data = {
+      ...structuredClone(DEFAULT_SAVE),
+      ...JSON.parse(raw)
+    };
+
+    data.houses =
+      Array.isArray(data.houses)
+        ? data.houses
+        : structuredClone(DEFAULT_SAVE.houses);
+
+    data.ownedCookies =
+      Array.isArray(data.ownedCookies)
+        ? data.ownedCookies
+        : [...DEFAULT_SAVE.ownedCookies];
+
+    data.cookieHomes =
+      data.cookieHomes || {};
+
+    data.stages =
+      data.stages || {};
+
+    return data;
+
+  } catch {
+
+    return structuredClone(DEFAULT_SAVE);
+
+  }
+
 }
 
-* {
-  box-sizing: border-box;
-}
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+function persist() {
 
-  font-family:
-    Inter,
-    ui-rounded,
-    "Trebuchet MS",
-    Arial,
-    sans-serif;
+  localStorage.setItem(
+    SAVE_KEY,
+    JSON.stringify(save)
+  );
 
-  background: #10192d;
-  color: var(--ink);
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-#game,
-.screen {
-  position: absolute;
-  inset: 0;
-}
-
-.screen {
-  display: none;
-  overflow: hidden;
-}
-
-.screen.active {
-  display: block;
 }
 
 
-/* =====================================================
-   KINGDOM
-===================================================== */
+/* =========================================================
+   GENERAL HELPERS
+========================================================= */
 
-#kingdomScreen {
-  background:
-    linear-gradient(
-      #93d4ef,
-      #d8f0d2
-    );
-}
+function showToast(text) {
 
-#kingdomViewport {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
+  const el = qs("#toast");
 
-#kingdomScene {
-  position: absolute;
+  el.textContent = text;
 
-  left: 50%;
-  top: 50%;
+  el.hidden = false;
 
-  width: 1536px;
-  height: 1024px;
+  clearTimeout(toastTimer);
 
-  transform:
-    translate(-50%, -50%)
-    scale(var(--sceneScale, 1));
+  toastTimer =
+    setTimeout(() => {
 
-  transform-origin: center;
-}
+      el.hidden = true;
 
-#mapImage {
-  position: absolute;
-  inset: 0;
+    }, 2300);
 
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-
-  user-select: none;
-  pointer-events: none;
-}
-
-#mapError {
-  position: absolute;
-
-  left: 50%;
-  top: 50%;
-
-  transform:
-    translate(-50%, -50%);
-
-  z-index: 100;
-
-  width: 460px;
-
-  padding: 22px;
-
-  border: 4px solid #804d2c;
-  border-radius: 20px;
-
-  background: #fff4d2;
-
-  font-weight: 900;
-  text-align: center;
 }
 
 
-/* TIME */
+function formatNum(n) {
 
-#timeTint {
-  position: absolute;
-  inset: 0;
+  return Number(n || 0).toLocaleString();
 
-  z-index: 5;
-
-  pointer-events: none;
-
-  opacity: 0;
-
-  transition:
-    background 1.5s,
-    opacity 1.5s;
-}
-
-#timeTint.evening {
-  opacity: .24;
-
-  background:
-    linear-gradient(
-      rgba(255, 137, 71, .32),
-      rgba(95, 57, 130, .18)
-    );
-}
-
-#timeTint.night {
-  opacity: .42;
-
-  background:
-    rgba(
-      24,
-      31,
-      83,
-      .62
-    );
 }
 
 
-/* LAYERS */
+function dataFor(name) {
 
-#kingdomBuildings,
-#kingdomResidents {
-  position: absolute;
-  inset: 0;
-}
+  return (
+    COOKIE_DATA.find(
+      c => c.name === name
+    ) || COOKIE_DATA[0]
+  );
 
-#kingdomBuildings {
-  z-index: 10;
-  pointer-events: none;
-}
-
-#kingdomResidents {
-  z-index: 20;
-  pointer-events: none;
 }
 
 
-/* KINGDOM LABEL */
+function rarityColor(rarity) {
 
-.kingdom-title-card {
-  position: absolute;
+  return (
+    {
+      RARE: "#57a7e8",
 
-  z-index: 40;
+      EPIC: "#c66bdc",
 
-  left: 720px;
-  top: 440px;
+      "SUPER EPIC": "#e578b8",
 
-  transform: translateX(-50%);
+      LEGENDARY: "#f0c356",
 
-  display: flex;
-  align-items: center;
-  gap: 12px;
+      ANCIENT: "#f0dfaa",
 
-  padding: 8px 14px;
+      BEAST: "#e55b65"
+    }[rarity] || "#7aa2c9"
+  );
 
-  border: 3px solid rgba(91, 56, 34, .7);
-  border-radius: 18px;
-
-  background: rgba(255, 246, 218, .92);
-
-  box-shadow:
-    0 8px 18px rgba(0,0,0,.18);
-}
-
-.kingdom-title-card strong {
-  font-size: 20px;
-  color: #6b462b;
-}
-
-.kingdom-title-card span {
-  font-size: 13px;
-  color: #8b6e53;
 }
 
 
-/* FLOATING BUTTONS */
-
-.floating-quest,
-.floating-build {
-  position: absolute;
-
-  z-index: 60;
-
-  border: 4px solid #624029;
-  border-radius: 18px;
-
-  padding: 13px 18px;
-
-  color: #4e351f;
-  font-weight: 1000;
-
-  box-shadow:
-    0 8px 18px rgba(0,0,0,.2);
-}
-
-.floating-quest {
-  left: 340px;
-  top: 760px;
-
-  background: #fff3b6;
-}
-
-.floating-build {
-  right: 310px;
-  top: 760px;
-
-  background: #f5cf5e;
-}
-
-
-/* =====================================================
+/* =========================================================
    HUD
-===================================================== */
+========================================================= */
 
-.hud {
-  position: fixed;
+function updateHUD() {
 
-  z-index: 150;
+  qs("#playerLevel").textContent =
+    save.playerLevel;
 
-  pointer-events: none;
-}
+  qs("#coinValue").textContent =
+    formatNum(save.coins);
 
-.top-hud {
-  top: 12px;
-  left: 14px;
-  right: 14px;
+  qs("#gemValue").textContent =
+    formatNum(save.gems);
 
-  display: flex;
-  align-items: center;
+  qs("#woodValue").textContent =
+    formatNum(save.wood);
 
-  gap: 8px;
-}
+  qs("#stoneValue").textContent =
+    formatNum(save.stone);
 
-.hud button,
-.hud .resource-pill {
-  pointer-events: auto;
-}
+  qs("#ticketValue").textContent =
+    save.tickets;
 
-.profile-pill,
-.resource-pill,
-.hud-button,
-.ticket-pill {
-  min-height: 42px;
 
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border:
-    2px solid rgba(255,255,255,.42);
-
-  border-radius: 18px;
-
-  background:
-    rgba(
-      26,
-      40,
-      73,
-      .9
+  const capacity =
+    save.houses.reduce(
+      (total, house) =>
+        total + house.capacity,
+      0
     );
 
-  color: white;
 
-  box-shadow:
-    0 6px 18px rgba(10,17,33,.22);
+  qs("#residentValue").textContent =
+    `${save.ownedCookies.length}/${capacity}`;
 
-  font-weight: 900;
-}
 
-.profile-pill {
-  padding: 0 16px;
-}
+  qsa(".headerCoins").forEach(
+    el => {
 
-.resource-pill {
-  min-width: 90px;
+      el.textContent =
+        formatNum(save.coins);
 
-  padding: 0 14px;
-}
+    }
+  );
 
-.hud-button {
-  width: 44px;
-  border-radius: 50%;
-}
 
-.hud-spacer {
-  flex: 1;
+  qs("#questOwned").textContent =
+    `${Math.min(
+      save.ownedCookies.length,
+      8
+    )} / 8`;
+
 }
 
 
-/* =====================================================
-   KINGDOM LAUNCHERS
-===================================================== */
+/* =========================================================
+   SCREEN ROUTER
+========================================================= */
 
-.kingdom-launchers {
-  position: fixed;
+function showScreen(id) {
 
-  z-index: 140;
+  qsa(".screen").forEach(
+    screen => {
 
-  left: 50%;
-  bottom: 16px;
+      screen.classList.remove("active");
 
-  transform: translateX(-50%);
+    }
+  );
 
-  display: flex;
 
-  gap: 12px;
-}
+  const next =
+    qs(`#${id}`);
 
-.kingdom-launchers button {
-  min-width: 118px;
 
-  padding: 12px 18px;
+  if (next) {
 
-  display: flex;
+    next.classList.add("active");
 
-  gap: 8px;
+  }
 
-  align-items: center;
-  justify-content: center;
 
-  border:
-    3px solid rgba(255,255,255,.35);
+  if (id !== "kingdomScreen") {
 
-  border-radius: 20px;
+    exitBuildMode();
 
-  background:
-    rgba(
-      26,
-      40,
-      73,
-      .94
-    );
+  }
 
-  color: white;
 
-  box-shadow: var(--shadow);
+  if (id === "cookiesScreen") {
 
-  font-weight: 1000;
-}
+    renderCookieCollection();
 
-.kingdom-launchers span {
-  font-size: 13px;
+  }
 
-  letter-spacing: .4px;
-}
 
+  if (id === "worldScreen") {
 
-/* =====================================================
-   BUILD DRAWER
-===================================================== */
+    renderStages();
 
-.build-drawer {
-  position: fixed;
+  }
 
-  z-index: 240;
 
-  left: 18px;
-  right: 18px;
-  bottom: 14px;
+  if (id === "gachaScreen") {
 
-  padding: 14px;
+    updateHUD();
 
-  border: 3px solid #6a482e;
-  border-radius: 24px;
-
-  background:
-    rgba(
-      255,
-      247,
-      223,
-      .97
-    );
-
-  box-shadow:
-    0 18px 55px rgba(15,22,40,.35);
-
-  transform:
-    translateY(
-      calc(100% + 30px)
-    );
-
-  transition:
-    transform .28s ease;
-}
-
-.build-drawer.open {
-  transform: translateY(0);
-}
-
-.build-drawer-head {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 16px;
-}
-
-.build-drawer-head strong {
-  color: var(--navy);
-
-  font-size: 18px;
-}
-
-.build-drawer-head small {
-  display: block;
-
-  margin-top: 2px;
-
-  color: #78644f;
-}
-
-.build-drawer-head button,
-.build-controls button {
-  border: 0;
-
-  border-radius: 12px;
-
-  padding: 9px 13px;
-
-  background: var(--navy);
-
-  color: white;
-
-  font-weight: 900;
-}
-
-.build-tabs {
-  display: flex;
-
-  gap: 7px;
-
-  margin: 12px 0;
-}
-
-.build-tabs button {
-  padding: 7px 10px;
-
-  border: 1px solid #ceb88c;
-  border-radius: 10px;
-
-  background: #f6ead0;
-
-  color: #7e684f;
-
-  font-weight: 800;
-}
-
-.build-tabs .active {
-  background: var(--gold);
-
-  color: #543b1e;
-}
-
-.build-items {
-  display: flex;
-
-  gap: 10px;
-}
-
-.build-item {
-  width: 230px;
-
-  display: flex;
-
-  gap: 12px;
-
-  align-items: center;
-
-  padding: 11px;
-
-  border: 2px solid #c59d57;
-  border-radius: 16px;
-
-  background: #fffaf0;
-
-  text-align: left;
-
-  touch-action: none;
-}
-
-.build-item-art {
-  font-size: 34px;
-}
-
-.build-item b,
-.build-item small,
-.build-item em {
-  display: block;
-}
-
-.build-item small {
-  color: #7c6a58;
-
-  margin: 3px 0;
-}
-
-.build-item em {
-  color: #a16c14;
-
-  font-style: normal;
-
-  font-weight: 900;
-}
-
-.build-controls {
-  position: absolute;
-
-  right: 14px;
-  bottom: 14px;
-
-  display: flex;
-
-  gap: 8px;
-}
-
-
-/* =====================================================
-   BUILD GHOST
-===================================================== */
-
-#buildGhost {
-  position: fixed;
-
-  z-index: 500;
-
-  width: 88px;
-  height: 88px;
-
-  display: none;
-
-  pointer-events: none;
-
-  transform:
-    translate(-50%, -50%)
-    rotate(
-      var(--ghostRotation, 0deg)
-    );
-
-  transform-origin: center;
-}
-
-#buildGhost.visible {
-  display: block;
-}
-
-.ghost-house {
-  position: absolute;
-
-  left: 10px;
-  top: 3px;
-
-  width: 68px;
-  height: 60px;
-
-  display: grid;
-
-  place-items: center;
-
-  font-size: 46px;
-
-  filter:
-    drop-shadow(
-      0 6px 6px
-      rgba(0,0,0,.25)
-    );
-}
-
-#ghostFootprint {
-  position: absolute;
-
-  left: 4px;
-  right: 4px;
-  bottom: 0;
-
-  height: 29px;
-
-  border: 4px solid var(--green);
-  border-radius: 50%;
-
-  background:
-    rgba(
-      93,
-      185,
-      107,
-      .24
-    );
-}
-
-#buildGhost.invalid #ghostFootprint {
-  border-color: var(--red);
-
-  background:
-    rgba(
-      217,
-      90,
-      90,
-      .25
-    );
-}
-
-
-/* =====================================================
-   HOUSES
-===================================================== */
-
-.kingdom-house {
-  position: absolute;
-
-  width: 86px;
-  height: 90px;
-
-  transform:
-    translate(-50%, -55%)
-    rotate(
-      var(--houseRotation, 0deg)
-    );
-
-  transform-origin:
-    center bottom;
-
-  pointer-events: auto;
-
-  border: 0;
-
-  background: transparent;
-
-  padding: 0;
-}
-
-.kingdom-house-art {
-  display: grid;
-
-  place-items: center;
-
-  width: 74px;
-  height: 64px;
-
-  margin: auto;
-
-  border:
-    3px solid rgba(98,64,41,.76);
-
-  border-radius:
-    22px
-    22px
-    12px
-    12px;
-
-  background:
-    linear-gradient(
-      #ffd985,
-      #ecaa5b
-    );
-
-  box-shadow:
-    0 7px 12px rgba(0,0,0,.2);
-
-  font-size: 38px;
-
-  transition:
-    transform .2s;
-}
-
-.kingdom-house:hover
-.kingdom-house-art {
-  transform:
-    translateY(-5px)
-    scale(1.06);
-}
-
-.kingdom-house-label {
-  margin-top: 2px;
-
-  padding: 2px 5px;
-
-  display: inline-block;
-
-  border-radius: 8px;
-
-  background:
-    rgba(
-      33,
-      41,
-      61,
-      .78
-    );
-
-  color: white;
-
-  font-size: 9px;
-
-  font-weight: 900;
-
-  white-space: nowrap;
-}
-
-.kingdom-house.move-target
-.kingdom-house-art {
-  outline:
-    5px solid
-    #6fc77d;
-}
-
-
-/* =====================================================
-   KINGDOM COOKIES
-===================================================== */
-
-.kingdom-cookie {
-  position: absolute;
-
-  width: 72px;
-  height: 86px;
-
-  transform:
-    translate(-50%, -80%);
-
-  transition:
-    left 3.6s ease-in-out,
-    top 3.6s ease-in-out;
-
-  pointer-events: auto;
-
-  cursor: pointer;
-
-  transform-origin:
-    center bottom;
-}
-
-.kingdom-cookie .cookie-avatar {
-  width: 100%;
-  height: 100%;
-}
-
-.kingdom-cookie.walk-left
-.cookie-avatar {
-  transform:
-    scaleX(-1);
-}
-
-.kingdom-cookie.idle
-.cookie-avatar {
-  animation:
-    cookieIdle
-    1.7s
-    ease-in-out
-    infinite;
-}
-
-.kingdom-cookie.sleeping
-.cookie-avatar {
-  opacity: .86;
-
-  animation:
-    cookieSleep
-    2.2s
-    ease-in-out
-    infinite;
-}
-
-@keyframes cookieIdle {
-
-  50% {
-    transform:
-      translateY(-3px);
   }
 
 }
 
-@keyframes cookieSleep {
 
-  50% {
-    transform:
-      translateY(2px)
-      rotate(2deg);
+qsa("[data-open]").forEach(
+  button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        showScreen(
+          button.dataset.open
+        );
+
+      }
+    );
+
+  }
+);
+
+
+qsa("[data-close]").forEach(
+  button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        qs(
+          `#${button.dataset.close}`
+        ).hidden = true;
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   COOKIE CHARACTER MARKUP
+========================================================= */
+
+function cookieMarkup(
+  cookie,
+  extraClass = ""
+) {
+
+  const c =
+    typeof cookie === "string"
+      ? dataFor(cookie)
+      : cookie;
+
+
+  const propClass =
+    c.prop || "coin";
+
+
+  return `
+    <div
+      class="cookie-card-art ${extraClass}"
+
+      style="
+        --dough:${c.dough};
+        --hair:${c.hair};
+        --outfit:${c.outfit};
+        --outfit2:${c.outfit2};
+        --accent:${c.accent};
+        --badge:${c.badge};
+      "
+    >
+
+      <div class="cookie-character">
+
+        <span class="cookie-leg left"></span>
+
+        <span class="cookie-leg right"></span>
+
+        <span class="cookie-shoe left"></span>
+
+        <span class="cookie-shoe right"></span>
+
+
+        <span class="cookie-arm left"></span>
+
+        <span class="cookie-arm right"></span>
+
+
+        <span class="cookie-body"></span>
+
+
+        <span class="cookie-head">
+
+          <span class="cookie-mouth"></span>
+
+          <i class="cookie-blush left"></i>
+
+          <i class="cookie-blush right"></i>
+
+        </span>
+
+
+        <span
+          class="cookie-hair ${
+            c.hat ? "short" : ""
+          }"
+        ></span>
+
+
+        ${
+          c.hat
+            ? `<span class="cookie-hat"></span>`
+            : ""
+        }
+
+
+        <span class="cookie-badge"></span>
+
+
+        <span
+          class="cookie-prop ${propClass}"
+        ></span>
+
+      </div>
+
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   KINGDOM LOCATIONS
+========================================================= */
+
+const LOCATIONS = {
+
+  castle: {
+    x: 768,
+    y: 330,
+    rx: 90,
+    ry: 50
+  },
+
+  bank: {
+    x: 525,
+    y: 585,
+    rx: 74,
+    ry: 42
+  },
+
+  market: {
+    x: 1055,
+    y: 600,
+    rx: 95,
+    ry: 55
+  },
+
+  academy: {
+    x: 340,
+    y: 345,
+    rx: 75,
+    ry: 50
+  },
+
+  concert: {
+    x: 1280,
+    y: 390,
+    rx: 95,
+    ry: 50
+  },
+
+  bakery: {
+    x: 250,
+    y: 600,
+    rx: 85,
+    ry: 48
+  },
+
+  plaza: {
+    x: 770,
+    y: 650,
+    rx: 140,
+    ry: 68
+  },
+
+  forest: {
+    x: 470,
+    y: 780,
+    rx: 120,
+    ry: 70
   }
 
+};
+
+
+/* =========================================================
+   COOKIE JOB LOCATION
+========================================================= */
+
+function jobLocation(cookie) {
+
+  const name =
+    cookie.name.toLowerCase();
+
+
+  if (
+    name.includes("bank") ||
+    name.includes("invest") ||
+    name.includes("dollar") ||
+    name.includes("saving")
+  ) {
+
+    return LOCATIONS.bank;
+
+  }
+
+
+  if (
+    name.includes("violin")
+  ) {
+
+    return LOCATIONS.concert;
+
+  }
+
+
+  if (
+    name.includes("education") ||
+    name.includes("budget")
+  ) {
+
+    return LOCATIONS.academy;
+
+  }
+
+
+  if (
+    name.includes("merchant")
+  ) {
+
+    return LOCATIONS.market;
+
+  }
+
+
+  if (
+    name.includes("builder") ||
+    name.includes("property")
+  ) {
+
+    return LOCATIONS.castle;
+
+  }
+
+
+  if (
+    name.includes("health") ||
+    name.includes("charity") ||
+    name.includes("lucky")
+  ) {
+
+    return LOCATIONS.plaza;
+
+  }
+
+
+  return LOCATIONS.bakery;
+
 }
 
-.cookie-name {
-  position: absolute;
 
-  left: 50%;
-  bottom: -12px;
+/* =========================================================
+   RANDOM KINGDOM POSITION
+========================================================= */
 
-  transform:
-    translateX(-50%);
+function randomSpot(
+  location,
+  seed = 0
+) {
 
-  display: none;
+  const angle =
+    (seed * 1.97) % 6.28;
 
-  padding: 2px 7px;
 
-  border-radius: 9px;
+  const radius =
+    0.4 +
+    0.5 *
+    (((seed * 17) % 10) / 10);
 
-  background:
-    rgba(
-      24,
-      31,
-      52,
-      .86
+
+  return {
+
+    x:
+      location.x +
+      Math.cos(angle) *
+      location.rx *
+      radius,
+
+    y:
+      location.y +
+      Math.sin(angle) *
+      location.ry *
+      radius
+
+  };
+
+}
+
+
+/* =========================================================
+   HOUSING
+========================================================= */
+
+function ensureHousing() {
+
+  save.houses.forEach(
+    house => {
+
+      house.residents = [];
+
+    }
+  );
+
+
+  save.ownedCookies.forEach(
+    name => {
+
+      const homeId =
+        save.cookieHomes[name];
+
+
+      let house =
+        save.houses.find(
+          h =>
+            h.id === homeId &&
+            h.residents.length <
+              h.capacity
+        );
+
+
+      if (!house) {
+
+        house =
+          save.houses.find(
+            h =>
+              h.residents.length <
+              h.capacity
+          );
+
+      }
+
+
+      if (house) {
+
+        house.residents.push(name);
+
+        save.cookieHomes[name] =
+          house.id;
+
+      } else {
+
+        save.cookieHomes[name] =
+          "castle-guest";
+
+      }
+
+    }
+  );
+
+
+  persist();
+
+}
+
+
+/* =========================================================
+   HOME POSITION
+========================================================= */
+
+function homeSpot(
+  name,
+  index
+) {
+
+  const id =
+    save.cookieHomes[name];
+
+
+  const house =
+    save.houses.find(
+      h => h.id === id
     );
 
-  color: white;
 
-  font-size: 8px;
+  if (house) {
 
-  font-weight: 900;
+    return {
 
-  white-space: nowrap;
-}
+      x:
+        house.x -
+        28 +
+        (index % 3) * 28,
 
-.kingdom-cookie:hover
-.cookie-name {
-  display: block;
-}
+      y:
+        house.y +
+        22 +
+        Math.floor(index / 3) * 16
 
-.cookie-work-icon {
-  position: absolute;
+    };
 
-  right: -3px;
-  top: 1px;
+  }
 
-  width: 23px;
-  height: 23px;
 
-  display: grid;
+  return {
 
-  place-items: center;
+    x:
+      768 +
+      (index % 5 - 2) * 30,
 
-  border: 2px solid #62442c;
+    y:
+      385 +
+      Math.floor(index / 5) * 18
 
-  border-radius: 50%;
+  };
 
-  background: white;
-
-  font-size: 12px;
-}
-
-.cookie-speech {
-  position: absolute;
-
-  left: 50%;
-  bottom: 82px;
-
-  transform:
-    translateX(-50%)
-    translateY(5px);
-
-  max-width: 155px;
-
-  width: max-content;
-
-  padding: 7px 9px;
-
-  border: 2px solid #68462e;
-
-  border-radius: 12px;
-
-  background: #fffdf6;
-
-  color: #4e3828;
-
-  font-size: 9px;
-
-  font-weight: 800;
-
-  text-align: center;
-
-  box-shadow:
-    0 5px 12px rgba(0,0,0,.16);
-
-  opacity: 0;
-
-  pointer-events: none;
-
-  transition:
-    opacity .2s,
-    transform .2s;
-}
-
-.cookie-speech.show {
-  opacity: 1;
-
-  transform:
-    translateX(-50%)
-    translateY(-2px);
 }
 
 
-/* =====================================================
-   COOKIE ART
-===================================================== */
+/* =========================================================
+   RENDER KINGDOM
+========================================================= */
 
-.cookie-avatar {
-  position: relative;
+function renderKingdom() {
 
-  display: inline-block;
+  ensureHousing();
 
-  width: 100px;
-  height: 118px;
 
-  filter:
-    drop-shadow(
-      0 7px 5px
-      rgba(0,0,0,.18)
-    );
-}
+  const buildingLayer =
+    qs("#kingdomBuildings");
 
-.cookie-head {
-  position: absolute;
 
-  left: 50%;
-  top: 8px;
+  buildingLayer.innerHTML = "";
 
-  width: 62px;
-  height: 62px;
 
-  transform:
-    translateX(-50%);
+  save.houses.forEach(
+    house => {
 
-  border: 4px solid #643d24;
+      const el =
+        document.createElement(
+          "button"
+        );
 
-  border-radius:
-    46%
-    48%
-    45%
-    50%;
 
-  background: #d99555;
-}
+      el.className =
+        "placed-building";
 
-.cookie-frosting {
-  position: absolute;
 
-  left: 50%;
-  top: -8px;
+      el.style.left =
+        house.x + "px";
 
-  width: 58px;
-  height: 27px;
 
-  transform:
-    translateX(-50%);
+      el.style.top =
+        house.y + "px";
 
-  border: 4px solid #643d24;
-  border-bottom-width: 2px;
 
-  border-radius:
-    50%
-    50%
-    40%
-    40%;
+      el.style.transform =
+        `translate(-50%,-50%) rotate(${house.rotation || 0}deg)`;
 
-  background:
-    var(--cookieFrosting);
-}
 
-.cookie-eye {
-  position: absolute;
+      el.innerHTML = `
 
-  top: 28px;
+        <div class="mini-house">
 
-  width: 6px;
-  height: 9px;
+          <div class="house-roof"></div>
 
-  border-radius: 50%;
+          <div class="house-body">
 
-  background: #4f2d1d;
-}
+            <span class="window window-left"></span>
 
-.cookie-eye.left {
-  left: 16px;
-}
+            <span class="window window-right"></span>
 
-.cookie-eye.right {
-  right: 16px;
-}
+            <span class="door"></span>
 
-.cookie-mouth {
-  position: absolute;
+          </div>
 
-  left: 50%;
-  top: 43px;
+          <div class="chimney"></div>
 
-  width: 17px;
-  height: 8px;
+        </div>
 
-  transform:
-    translateX(-50%);
 
-  border-bottom:
-    3px solid #633725;
+        <span class="occupancy">
 
-  border-radius: 50%;
-}
+          ${house.residents.length}/${house.capacity}
 
-.cookie-body {
-  position: absolute;
+        </span>
+      `;
 
-  left: 50%;
-  top: 61px;
 
-  width: 52px;
-  height: 43px;
+      el.addEventListener(
+        "click",
+        event => {
 
-  transform:
-    translateX(-50%);
+          event.stopPropagation();
 
-  border: 4px solid #643d24;
 
-  border-radius:
-    15px
-    15px
-    20px
-    20px;
+          if (buildMode) {
 
-  background:
-    linear-gradient(
-      var(--cookiePrimary),
-      var(--cookieSecondary)
-    );
-}
+            beginMoveHouse(
+              house.id
+            );
 
-.cookie-motif {
-  position: absolute;
+          } else {
 
-  left: 50%;
-  top: 12px;
+            openHouse(
+              house.id
+            );
 
-  transform:
-    translateX(-50%);
+          }
 
-  color: #fff8c7;
+        }
+      );
 
-  font-size: 16px;
 
-  font-weight: 1000;
+      buildingLayer.appendChild(el);
 
-  text-shadow:
-    0 2px 0 rgba(82,49,28,.5);
-}
+    }
+  );
 
-.cookie-arm,
-.cookie-leg {
-  position: absolute;
 
-  background: #d99555;
+  const residentLayer =
+    qs("#kingdomResidents");
 
-  border: 3px solid #643d24;
 
-  border-radius: 20px;
-}
+  residentLayer.innerHTML = "";
 
-.cookie-arm {
-  width: 11px;
-  height: 34px;
 
-  top: 67px;
-}
+  save.ownedCookies.forEach(
+    (name, index) => {
 
-.cookie-arm.left {
-  left: 14px;
+      const cookie =
+        dataFor(name);
 
-  transform:
-    rotate(24deg);
-}
 
-.cookie-arm.right {
-  right: 14px;
+      const el =
+        document.createElement(
+          "div"
+        );
 
-  transform:
-    rotate(-24deg);
-}
 
-.cookie-leg {
-  width: 12px;
-  height: 27px;
+      el.className =
+        "cookie-resident";
 
-  top: 95px;
-}
 
-.cookie-leg.left {
-  left: 33px;
+      el.dataset.cookie =
+        name;
 
-  transform:
-    rotate(5deg);
-}
 
-.cookie-leg.right {
-  right: 33px;
+      el.innerHTML = `
 
-  transform:
-    rotate(-5deg);
-}
+        <div class="cookie-shadow"></div>
 
-.rarity-crown {
-  position: absolute;
+        ${cookieMarkup(cookie)}
 
-  left: 50%;
-  top: -12px;
+        <span class="cookie-nameplate">
+          ${name}
+        </span>
 
-  transform:
-    translateX(-50%);
+      `;
 
-  z-index: 4;
 
-  font-size: 22px;
+      residentLayer.appendChild(el);
+
+    }
+  );
+
+
+  applyPhase();
+
+  updateHUD();
+
 }
 
 
-/* =====================================================
-   OTHER SCREENS
-===================================================== */
+/* =========================================================
+   KINGDOM DAY / NIGHT
+========================================================= */
 
-.panel-screen,
-.gacha-screen {
-  overflow-y: auto;
+function applyPhase() {
 
-  background:
-    radial-gradient(
-      circle at 50% 0,
-      #435f95,
-      #182744 55%,
-      #111a2c
-    );
+  qs("#phaseLabel").textContent =
+    kingdomPhase[0].toUpperCase() +
+    kingdomPhase.slice(1);
 
-  color: white;
+
+  const tint =
+    qs("#timeTint");
+
+
+  tint.className =
+    `time-tint ${kingdomPhase}`;
+
+
+  qsa(".cookie-resident").forEach(
+    (el, index) => {
+
+      const name =
+        el.dataset.cookie;
+
+
+      const cookie =
+        dataFor(name);
+
+
+      let position;
+
+
+      if (
+        kingdomPhase === "morning"
+      ) {
+
+        position =
+          randomSpot(
+            LOCATIONS.plaza,
+            index + 2
+          );
+
+      }
+
+      else if (
+        kingdomPhase === "work"
+      ) {
+
+        position =
+          randomSpot(
+            jobLocation(cookie),
+            index + 4
+          );
+
+      }
+
+      else if (
+        kingdomPhase === "evening"
+      ) {
+
+        position =
+          randomSpot(
+            LOCATIONS.plaza,
+            index + 9
+          );
+
+      }
+
+      else {
+
+        position =
+          homeSpot(
+            name,
+            index
+          );
+
+      }
+
+
+      el.style.left =
+        position.x + "px";
+
+
+      el.style.top =
+        position.y + "px";
+
+
+      el.classList.toggle(
+        "walking",
+        kingdomPhase !== "night"
+      );
+
+
+      el.classList.toggle(
+        "working",
+        kingdomPhase === "work"
+      );
+
+
+      el.classList.toggle(
+        "sleeping",
+        kingdomPhase === "night"
+      );
+
+    }
+  );
+
 }
 
-.screen-header {
-  position: sticky;
 
-  z-index: 100;
+/* =========================================================
+   KINGDOM TIME LOOP
+========================================================= */
 
-  top: 0;
+function startDayCycle() {
 
-  min-height: 70px;
+  const phases = [
+    "morning",
+    "work",
+    "evening",
+    "night"
+  ];
 
-  padding: 12px 18px;
 
-  display: grid;
+  let index = 0;
 
-  grid-template-columns:
-    1fr
-    auto
-    1fr;
 
-  align-items: center;
+  setInterval(
+    () => {
 
-  background:
-    rgba(
-      16,
-      26,
-      47,
-      .94
-    );
+      index =
+        (index + 1) %
+        phases.length;
 
-  border-bottom:
-    1px solid rgba(255,255,255,.12);
-}
 
-.screen-header h1 {
-  margin: 0;
+      kingdomPhase =
+        phases[index];
 
-  font-size: 22px;
 
-  letter-spacing: 1px;
-}
+      applyPhase();
 
-.screen-header > :last-child {
-  justify-self: end;
-}
+    },
+    30000
+  );
 
-.back-button {
-  justify-self: start;
-
-  padding: 10px 14px;
-
-  border:
-    1px solid rgba(255,255,255,.2);
-
-  border-radius: 14px;
-
-  background:
-    rgba(255,255,255,.09);
-
-  color: white;
-
-  font-weight: 900;
 }
 
 
-/* =====================================================
-   ADVENTURE
-===================================================== */
+/* =========================================================
+   KINGDOM SCALING
+========================================================= */
 
-.adventure-hub {
-  width:
-    min(
-      980px,
-      94vw
+function scaleScene() {
+
+  const scene =
+    qs("#kingdomScene");
+
+
+  const viewport =
+    qs("#kingdomViewport");
+
+
+  const scale =
+    Math.max(
+      viewport.clientWidth /
+        SCENE_W,
+
+      viewport.clientHeight /
+        SCENE_H
     );
 
-  margin:
-    30px
-    auto
-    80px;
 
-  display: grid;
+  scene.style.transform =
+    `translate(-50%,-50%) scale(${scale})`;
 
-  grid-template-columns:
-    repeat(
-      2,
-      1fr
+}
+
+
+window.addEventListener(
+  "resize",
+  scaleScene
+);
+
+
+/* =========================================================
+   OPEN HOUSE
+========================================================= */
+
+function openHouse(id) {
+
+  const house =
+    save.houses.find(
+      h => h.id === id
     );
 
-  gap: 18px;
+
+  if (!house) {
+    return;
+  }
+
+
+  qs("#homePanel").hidden =
+    false;
+
+
+  qs("#homePanel").dataset.house =
+    id;
+
+
+  qs("#homeName").textContent =
+    house.name;
+
+
+  qs("#homeLevel").textContent =
+    house.level;
+
+
+  qs("#homeCapacity").textContent =
+    `${house.residents.length}/${house.capacity}`;
+
+
+  const list =
+    qs("#homeResidents");
+
+
+  list.innerHTML =
+    house.residents.length
+      ? ""
+      : `
+        <div class="resident-row">
+          <b>
+            This home is ready for a resident.
+          </b>
+        </div>
+      `;
+
+
+  house.residents.forEach(
+    name => {
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "resident-row";
+
+
+      row.innerHTML = `
+
+        <div class="tiny-cookie">
+
+          ${cookieMarkup(name)}
+
+        </div>
+
+
+        <b>
+          ${name}
+        </b>
+
+
+        <button type="button">
+          Move
+        </button>
+      `;
+
+
+      row
+        .querySelector("button")
+        .onclick =
+        () =>
+          moveResident(
+            name,
+            house.id
+          );
+
+
+      list.appendChild(row);
+
+    }
+  );
+
 }
 
-.mode-card {
-  min-height: 190px;
 
-  padding: 25px;
+/* =========================================================
+   MOVE RESIDENT
+========================================================= */
 
-  display: flex;
+function moveResident(
+  name,
+  currentHouse
+) {
 
-  flex-direction: column;
-
-  align-items: flex-start;
-  justify-content: flex-end;
-
-  border:
-    2px solid rgba(255,255,255,.18);
-
-  border-radius: 26px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.13),
-      rgba(255,255,255,.04)
+  const target =
+    save.houses.find(
+      house =>
+        house.id !== currentHouse &&
+        house.residents.length <
+          house.capacity
     );
 
-  color: white;
 
-  text-align: left;
+  if (!target) {
 
-  box-shadow:
-    var(--shadow);
-}
-
-.mode-card.hero-mode {
-  grid-column:
-    1 / -1;
-
-  min-height: 240px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #5b85bd,
-      #2d4e80
-    );
-}
-
-.mode-icon {
-  font-size: 48px;
-
-  margin-bottom: 15px;
-}
-
-.mode-card b {
-  font-size: 23px;
-}
-
-.mode-card small {
-  margin-top: 7px;
-
-  color: #d9e5ff;
-}
-
-
-/* =====================================================
-   WORLD
-===================================================== */
-
-.world-layout {
-  width:
-    min(
-      1180px,
-      95vw
+    return showToast(
+      "No other house has free space."
     );
 
-  margin:
-    24px
-    auto
-    70px;
-}
+  }
 
-.world-map-card {
-  position: relative;
 
-  height: 310px;
+  save.cookieHomes[name] =
+    target.id;
 
-  overflow: hidden;
 
-  border:
-    2px solid rgba(255,255,255,.18);
+  ensureHousing();
 
-  border-radius: 26px;
+  renderKingdom();
 
-  box-shadow:
-    var(--shadow);
-}
+  openHouse(currentHouse);
 
-.world-map-card img {
-  width: 100%;
-  height: 100%;
 
-  object-fit: cover;
-}
+  showToast(
+    `${name} moved to ${target.name}.`
+  );
 
-.world-map-caption {
-  position: absolute;
-
-  left: 20px;
-  bottom: 18px;
-
-  padding: 10px 14px;
-
-  border-radius: 14px;
-
-  background:
-    rgba(20,31,55,.88);
-
-  font-weight: 900;
-}
-
-.stage-route-wrap {
-  margin-top: 18px;
-
-  padding: 20px;
-
-  border-radius: 24px;
-
-  background:
-    rgba(255,255,255,.08);
-}
-
-.stage-route-title h2 {
-  margin: 0;
-}
-
-.stage-route-title p {
-  margin:
-    4px
-    0
-    18px;
-
-  color: #c9d6ee;
-}
-
-.stage-route {
-  display: flex;
-
-  flex-wrap: wrap;
-
-  align-items: center;
-
-  gap: 12px;
-}
-
-.stage-node {
-  width: 74px;
-  height: 74px;
-
-  border: 3px solid #d3ddef;
-  border-radius: 50%;
-
-  background: #31486e;
-
-  color: white;
-
-  font-weight: 1000;
-}
-
-.stage-node.done {
-  background: #6a9b64;
-
-  border-color: #dff0a8;
-}
-
-.stage-node.boss {
-  background: #7f4151;
-
-  border-color: #ffd78e;
 }
 
 
-/* =====================================================
-   STAGE
-===================================================== */
+/* =========================================================
+   UPGRADE HOUSE
+========================================================= */
 
-.stage-detail-card {
-  width:
-    min(
-      760px,
-      92vw
+qs("#upgradeHouseButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const id =
+        qs("#homePanel")
+          .dataset.house;
+
+
+      const house =
+        save.houses.find(
+          h => h.id === id
+        );
+
+
+      if (!house) {
+        return;
+      }
+
+
+      const cost =
+        house.level * 1000;
+
+
+      if (
+        save.coins < cost
+      ) {
+
+        return showToast(
+          "Not enough coins."
+        );
+
+      }
+
+
+      save.coins -= cost;
+
+
+      house.level++;
+
+
+      house.capacity += 2;
+
+
+      persist();
+
+      renderKingdom();
+
+      openHouse(id);
+
+
+      showToast(
+        `${house.name} upgraded.`
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   BUILD MODE
+========================================================= */
+
+function enterBuildMode() {
+
+  buildMode = true;
+
+
+  qs("#buildDrawer")
+    .classList
+    .add("open");
+
+
+  qs("#buildDrawer")
+    .setAttribute(
+      "aria-hidden",
+      "false"
     );
 
-  margin:
-    45px
-    auto
-    90px;
 
-  padding: 28px;
+  qs("#buildGrid")
+    .classList
+    .add("show");
 
-  border-radius: 28px;
 
-  background:
-    rgba(255,255,255,.09);
+  qs("#kingdomLaunchers")
+    .style.opacity = "0";
 
-  box-shadow:
-    var(--shadow);
+
+  qs("#kingdomLaunchers")
+    .style.pointerEvents =
+    "none";
+
+
+  qs("#buildButton")
+    .style.opacity = "0";
+
 }
 
-.enemy-preview {
-  padding: 35px;
 
-  margin-bottom: 20px;
+function exitBuildMode() {
 
-  border-radius: 20px;
+  buildMode = false;
 
-  background:
-    rgba(0,0,0,.15);
+  placement = null;
 
-  text-align: center;
 
-  font-size: 50px;
+  qs("#buildDrawer")
+    .classList
+    .remove("open");
+
+
+  qs("#buildGrid")
+    .classList
+    .remove("show");
+
+
+  qs("#buildGhost").hidden =
+    true;
+
+
+  qs("#kingdomLaunchers")
+    .style.opacity = "1";
+
+
+  qs("#kingdomLaunchers")
+    .style.pointerEvents =
+    "auto";
+
+
+  qs("#buildButton")
+    .style.opacity = "1";
+
 }
 
-.stage-stat,
-.reward-row {
-  display: flex;
 
-  justify-content: space-between;
+qs("#buildButton")
+  .addEventListener(
+    "click",
+    enterBuildMode
+  );
 
-  gap: 20px;
 
-  padding:
-    13px
-    0;
+qs("#exitBuildButton")
+  .addEventListener(
+    "click",
+    exitBuildMode
+  );
 
-  border-bottom:
-    1px solid rgba(255,255,255,.12);
-}
 
-.team-preview {
-  display: flex;
+qs("#cancelBuildButton")
+  .addEventListener(
+    "click",
+    () => {
 
-  gap: 10px;
+      placement = null;
 
-  flex-wrap: wrap;
 
-  margin:
-    15px
-    0
-    24px;
-}
+      qs("#buildGhost").hidden =
+        true;
 
-.team-mini {
-  width: 88px;
 
-  padding: 8px;
+      qs("#placementHint")
+        .textContent =
+        "Choose a building, then place it in Prospera.";
 
-  border-radius: 16px;
+    }
+  );
 
-  background:
-    rgba(255,255,255,.08);
 
-  text-align: center;
+/* =========================================================
+   NEW COOKIE HOUSE
+========================================================= */
 
-  font-size: 9px;
-}
+function beginNewHouse() {
 
-.team-mini .cookie-avatar {
-  width: 64px;
-  height: 74px;
-}
+  if (
+    save.coins < HOUSE_COST
+  ) {
 
-.stage-actions {
-  display: flex;
-
-  justify-content: flex-end;
-
-  gap: 12px;
-}
-
-.primary-action,
-.secondary-action {
-  padding: 12px 18px;
-
-  border: 0;
-  border-radius: 14px;
-
-  font-weight: 1000;
-}
-
-.primary-action {
-  background:
-    linear-gradient(
-      #f7d365,
-      #e8a938
+    return showToast(
+      "You need 2,500 coins."
     );
 
-  color: #52380f;
+  }
+
+
+  placement = {
+
+    type: "new",
+
+    x: 850,
+
+    y: 730,
+
+    rotation: 0,
+
+    valid: true
+
+  };
+
+
+  qs("#buildGhost").hidden =
+    false;
+
+
+  updateGhost();
+
+
+  qs("#placementHint")
+    .textContent =
+    "Move the house onto an open area and click to place.";
+
 }
 
-.secondary-action {
-  background: #314b77;
 
-  color: white;
+/* =========================================================
+   MOVE COOKIE HOUSE
+========================================================= */
+
+function beginMoveHouse(id) {
+
+  const house =
+    save.houses.find(
+      h => h.id === id
+    );
+
+
+  if (!house) {
+    return;
+  }
+
+
+  placement = {
+
+    type: "move",
+
+    id,
+
+    x: house.x,
+
+    y: house.y,
+
+    rotation:
+      house.rotation || 0,
+
+    valid: true
+
+  };
+
+
+  qs("#buildGhost").hidden =
+    false;
+
+
+  updateGhost();
+
+
+  qs("#placementHint")
+    .textContent =
+    `Moving ${house.name}. Click an open area to place.`;
+
 }
 
 
-/* =====================================================
+/* =========================================================
+   BUILD BUTTONS
+========================================================= */
+
+qs("#cookieHouseBuildItem")
+  .addEventListener(
+    "click",
+    beginNewHouse
+  );
+
+
+qs("#rotateBuildButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      if (!placement) {
+        return;
+      }
+
+
+      placement.rotation =
+        (
+          placement.rotation +
+          90
+        ) % 360;
+
+
+      updateGhost();
+
+    }
+  );
+
+
+/* =========================================================
+   SCREEN TO KINGDOM COORDINATES
+========================================================= */
+
+function clientToScene(
+  x,
+  y
+) {
+
+  const rect =
+    qs("#kingdomScene")
+      .getBoundingClientRect();
+
+
+  return {
+
+    x:
+      (x - rect.left) *
+      (SCENE_W / rect.width),
+
+    y:
+      (y - rect.top) *
+      (SCENE_H / rect.height)
+
+  };
+
+}
+
+
+/* =========================================================
+   BUILDING COLLISION
+========================================================= */
+
+function canPlace(
+  x,
+  y,
+  id = null
+) {
+
+  if (
+    x < 190 ||
+    x > 1400 ||
+    y < 430 ||
+    y > 900
+  ) {
+
+    return false;
+
+  }
+
+
+  if (
+    Math.hypot(
+      x - 768,
+      y - 400
+    ) < 165
+  ) {
+
+    return false;
+
+  }
+
+
+  return !save.houses.some(
+    house =>
+
+      house.id !== id &&
+
+      Math.hypot(
+        x - house.x,
+        y - house.y
+      ) < 115
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE BUILD GHOST
+========================================================= */
+
+function updateGhost() {
+
+  if (!placement) {
+    return;
+  }
+
+
+  const ghost =
+    qs("#buildGhost");
+
+
+  ghost.style.left =
+    placement.x + "px";
+
+
+  ghost.style.top =
+    placement.y + "px";
+
+
+  ghost.style.transform =
+    `translate(-50%,-50%) rotate(${placement.rotation}deg)`;
+
+
+  placement.valid =
+    canPlace(
+      placement.x,
+      placement.y,
+      placement.type === "move"
+        ? placement.id
+        : null
+    );
+
+
+  ghost.classList.toggle(
+    "invalid",
+    !placement.valid
+  );
+
+}
+
+
+/* =========================================================
+   BUILD POINTER MOVE
+========================================================= */
+
+qs("#kingdomScene")
+  .addEventListener(
+    "pointermove",
+    event => {
+
+      if (
+        !buildMode ||
+        !placement
+      ) {
+
+        return;
+
+      }
+
+
+      const point =
+        clientToScene(
+          event.clientX,
+          event.clientY
+        );
+
+
+      placement.x =
+        point.x;
+
+
+      placement.y =
+        point.y;
+
+
+      updateGhost();
+
+    }
+  );
+
+
+/* =========================================================
+   PLACE BUILDING
+========================================================= */
+
+qs("#kingdomScene")
+  .addEventListener(
+    "click",
+    event => {
+
+      if (
+        !buildMode ||
+        !placement
+      ) {
+
+        return;
+
+      }
+
+
+      const point =
+        clientToScene(
+          event.clientX,
+          event.clientY
+        );
+
+
+      placement.x =
+        point.x;
+
+
+      placement.y =
+        point.y;
+
+
+      updateGhost();
+
+
+      if (
+        !placement.valid
+      ) {
+
+        return showToast(
+          "That space is blocked."
+        );
+
+      }
+
+
+      if (
+        placement.type === "new"
+      ) {
+
+        if (
+          save.coins <
+          HOUSE_COST
+        ) {
+
+          return showToast(
+            "Not enough coins."
+          );
+
+        }
+
+
+        save.coins -=
+          HOUSE_COST;
+
+
+        const number =
+          save.houses.length + 1;
+
+
+        save.houses.push({
+
+          id:
+            `cookie-house-${Date.now()}`,
+
+          name:
+            `Cookie House ${number}`,
+
+          level: 1,
+
+          capacity:
+            HOUSE_CAPACITY,
+
+          x:
+            Math.round(point.x),
+
+          y:
+            Math.round(point.y),
+
+          rotation:
+            placement.rotation,
+
+          residents: []
+
+        });
+
+
+        showToast(
+          "Cookie House built."
+        );
+
+      }
+
+      else {
+
+        const house =
+          save.houses.find(
+            h =>
+              h.id ===
+              placement.id
+          );
+
+
+        if (house) {
+
+          house.x =
+            Math.round(point.x);
+
+
+          house.y =
+            Math.round(point.y);
+
+
+          house.rotation =
+            placement.rotation;
+
+
+          showToast(
+            `${house.name} moved.`
+          );
+
+        }
+
+      }
+
+
+      placement = null;
+
+
+      qs("#buildGhost").hidden =
+        true;
+
+
+      persist();
+
+      renderKingdom();
+
+    }
+  );
+
+
+/* =========================================================
+   BUILD KEYBOARD CONTROLS
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (!buildMode) {
+      return;
+    }
+
+
+    if (
+      event.key.toLowerCase() ===
+        "r" &&
+      placement
+    ) {
+
+      placement.rotation =
+        (
+          placement.rotation +
+          90
+        ) % 360;
+
+
+      updateGhost();
+
+    }
+
+
+    if (
+      event.key === "Escape"
+    ) {
+
+      placement = null;
+
+
+      qs("#buildGhost").hidden =
+        true;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   BUILD TABS
+========================================================= */
+
+qsa(".build-tab").forEach(
+  button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        qsa(".build-tab")
+          .forEach(
+            tab => {
+
+              tab.classList.remove(
+                "active"
+              );
+
+            }
+          );
+
+
+        button.classList.add(
+          "active"
+        );
+
+
+        if (
+          button.dataset.tab !==
+          "buildings"
+        ) {
+
+          showToast(
+            `${button.textContent} items are coming next.`
+          );
+
+        }
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   QUESTS
+========================================================= */
+
+qs("#questButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      qs("#questPanel").hidden =
+        false;
+
+    }
+  );
+
+
+/* =========================================================
    COOKIE COLLECTION
-===================================================== */
+========================================================= */
 
-.cookies-layout {
-  width:
-    min(
-      1300px,
-      96vw
+function renderCookieCollection() {
+
+  qs("#ownedCount")
+    .textContent =
+    `${save.ownedCookies.length} / ${COOKIE_DATA.length}`;
+
+
+  const query =
+    qs("#cookieSearch")
+      .value
+      .toLowerCase();
+
+
+  const rarity =
+    qs("#rarityFilter")
+      .value;
+
+
+  const ownedMode =
+    qs("#ownedFilter")
+      .value;
+
+
+  const filtered =
+    COOKIE_DATA.filter(
+      cookie => {
+
+        const matchesSearch =
+          !query ||
+          cookie.name
+            .toLowerCase()
+            .includes(query);
+
+
+        const matchesRarity =
+          rarity === "ALL" ||
+          cookie.rarity === rarity;
+
+
+        const matchesOwned =
+          ownedMode === "ALL" ||
+          save.ownedCookies.includes(
+            cookie.name
+          );
+
+
+        return (
+          matchesSearch &&
+          matchesRarity &&
+          matchesOwned
+        );
+
+      }
     );
 
-  margin:
-    24px
-    auto
-    70px;
 
-  display: grid;
+  const grid =
+    qs("#cookieGrid");
 
-  grid-template-columns:
-    340px
-    1fr;
 
-  gap: 20px;
+  grid.innerHTML = "";
+
+
+  filtered.forEach(
+    cookie => {
+
+      const owned =
+        save.ownedCookies.includes(
+          cookie.name
+        );
+
+
+      const card =
+        document.createElement(
+          "button"
+        );
+
+
+      card.className =
+        `cookie-card ${
+          cookie.name ===
+          selectedCookie
+            ? "selected"
+            : ""
+        }`;
+
+
+      card.style.setProperty(
+        "--rarity",
+        rarityColor(
+          cookie.rarity
+        )
+      );
+
+
+      card.innerHTML = `
+
+        <span class="cookie-level">
+          Lv. ${cookie.level}
+        </span>
+
+        ${cookieMarkup(cookie)}
+
+        <div class="cookie-card-copy">
+
+          <strong>
+            ${cookie.name}
+          </strong>
+
+          <span>
+            ${
+              owned
+                ? cookie.rarity
+                : "Not Owned"
+            }
+          </span>
+
+        </div>
+      `;
+
+
+      card.onclick =
+        () => {
+
+          selectedCookie =
+            cookie.name;
+
+
+          renderCookieCollection();
+
+        };
+
+
+      grid.appendChild(card);
+
+    }
+  );
+
+
+  renderFeatured();
+
 }
 
-.cookie-detail {
-  min-height: 560px;
 
-  padding: 20px;
+/* =========================================================
+   FEATURED COOKIE
+========================================================= */
 
-  border:
-    2px solid rgba(255,255,255,.14);
+function renderFeatured() {
 
-  border-radius: 24px;
+  const cookie =
+    dataFor(selectedCookie);
 
-  background:
-    rgba(255,255,255,.08);
 
-  text-align: center;
+  qs("#featuredName")
+    .textContent =
+    cookie.name;
+
+
+  qs("#featuredRarity")
+    .textContent =
+    cookie.rarity;
+
+
+  qs("#featuredRarity")
+    .style.background =
+    rarityColor(
+      cookie.rarity
+    );
+
+
+  qs("#featuredCookieArt")
+    .innerHTML =
+    cookieMarkup(cookie);
+
+
+  qs("#featuredRole")
+    .textContent =
+    cookie.role;
+
+
+  qs("#featuredPosition")
+    .textContent =
+    cookie.position;
+
+
+  qs("#featuredLevel")
+    .textContent =
+    cookie.level;
+
+
+  qs("#featuredPower")
+    .textContent =
+    formatNum(
+      cookie.power
+    );
+
+
+  const home =
+    save.houses.find(
+      house =>
+        house.id ===
+        save.cookieHomes[
+          cookie.name
+        ]
+    );
+
+
+  qs("#featuredHome")
+    .textContent =
+    home
+      ? home.name
+      : "Fortune Castle";
+
 }
 
-.cookie-detail .cookie-avatar {
-  width: 190px;
-  height: 220px;
 
-  margin:
-    12px
-    auto;
+/* =========================================================
+   COOKIE FILTERS
+========================================================= */
+
+[
+  "cookieSearch",
+  "rarityFilter",
+  "ownedFilter"
+].forEach(
+  id => {
+
+    qs(`#${id}`)
+      .addEventListener(
+        "input",
+        renderCookieCollection
+      );
+
+  }
+);
+
+
+qs("#levelCookieButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      showToast(
+        "EXP Candy leveling is the next upgrade."
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   STAGE MAP
+========================================================= */
+
+function stagePos(i) {
+
+  const column =
+    (i - 1) % 10;
+
+
+  const row =
+    Math.floor(
+      (i - 1) / 10
+    );
+
+
+  const x =
+    8 +
+    column * 8.7 +
+    (row % 2 ? 3 : 0);
+
+
+  const curve =
+    Math.sin(
+      (column / 9) *
+      Math.PI
+    ) * 10;
+
+
+  const y =
+    80 -
+    row * 30 -
+    curve;
+
+
+  return {
+    x,
+    y
+  };
+
 }
 
-.cookie-detail h2 {
-  margin:
-    2px
-    0
-    5px;
+
+/* =========================================================
+   RENDER STAGES
+========================================================= */
+
+function renderStages() {
+
+  const route =
+    qs("#stageRoute");
+
+
+  route.innerHTML = "";
+
+
+  let cleared = 0;
+
+
+  for (
+    let i = 1;
+    i <= 30;
+    i++
+  ) {
+
+    const position =
+      stagePos(i);
+
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+
+    button.className =
+      `stage-node ${
+        save.stages[i]
+          ? "cleared"
+          : ""
+      } ${
+        i % 10 === 0
+          ? "boss"
+          : ""
+      }`;
+
+
+    button.style.left =
+      position.x + "%";
+
+
+    button.style.top =
+      position.y + "%";
+
+
+    button.innerHTML = `
+
+      <span>
+        ${i}
+      </span>
+
+      <small>
+
+        ${
+          i % 10 === 0
+            ? "Boss"
+            : "Stage 1-" + i
+        }
+
+      </small>
+    `;
+
+
+    button.onclick =
+      () =>
+        openStage(i);
+
+
+    route.appendChild(
+      button
+    );
+
+
+    if (
+      save.stages[i]
+    ) {
+
+      cleared++;
+
+    }
+
+  }
+
+
+  qs("#worldStars")
+    .textContent =
+    cleared * 3;
+
+
+  qs("#questStage")
+    .textContent =
+    save.stages[3]
+      ? "1 / 1"
+      : "0 / 1";
+
 }
 
-.detail-rarity {
-  font-weight: 1000;
 
-  color: #ffe191;
+/* =========================================================
+   OPEN STAGE
+========================================================= */
+
+function openStage(i) {
+
+  currentStage = i;
+
+
+  qs("#stageTitle")
+    .textContent =
+    `Stage 1-${i}`;
+
+
+  qs("#stageSubtitle")
+    .textContent =
+
+    i % 10 === 0
+      ? "The Guardian of Frostpeak"
+
+      : i < 10
+      ? "Footprints in the Snow"
+
+      : i < 20
+      ? "Across the Frozen Pass"
+
+      : "The Summit Draws Near";
+
+
+  qs("#recommendedPower")
+    .textContent =
+    formatNum(
+      3500 +
+      i * 210
+    );
+
+
+  renderTeam();
+
+
+  showScreen(
+    "stageScreen"
+  );
+
 }
 
-.detail-meta {
-  margin:
-    12px
-    0;
 
-  color: #d7e2f7;
+/* =========================================================
+   TEAM PREVIEW
+========================================================= */
+
+function renderTeam() {
+
+  const wrap =
+    qs("#teamPreview");
+
+
+  wrap.innerHTML = "";
+
+
+  save.team.forEach(
+    name => {
+
+      const cookie =
+        dataFor(name);
+
+
+      const el =
+        document.createElement(
+          "div"
+        );
+
+
+      el.className =
+        "team-mini";
+
+
+      el.innerHTML = `
+
+        ${cookieMarkup(cookie)}
+
+        <b>
+          ${
+            name.replace(
+              " Cookie",
+              ""
+            )
+          }
+        </b>
+      `;
+
+
+      wrap.appendChild(el);
+
+    }
+  );
+
 }
 
-.detail-lore {
-  padding: 12px;
 
-  border-radius: 14px;
+/* =========================================================
+   BATTLE PLACEHOLDER
+========================================================= */
 
-  background:
-    rgba(0,0,0,.15);
+qs("#battleButton")
+  .addEventListener(
+    "click",
+    () => {
 
-  color: #dfe8f7;
+      save.stages[
+        currentStage
+      ] = true;
 
-  line-height: 1.5;
+
+      save.coins += 500;
+
+      save.wood += 8;
+
+
+      persist();
+
+      updateHUD();
+
+      renderStages();
+
+
+      showToast(
+        `Victory! Stage 1-${currentStage} cleared.`
+      );
+
+
+      setTimeout(
+        () => {
+
+          showScreen(
+            "worldScreen"
+          );
+
+        },
+        800
+      );
+
+    }
+  );
+
+
+qs("#editTeamButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      showScreen(
+        "cookiesScreen"
+      );
+
+
+      showToast(
+        "Choose Cookies from your collection."
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SUMMON WEIGHTS
+========================================================= */
+
+function weightedCookie() {
+
+  const pool = [];
+
+
+  const weights = {
+
+    RARE: 45,
+
+    EPIC: 34,
+
+    "SUPER EPIC": 10,
+
+    LEGENDARY: 6,
+
+    ANCIENT: 4,
+
+    BEAST: 1
+
+  };
+
+
+  COOKIE_DATA.forEach(
+    cookie => {
+
+      const weight =
+        weights[
+          cookie.rarity
+        ] || 1;
+
+
+      for (
+        let i = 0;
+        i < weight;
+        i++
+      ) {
+
+        pool.push(cookie);
+
+      }
+
+    }
+  );
+
+
+  return pool[
+    Math.floor(
+      Math.random() *
+      pool.length
+    )
+  ];
+
 }
 
-.cookie-browser {
-  min-width: 0;
-}
 
-.cookie-toolbar {
-  display: flex;
+/* =========================================================
+   SUMMON
+========================================================= */
 
-  gap: 8px;
+function summon(count) {
 
-  margin-bottom: 12px;
-}
+  if (
+    save.tickets < count
+  ) {
 
-.cookie-toolbar input,
-.cookie-toolbar select {
-  min-height: 42px;
+    return showToast(
+      "Not enough Fortune Tickets."
+    );
 
-  border:
-    1px solid rgba(255,255,255,.18);
+  }
 
-  border-radius: 12px;
 
-  background:
-    rgba(255,255,255,.09);
+  save.tickets -= count;
 
-  color: white;
 
-  padding:
-    0
-    12px;
-}
+  let last = null;
 
-.cookie-toolbar input {
-  flex: 1;
-}
+  let newCount = 0;
 
-.cookie-toolbar select option {
-  color: #111;
-}
 
-.cookie-grid {
-  display: grid;
+  for (
+    let i = 0;
+    i < count;
+    i++
+  ) {
 
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(
-        145px,
-        1fr
+    const cookie =
+      weightedCookie();
+
+
+    last = cookie;
+
+
+    if (
+      !save.ownedCookies.includes(
+        cookie.name
       )
-    );
+    ) {
 
-  gap: 12px;
-}
-
-.cookie-card {
-  position: relative;
-
-  min-height: 205px;
-
-  padding: 10px;
-
-  border:
-    2px solid rgba(255,255,255,.14);
-
-  border-radius: 18px;
-
-  background:
-    rgba(255,255,255,.07);
-
-  color: white;
-
-  text-align: center;
-}
-
-.cookie-card.owned {
-  border-color:
-    rgba(
-      255,
-      220,
-      120,
-      .6
-    );
-}
-
-.cookie-card.locked .cookie-avatar {
-  filter:
-    grayscale(.75)
-    brightness(.55);
-}
-
-.cookie-card .cookie-avatar {
-  width: 96px;
-  height: 112px;
-
-  margin: auto;
-}
-
-.cookie-card b {
-  display: block;
-
-  font-size: 12px;
-}
-
-.cookie-card small {
-  color: #c8d6ef;
-}
-
-.cookie-status {
-  position: absolute;
-
-  left: 9px;
-  right: 9px;
-  bottom: 8px;
-
-  padding: 4px 7px;
-
-  border-radius: 8px;
-
-  background:
-    rgba(9,16,28,.55);
-
-  font-size: 9px;
-
-  font-weight: 900;
-}
+      save.ownedCookies.push(
+        cookie.name
+      );
 
 
-/* =====================================================
-   GACHA
-===================================================== */
+      newCount++;
 
-.gacha-screen {
-  background:
-    radial-gradient(
-      circle at 50% 40%,
-      #4c5e8d,
-      #1b2744 50%,
-      #0c1428
-    );
-}
-
-.translucent-header {
-  background:
-    rgba(12,20,40,.65);
-}
-
-.gacha-lobby {
-  min-height:
-    calc(
-      100vh - 72px
-    );
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  padding:
-    35px
-    18px
-    70px;
-
-  text-align: center;
-}
-
-.fortune-tree {
-  position: relative;
-
-  width: 280px;
-  height: 300px;
-
-  margin-bottom: 5px;
-}
-
-.fortune-glow {
-  position: absolute;
-
-  left: 50%;
-  top: 38%;
-
-  width: 220px;
-  height: 220px;
-
-  transform:
-    translate(-50%, -50%);
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,231,126,.75),
-      rgba(255,231,126,0)
-    );
-
-  animation:
-    pulseGlow
-    2s
-    ease-in-out
-    infinite;
-}
-
-@keyframes pulseGlow {
-
-  50% {
-
-    transform:
-      translate(-50%, -50%)
-      scale(1.12);
-
-    opacity: .7;
+    }
 
   }
 
-}
 
-.fortune-leaves {
-  position: absolute;
+  ensureHousing();
 
-  left: 50%;
-  top: 20px;
+  persist();
 
-  transform:
-    translateX(-50%);
+  renderKingdom();
 
-  font-size: 100px;
+  updateHUD();
 
-  line-height: .85;
 
-  filter:
-    drop-shadow(
-      0 10px 20px
-      rgba(0,0,0,.32)
-    );
-}
+  const box =
+    qs("#summonResult");
 
-.fortune-trunk {
-  position: absolute;
 
-  left: 50%;
-  bottom: 22px;
+  box.classList.remove(
+    "empty"
+  );
 
-  width: 45px;
-  height: 100px;
 
-  transform:
-    translateX(-50%);
+  box.innerHTML = `
 
-  border-radius: 20px;
+    <div>
 
-  background:
-    linear-gradient(
-      #92613b,
-      #5e3d28
-    );
-}
+      <div
+        class="rarity-ribbon"
 
-.gacha-lobby h2 {
-  margin:
-    0
-    0
-    7px;
-}
+        style="
+          background:
+          ${rarityColor(last.rarity)}
+        "
+      >
 
-.gacha-lobby p {
-  max-width: 650px;
+        ${last.rarity}
 
-  color: #cedaf0;
-}
+      </div>
 
-.gacha-buttons {
-  display: flex;
 
-  gap: 14px;
+      <div>
 
-  margin:
-    18px
-    0;
-}
+        ${cookieMarkup(last)}
 
-.gacha-buttons button {
-  min-width: 180px;
+      </div>
 
-  padding:
-    14px
-    20px;
 
-  border:
-    2px solid #f9df8a;
+      <h2>
+        ${last.name}
+      </h2>
 
-  border-radius: 18px;
 
-  background:
-    linear-gradient(
-      #f3c95d,
-      #c9912f
-    );
+      ${
+        newCount
 
-  color: #452d0e;
+          ? `
+            <span class="new-badge">
+              NEW FRIEND
+            </span>
+          `
 
-  font-weight: 1000;
-}
+          : `
+            <span>
+              Duplicate rewards received
+            </span>
+          `
+      }
 
-.gacha-buttons small {
-  display: block;
 
-  margin-top: 3px;
-}
+      <p>
 
-.summon-results {
-  width:
-    min(
-      980px,
-      95vw
-    );
+        ${
+          count === 10
 
-  display: grid;
+            ? `${newCount} new Cookies joined Prospera.`
 
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(
-        110px,
-        1fr
-      )
-    );
+            : "A new wish has answered."
+        }
 
-  gap: 10px;
+      </p>
 
-  margin-top: 15px;
-}
+    </div>
+  `;
 
-.summon-card {
-  padding: 9px;
-
-  border:
-    2px solid rgba(255,255,255,.16);
-
-  border-radius: 16px;
-
-  background:
-    rgba(255,255,255,.08);
-
-  color: white;
-}
-
-.summon-card.new {
-  border-color: #ffe17f;
-
-  box-shadow:
-    0 0 25px rgba(255,215,105,.2);
-}
-
-.summon-card .cookie-avatar {
-  width: 80px;
-  height: 92px;
-}
-
-.summon-card b {
-  display: block;
-
-  font-size: 11px;
 }
 
 
-/* =====================================================
-   MODALS
-===================================================== */
+/* =========================================================
+   SUMMON BUTTONS
+========================================================= */
 
-.modal-layer {
-  position: fixed;
-  inset: 0;
+qs("#summonOne")
+  .addEventListener(
+    "click",
+    () =>
+      summon(1)
+  );
 
-  z-index: 1000;
 
-  display: none;
+qs("#summonTen")
+  .addEventListener(
+    "click",
+    () =>
+      summon(10)
+  );
 
-  place-items: center;
 
-  padding: 18px;
+/* =========================================================
+   INITIALISE GAME
+========================================================= */
 
-  background:
-    rgba(
-      8,
-      14,
-      29,
-      .68
-    );
-}
+ensureHousing();
 
-.modal-layer.open {
-  display: grid;
-}
+renderKingdom();
 
-.modal-card {
-  position: relative;
+renderStages();
 
-  width:
-    min(
-      500px,
-      92vw
-    );
+renderCookieCollection();
 
-  max-height: 82vh;
+updateHUD();
 
-  overflow-y: auto;
+scaleScene();
 
-  padding: 24px;
-
-  border: 4px solid #735039;
-
-  border-radius: 24px;
-
-  background:
-    linear-gradient(
-      #fff9e8,
-      #f1dfba
-    );
-
-  color: #4a3525;
-
-  box-shadow:
-    0 20px 70px rgba(0,0,0,.42);
-}
-
-.modal-close {
-  position: absolute;
-
-  right: 12px;
-  top: 12px;
-
-  width: 34px;
-  height: 34px;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  background: #65442f;
-
-  color: white;
-}
-
-.home-summary {
-  display: flex;
-
-  gap: 10px;
-
-  margin:
-    10px
-    0
-    18px;
-}
-
-.home-summary span {
-  padding:
-    6px
-    9px;
-
-  border-radius: 10px;
-
-  background: #f4e2ba;
-
-  font-weight: 800;
-}
-
-.home-resident-list {
-  display: grid;
-
-  gap: 8px;
-
-  margin:
-    15px
-    0;
-}
-
-.home-resident {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding:
-    9px
-    10px;
-
-  border-radius: 12px;
-
-  background:
-    rgba(255,255,255,.7);
-}
-
-.home-resident button {
-  border: 0;
-
-  border-radius: 9px;
-
-  padding:
-    6px
-    9px;
-
-  background: #79553b;
-
-  color: white;
-
-  font-weight: 800;
-}
-
-.empty-house-slot {
-  padding: 9px;
-
-  border:
-    2px dashed rgba(86,58,39,.27);
-
-  border-radius: 10px;
-
-  text-align: center;
-
-  color: #8c765e;
-}
-
-.quest-card {
-  padding: 16px;
-
-  border-radius: 14px;
-
-  background:
-    rgba(255,255,255,.7);
-}
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-#toast {
-  position: fixed;
-
-  z-index: 4000;
-
-  left: 50%;
-  top: 90px;
-
-  transform:
-    translate(-50%, -15px);
-
-  padding:
-    10px
-    15px;
-
-  border-radius: 14px;
-
-  background:
-    rgba(
-      20,
-      30,
-      54,
-      .94
-    );
-
-  color: white;
-
-  font-weight: 900;
-
-  box-shadow:
-    var(--shadow);
-
-  opacity: 0;
-
-  pointer-events: none;
-
-  transition:
-    opacity .2s,
-    transform .2s;
-}
-
-#toast.show {
-  opacity: 1;
-
-  transform:
-    translate(-50%, 0);
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 820px) {
-
-  .cookies-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .cookie-detail {
-    min-height: 0;
-  }
-
-  .adventure-hub {
-    grid-template-columns: 1fr;
-  }
-
-  .mode-card.hero-mode {
-    grid-column: auto;
-  }
-
-  .kingdom-launchers button {
-    min-width: 92px;
-
-    padding: 10px;
-  }
-
-  .kingdom-launchers span {
-    display: none;
-  }
-
-  .resource-pill {
-    min-width: 70px;
-
-    padding: 0 8px;
-  }
-
-}
+startDayCycle();
