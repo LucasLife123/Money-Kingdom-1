@@ -4,428 +4,811 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Money Kingdom</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <div id="game">
 
-<div id="game">
+    <!-- ======================================================
+         KINGDOM
+    ======================================================= -->
+    <section id="kingdomScreen" class="screen active">
 
-  <!-- =====================================================
-       KINGDOM
-  ====================================================== -->
+      <div id="kingdomViewport" class="kingdom-viewport">
+        <div id="kingdomScene" class="kingdom-scene">
 
-  <section id="kingdomScreen" class="screen active">
+          <img
+            id="kingdomArt"
+            src="./prospera-kingdom.png"
+            alt="Prospera Kingdom"
+          />
 
-    <div id="kingdomViewport">
+          <div class="scene-shade"></div>
+          <div id="timeTint" class="time-tint morning"></div>
 
-      <div id="kingdomScene">
+          <div class="atmosphere atmosphere-one"></div>
+          <div class="atmosphere atmosphere-two"></div>
 
-        <img
-          id="mapImage"
-          src="./money-kingdom-map.png"
-          alt="Money Kingdom world map"
-        />
+          <div id="buildGrid" class="build-grid"></div>
 
-        <div id="mapError" hidden>
-          money-kingdom-map.png was not found.
-          Make sure it is in the same folder as index.html.
-        </div>
+          <div
+            id="kingdomBuildings"
+            class="kingdom-buildings"
+          ></div>
 
-        <div id="timeTint"></div>
-
-        <div id="kingdomBuildings"></div>
-
-        <div id="kingdomResidents"></div>
-
-        <div class="kingdom-title-card">
-          <strong>PROSPERA</strong>
-          <span id="phaseLabel">Morning</span>
-        </div>
-
-        <button
-          class="floating-quest"
-          id="questButton"
-        >
-          ! QUEST
-        </button>
-
-        <button
-          class="floating-build"
-          id="buildButton"
-        >
-          🔨 BUILD
-        </button>
-
-      </div>
-
-    </div>
+          <div
+            id="kingdomResidents"
+            class="kingdom-residents"
+          ></div>
 
 
-    <!-- TOP HUD -->
+          <!-- KINGDOM NAME -->
+          <div class="kingdom-title-card">
 
-    <header class="hud top-hud">
+            <span class="eyebrow">
+              A RICHER TOMORROW TOGETHER
+            </span>
 
-      <button
-        class="profile-pill"
-        id="profileButton"
-      >
-        Lv.
-        <span id="playerLevel">12</span>
-      </button>
+            <strong>
+              PROSPERA
+            </strong>
 
-      <div class="resource-pill">
-        🪙
-        <span id="coinCount">0</span>
-      </div>
+            <span id="phaseLabel">
+              Morning
+            </span>
 
-      <div class="resource-pill">
-        💎
-        <span id="gemCount">0</span>
-      </div>
-
-      <div class="resource-pill">
-        🪵
-        <span id="woodCount">0</span>
-      </div>
-
-      <div class="resource-pill">
-        🪨
-        <span id="stoneCount">0</span>
-      </div>
-
-      <div class="hud-spacer"></div>
-
-      <button
-        class="hud-button"
-        id="mailButton"
-      >
-        ✉
-      </button>
-
-      <button
-        class="hud-button"
-        id="settingsButton"
-      >
-        ⚙
-      </button>
-
-    </header>
+          </div>
 
 
-    <!-- KINGDOM ENTRANCES -->
+          <!-- QUEST -->
+          <button
+            id="questButton"
+            class="floating-action quest-action"
+            type="button"
+          >
 
-    <nav class="kingdom-launchers">
+            <span class="mini-icon scroll-icon"></span>
 
-      <button data-screen="playScreen">
-        ⚔
-        <span>PLAY</span>
-      </button>
+            <span>
+              Quests
+            </span>
 
-      <button data-screen="cookiesScreen">
-        🍪
-        <span>COOKIES</span>
-      </button>
-
-      <button data-screen="gachaScreen">
-        ✦
-        <span>SUMMON</span>
-      </button>
-
-    </nav>
-
-
-    <!-- BUILD MODE -->
-
-    <aside
-      id="buildDrawer"
-      class="build-drawer"
-    >
-
-      <div class="build-drawer-head">
-
-        <div>
-          <strong>BUILD MODE</strong>
-
-          <small id="buildHint">
-            Drag a building onto Prospera, or click it and then click the map.
-          </small>
-        </div>
-
-        <button id="exitBuildButton">
-          EXIT
-        </button>
-
-      </div>
-
-
-      <div class="build-tabs">
-
-        <button class="active">
-          BUILDINGS
-        </button>
-
-        <button disabled>
-          NATURE
-        </button>
-
-        <button disabled>
-          DECOR
-        </button>
-
-        <button disabled>
-          PATHS
-        </button>
-
-        <button disabled>
-          WATER
-        </button>
-
-      </div>
-
-
-      <div class="build-items">
-
-        <button
-          id="cookieHouseBuildItem"
-          class="build-item"
-        >
-
-          <span class="build-item-art">
-            🏠
-          </span>
-
-          <span>
-
-            <b>
-              Cookie House
+            <b
+              id="questDot"
+              class="notification-dot"
+            >
+              3
             </b>
 
-            <small>
-              +4 resident spaces
-            </small>
+          </button>
 
-            <em>
-              🪙 2,500
-            </em>
 
-          </span>
+          <!-- BUILD -->
+          <button
+            id="buildButton"
+            class="floating-action build-action"
+            type="button"
+          >
 
-        </button>
+            <span class="mini-icon hammer-icon"></span>
 
-      </div>
+            <span>
+              Build
+            </span>
 
+          </button>
 
-      <div class="build-controls">
 
-        <button id="rotateBuildButton">
-          ↻ ROTATE
-        </button>
+          <!-- BUILDING PLACEMENT GHOST -->
+          <div
+            id="buildGhost"
+            class="build-ghost"
+            hidden
+          >
 
-        <button id="cancelBuildButton">
-          CANCEL
-        </button>
+            <div class="placement-footprint"></div>
 
-      </div>
+            <div class="mini-house ghost-house">
 
-    </aside>
+              <div class="house-roof"></div>
 
-  </section>
+              <div class="house-body">
 
+                <span class="window window-left"></span>
 
-  <!-- =====================================================
-       PLAY
-  ====================================================== -->
+                <span class="window window-right"></span>
 
-  <section
-    id="playScreen"
-    class="screen panel-screen"
-  >
+                <span class="door"></span>
 
-    <header class="screen-header">
+              </div>
 
-      <button
-        class="back-button"
-        data-screen="kingdomScreen"
-      >
-        ← PROSPERA
-      </button>
+              <div class="chimney"></div>
 
-      <h1>
-        ADVENTURE
-      </h1>
-
-      <div></div>
-
-    </header>
-
-
-    <main class="adventure-hub">
-
-      <button
-        class="mode-card hero-mode"
-        id="worldExplorationButton"
-      >
-
-        <span class="mode-icon">
-          🗺️
-        </span>
-
-        <b>
-          WORLD EXPLORATION
-        </b>
-
-        <small>
-          Continue your journey across Money Kingdom
-        </small>
-
-      </button>
-
-
-      <button
-        class="mode-card"
-        id="arenaButton"
-      >
-
-        <span class="mode-icon">
-          🏆
-        </span>
-
-        <b>
-          FORTUNE ARENA
-        </b>
-
-        <small>
-          Coming next
-        </small>
-
-      </button>
-
-
-      <button
-        class="mode-card"
-        id="beastsButton"
-      >
-
-        <span class="mode-icon">
-          ⛓️
-        </span>
-
-        <b>
-          SEALED DOMINION
-        </b>
-
-        <small>
-          Five Beast prisons
-        </small>
-
-      </button>
-
-
-      <button
-        class="mode-card"
-        id="wonderlandsButton"
-      >
-
-        <span class="mode-icon">
-          🌈
-        </span>
-
-        <b>
-          WONDERLANDS
-        </b>
-
-        <small>
-          Special visitors and magical islands
-        </small>
-
-      </button>
-
-
-      <button
-        class="mode-card"
-        id="trialsButton"
-      >
-
-        <span class="mode-icon">
-          ⚔️
-        </span>
-
-        <b>
-          COOKIE TRIALS
-        </b>
-
-        <small>
-          Coming next
-        </small>
-
-      </button>
-
-    </main>
-
-  </section>
-
-
-  <!-- =====================================================
-       WORLD
-  ====================================================== -->
-
-  <section
-    id="worldScreen"
-    class="screen panel-screen"
-  >
-
-    <header class="screen-header">
-
-      <button
-        class="back-button"
-        data-screen="playScreen"
-      >
-        ← ADVENTURE
-      </button>
-
-      <h1>
-        WORLD EXPLORATION
-      </h1>
-
-      <div></div>
-
-    </header>
-
-
-    <main class="world-layout">
-
-      <div class="world-map-card">
-
-        <img
-          src="./money-kingdom-map.png"
-          alt="Money Kingdom world map"
-        />
-
-        <div class="world-map-caption">
-          Frostpeak Mountains • Bravery in Every Step
-        </div>
-
-      </div>
-
-
-      <div class="stage-route-wrap">
-
-        <div class="stage-route-title">
-
-          <div>
-
-            <h2>
-              Frostpeak Mountains
-            </h2>
-
-            <p>
-              30 stages • Mini Boss 1-10 • Story Reveal 1-20 • World Boss 1-30
-            </p>
+            </div>
 
           </div>
 
         </div>
+      </div>
+
+
+      <!-- ====================================================
+           TOP HUD
+      ===================================================== -->
+      <header class="top-hud">
+
+        <div class="profile-card">
+
+          <div class="profile-portrait">
+
+            <div class="profile-cookie">
+
+              <span class="profile-hair"></span>
+
+              <span class="profile-face"></span>
+
+            </div>
+
+          </div>
+
+
+          <div class="profile-copy">
+
+            <strong>
+              MoneyKingdom
+            </strong>
+
+            <span>
+              Lv.
+              <b id="playerLevel">
+                12
+              </b>
+            </span>
+
+            <div class="xp-bar">
+              <i></i>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RESOURCES -->
+        <div class="resources">
+
+          <div class="resource-pill">
+
+            <span
+              class="resource-icon coin-resource"
+            ></span>
+
+            <b id="coinValue">
+              25,000
+            </b>
+
+          </div>
+
+
+          <div class="resource-pill">
+
+            <span
+              class="resource-icon gem-resource"
+            ></span>
+
+            <b id="gemValue">
+              1,200
+            </b>
+
+          </div>
+
+
+          <div class="resource-pill">
+
+            <span
+              class="resource-icon wood-resource"
+            ></span>
+
+            <b id="woodValue">
+              340
+            </b>
+
+          </div>
+
+
+          <div class="resource-pill">
+
+            <span
+              class="resource-icon stone-resource"
+            ></span>
+
+            <b id="stoneValue">
+              220
+            </b>
+
+          </div>
+
+
+          <div class="resource-pill compact">
+
+            <span
+              class="resource-icon resident-resource"
+            ></span>
+
+            <b id="residentValue">
+              0/0
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <div class="hud-actions">
+
+          <button
+            type="button"
+            class="hud-square"
+            aria-label="Mail"
+          >
+
+            <span class="mail-symbol"></span>
+
+            <i></i>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="hud-square"
+            aria-label="Settings"
+          >
+
+            <span class="gear-symbol"></span>
+
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- EVENT BANNER -->
+      <div class="event-banner">
+
+        <div class="event-shimmer"></div>
+
+        <div>
+
+          <small>
+            LIMITED TIME EVENT
+          </small>
+
+          <strong>
+            Grand Fortune Festival
+          </strong>
+
+          <span>
+            Light up a kinder tomorrow
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ====================================================
+           KINGDOM BOTTOM MENU
+      ===================================================== -->
+      <nav
+        class="kingdom-launchers"
+        id="kingdomLaunchers"
+      >
+
+        <button
+          type="button"
+          data-open="kingdomScreen"
+          class="launcher active"
+        >
+
+          <span class="nav-gem crown-nav"></span>
+
+          <b>
+            Kingdom
+          </b>
+
+        </button>
+
+
+        <button
+          type="button"
+          data-open="cookiesScreen"
+          class="launcher"
+        >
+
+          <span class="nav-gem cookie-nav"></span>
+
+          <b>
+            Cookies
+          </b>
+
+        </button>
+
+
+        <button
+          type="button"
+          data-open="playScreen"
+          class="launcher"
+        >
+
+          <span class="nav-gem scroll-nav"></span>
+
+          <b>
+            Adventure
+          </b>
+
+        </button>
+
+
+        <button
+          type="button"
+          data-open="gachaScreen"
+          class="launcher"
+        >
+
+          <span class="nav-gem crystal-nav"></span>
+
+          <b>
+            Summon
+          </b>
+
+        </button>
+
+      </nav>
+
+
+      <!-- KINGDOM PROGRESS -->
+      <div class="progress-card">
+
+        <span class="progress-crown"></span>
+
+        <div>
+
+          <strong>
+            Prospera Progress
+          </strong>
+
+          <span>
+            Upgrade the Castle to Lv. 3
+          </span>
+
+          <div class="goal-bar">
+
+            <i style="width:66%"></i>
+
+            <b>
+              2 / 3
+            </b>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ====================================================
+           BUILD MODE
+      ===================================================== -->
+      <aside
+        id="buildDrawer"
+        class="build-drawer"
+        aria-hidden="true"
+      >
+
+        <div class="drawer-handle"></div>
+
+
+        <div class="build-header">
+
+          <div>
+
+            <small>
+              PROSPERA WORKSHOP
+            </small>
+
+            <h2>
+              Build & Decorate
+            </h2>
+
+          </div>
+
+
+          <button
+            id="exitBuildButton"
+            class="round-close"
+            type="button"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="build-tabs">
+
+          <button
+            class="build-tab active"
+            data-tab="buildings"
+          >
+            Buildings
+          </button>
+
+          <button
+            class="build-tab"
+            data-tab="nature"
+          >
+            Nature
+          </button>
+
+          <button
+            class="build-tab"
+            data-tab="decor"
+          >
+            Decor
+          </button>
+
+          <button
+            class="build-tab"
+            data-tab="paths"
+          >
+            Paths
+          </button>
+
+          <button
+            class="build-tab"
+            data-tab="water"
+          >
+            Water
+          </button>
+
+        </div>
+
+
+        <div
+          class="build-items"
+          id="buildItems"
+        >
+
+          <!-- COOKIE HOUSE -->
+          <button
+            id="cookieHouseBuildItem"
+            class="build-card"
+            type="button"
+          >
+
+            <div class="build-preview">
+
+              <div class="mini-house">
+
+                <div class="house-roof"></div>
+
+                <div class="house-body">
+
+                  <span class="window window-left"></span>
+
+                  <span class="window window-right"></span>
+
+                  <span class="door"></span>
+
+                </div>
+
+                <div class="chimney"></div>
+
+              </div>
+
+            </div>
+
+
+            <div class="build-copy">
+
+              <strong>
+                Cookie House
+              </strong>
+
+              <span>
+                +4 resident spaces
+              </span>
+
+              <b>
+                <span class="tiny-coin"></span>
+                2,500
+              </b>
+
+            </div>
+
+          </button>
+
+
+          <!-- LOCKED FARM -->
+          <div class="locked-build-card">
+
+            <div class="blur-tower"></div>
+
+            <div>
+
+              <strong>
+                Fortune Farm
+              </strong>
+
+              <span>
+                Castle Lv. 3
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- LOCKED BAKERY -->
+          <div class="locked-build-card">
+
+            <div class="blur-tower bank"></div>
+
+            <div>
+
+              <strong>
+                Golden Bakery
+              </strong>
+
+              <span>
+                Castle Lv. 3
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="placement-controls">
+
+          <button
+            id="rotateBuildButton"
+            type="button"
+          >
+            Rotate
+          </button>
+
+          <button
+            id="cancelBuildButton"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <span id="placementHint">
+            Choose a building, then place it in Prospera.
+          </span>
+
+        </div>
+
+      </aside>
+
+    </section>
+
+
+
+    <!-- ======================================================
+         ADVENTURE
+    ======================================================= -->
+    <section
+      id="playScreen"
+      class="screen secondary-screen"
+    >
+
+      <div class="screen-background adventure-bg"></div>
+
+
+      <header class="scene-header">
+
+        <button
+          class="back-button"
+          data-open="kingdomScreen"
+          type="button"
+        >
+          Back
+        </button>
+
+        <div>
+
+          <small>
+            CHOOSE YOUR JOURNEY
+          </small>
+
+          <h1>
+            Adventure
+          </h1>
+
+        </div>
+
+        <div class="header-resource">
+
+          <span
+            class="resource-icon coin-resource"
+          ></span>
+
+          <b class="headerCoins">
+            0
+          </b>
+
+        </div>
+
+      </header>
+
+
+      <main class="mode-grid">
+
+        <button
+          class="mode-card world-card"
+          data-open="worldScreen"
+        >
+
+          <span>
+            WORLD EXPLORATION
+          </span>
+
+          <strong>
+            Build a brighter tomorrow
+          </strong>
+
+          <em>
+            Explore
+          </em>
+
+        </button>
+
+
+        <button class="mode-card arena-card">
+
+          <span>
+            FORTUNE ARENA
+          </span>
+
+          <strong>
+            Rise through the ranks
+          </strong>
+
+          <em>
+            Coming Soon
+          </em>
+
+        </button>
+
+
+        <button class="mode-card dominion-card">
+
+          <span>
+            SEALED DOMINION
+          </span>
+
+          <strong>
+            Face the Five Beasts
+          </strong>
+
+          <em>
+            Locked
+          </em>
+
+        </button>
+
+
+        <button class="mode-card trials-card">
+
+          <span>
+            COOKIE TRIALS
+          </span>
+
+          <strong>
+            Test every hero
+          </strong>
+
+          <em>
+            Coming Soon
+          </em>
+
+        </button>
+
+
+        <button class="mode-card wonder-card">
+
+          <span>
+            WONDERLANDS
+          </span>
+
+          <strong>
+            Stories beyond Prospera
+          </strong>
+
+          <em>
+            Coming Soon
+          </em>
+
+        </button>
+
+      </main>
+
+    </section>
+
+
+
+    <!-- ======================================================
+         WORLD EXPLORATION
+    ======================================================= -->
+    <section
+      id="worldScreen"
+      class="screen secondary-screen"
+    >
+
+      <div class="world-sky"></div>
+
+
+      <header class="scene-header transparent-header">
+
+        <button
+          class="back-button"
+          data-open="playScreen"
+          type="button"
+        >
+          Back
+        </button>
+
+
+        <div>
+
+          <small>
+            WORLD 1
+          </small>
+
+          <h1>
+            Frostpeak Mountains
+          </h1>
+
+        </div>
+
+
+        <div class="world-stars">
+
+          <b id="worldStars">
+            0
+          </b>
+
+          <span>
+            / 90 stars
+          </span>
+
+        </div>
+
+      </header>
+
+
+      <main class="stage-map">
+
+        <div class="mountain mountain-a"></div>
+
+        <div class="mountain mountain-b"></div>
+
+        <div class="mountain mountain-c"></div>
+
+
+        <div class="stage-road road-a"></div>
+
+        <div class="stage-road road-b"></div>
+
+        <div class="stage-road road-c"></div>
 
 
         <div
@@ -433,439 +816,671 @@
           class="stage-route"
         ></div>
 
-      </div>
+      </main>
 
-    </main>
-
-  </section>
+    </section>
 
 
-  <!-- =====================================================
-       STAGE
-  ====================================================== -->
 
-  <section
-    id="stageScreen"
-    class="screen panel-screen"
-  >
+    <!-- ======================================================
+         STAGE INFO
+    ======================================================= -->
+    <section
+      id="stageScreen"
+      class="screen secondary-screen stage-info-screen"
+    >
 
-    <header class="screen-header">
-
-      <button
-        class="back-button"
-        data-screen="worldScreen"
-      >
-        ← FROSTPEAK
-      </button>
-
-      <h1 id="stageTitle">
-        Stage 1-1
-      </h1>
-
-      <div></div>
-
-    </header>
+      <div class="stage-scene-art"></div>
 
 
-    <main class="stage-detail-card">
-
-      <div class="enemy-preview">
-        👾 👾 👾
-      </div>
-
-
-      <div class="stage-stat">
-
-        <span>
-          Recommended Power
-        </span>
-
-        <b id="recommendedPower">
-          8,700
-        </b>
-
-      </div>
-
-
-      <div class="reward-row">
-
-        <span>
-          Rewards
-        </span>
-
-        <b>
-          🪙 500
-          &nbsp;
-          🍬 EXP Candy
-          &nbsp;
-          🪵 Wood
-        </b>
-
-      </div>
-
-
-      <h3>
-        Your Team
-      </h3>
-
-
-      <div
-        id="teamPreview"
-        class="team-preview"
-      ></div>
-
-
-      <div class="stage-actions">
+      <header class="scene-header transparent-header">
 
         <button
-          id="editTeamButton"
-          class="secondary-action"
+          class="back-button"
+          data-open="worldScreen"
+          type="button"
         >
-          EDIT TEAM
+          Back
         </button>
 
-        <button
-          id="battleButton"
-          class="primary-action"
-        >
-          BATTLE
-        </button>
 
-      </div>
+        <div>
 
-    </main>
+          <small id="stageWorldLabel">
+            FROSTPEAK MOUNTAINS
+          </small>
 
-  </section>
+          <h1 id="stageTitle">
+            Stage 1-1
+          </h1>
 
+        </div>
 
-  <!-- =====================================================
-       COOKIES
-  ====================================================== -->
-
-  <section
-    id="cookiesScreen"
-    class="screen panel-screen"
-  >
-
-    <header class="screen-header">
-
-      <button
-        class="back-button"
-        data-screen="kingdomScreen"
-      >
-        ← PROSPERA
-      </button>
-
-      <h1>
-        COOKIES
-        <span id="collectionCount"></span>
-      </h1>
-
-      <div></div>
-
-    </header>
+      </header>
 
 
-    <main class="cookies-layout">
+      <main class="stage-panel">
 
-      <aside
-        id="cookieDetail"
-        class="cookie-detail"
-      ></aside>
+        <div class="stage-story-card">
 
+          <span class="stage-kicker">
+            MISSION
+          </span>
 
-      <section class="cookie-browser">
+          <h2 id="stageSubtitle">
+            First Steps Through the Snow
+          </h2>
 
-        <div class="cookie-toolbar">
-
-          <input
-            id="cookieSearch"
-            type="search"
-            placeholder="Search Cookies"
-          />
-
-
-          <select id="rarityFilter">
-
-            <option value="ALL">
-              All rarities
-            </option>
-
-            <option value="RARE">
-              RARE
-            </option>
-
-            <option value="EPIC">
-              EPIC
-            </option>
-
-            <option value="SUPER EPIC">
-              SUPER EPIC
-            </option>
-
-            <option value="LEGENDARY">
-              LEGENDARY
-            </option>
-
-            <option value="ANCIENT">
-              ANCIENT
-            </option>
-
-            <option value="BEAST">
-              BEAST
-            </option>
-
-          </select>
+          <p>
+            Guide your Cookie team through the mountain
+            trail and protect the supplies heading back
+            to Prospera.
+          </p>
 
 
-          <select id="ownershipFilter">
+          <div class="enemy-line">
 
-            <option value="ALL">
-              All Cookies
-            </option>
+            <span>
+              Recommended Power
+            </span>
 
-            <option value="OWNED">
-              Owned
-            </option>
+            <b id="recommendedPower">
+              4,200
+            </b>
 
-            <option value="LOCKED">
-              Not Obtained
-            </option>
+          </div>
 
-          </select>
+
+          <div class="reward-row">
+
+            <span>
+              First Clear
+            </span>
+
+            <b>
+              500 Coins
+            </b>
+
+            <b>
+              8 Wood
+            </b>
+
+          </div>
 
         </div>
 
 
         <div
-          id="cookieGrid"
-          class="cookie-grid"
+          class="team-strip"
+          id="teamPreview"
         ></div>
 
-      </section>
 
-    </main>
+        <div class="stage-actions">
 
-  </section>
+          <button
+            id="editTeamButton"
+            class="secondary-action"
+            type="button"
+          >
+            Edit Team
+          </button>
 
+          <button
+            id="battleButton"
+            class="primary-action"
+            type="button"
+          >
+            Battle
+          </button>
 
-  <!-- =====================================================
-       SUMMON
-  ====================================================== -->
-
-  <section
-    id="gachaScreen"
-    class="screen gacha-screen"
-  >
-
-    <header class="screen-header translucent-header">
-
-      <button
-        class="back-button"
-        data-screen="kingdomScreen"
-      >
-        ← PROSPERA
-      </button>
-
-      <h1>
-        TREE OF FORTUNE
-      </h1>
-
-      <div class="ticket-pill">
-        🎟
-        <span id="ticketCount">0</span>
-      </div>
-
-    </header>
-
-
-    <main class="gacha-lobby">
-
-      <div class="fortune-tree">
-
-        <div class="fortune-glow"></div>
-
-        <div class="fortune-leaves">
-          ✦
-          <br>
-          🌳
         </div>
 
-        <div class="fortune-trunk"></div>
+      </main>
 
-      </div>
-
-
-      <h2>
-        A Sweeter Tomorrow Begins With One Golden Seed
-      </h2>
+    </section>
 
 
-      <p>
-        Call new residents to Prospera.
-        Every Cookie you obtain will live in your kingdom.
-      </p>
+
+    <!-- ======================================================
+         COOKIE COLLECTION
+    ======================================================= -->
+    <section
+      id="cookiesScreen"
+      class="screen secondary-screen cookies-screen"
+    >
+
+      <div class="cookie-room-bg"></div>
 
 
-      <div class="gacha-buttons">
+      <header class="scene-header cookie-header">
 
-        <button id="summonOneButton">
-
-          SUMMON ×1
-
-          <small>
-            🎟 1
-          </small>
-
+        <button
+          class="back-button"
+          data-open="kingdomScreen"
+          type="button"
+        >
+          Back
         </button>
 
 
-        <button id="summonTenButton">
-
-          SUMMON ×10
+        <div>
 
           <small>
-            🎟 10
+            HERO COLLECTION
           </small>
 
+          <h1>
+            Cookies
+          </h1>
+
+        </div>
+
+
+        <div class="collection-count">
+
+          <span>
+            Owned
+          </span>
+
+          <b id="ownedCount">
+            0 / 0
+          </b>
+
+        </div>
+
+      </header>
+
+
+      <main class="collection-layout">
+
+        <!-- FEATURED COOKIE -->
+        <section class="featured-cookie-panel">
+
+          <div
+            class="rarity-ribbon"
+            id="featuredRarity"
+          >
+            Rare
+          </div>
+
+
+          <h2 id="featuredName">
+            Coin Cookie
+          </h2>
+
+
+          <div
+            id="featuredCookieArt"
+            class="featured-cookie-art"
+          ></div>
+
+
+          <div class="featured-meta">
+
+            <span id="featuredRole">
+              Defender
+            </span>
+
+            <span id="featuredPosition">
+              Front
+            </span>
+
+          </div>
+
+
+          <div class="feature-stats">
+
+            <div>
+
+              <span>
+                Level
+              </span>
+
+              <b id="featuredLevel">
+                20
+              </b>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Power
+              </span>
+
+              <b id="featuredPower">
+                4,500
+              </b>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Home
+              </span>
+
+              <b id="featuredHome">
+                Prospera
+              </b>
+
+            </div>
+
+          </div>
+
+
+          <button
+            id="levelCookieButton"
+            class="primary-action small"
+            type="button"
+          >
+            Level Up
+          </button>
+
+        </section>
+
+
+
+        <!-- COOKIE GRID -->
+        <section class="collection-panel">
+
+          <div class="collection-toolbar">
+
+            <input
+              id="cookieSearch"
+              type="search"
+              placeholder="Search Cookies"
+            />
+
+
+            <select id="rarityFilter">
+
+              <option value="ALL">
+                All Rarities
+              </option>
+
+              <option>
+                RARE
+              </option>
+
+              <option>
+                EPIC
+              </option>
+
+              <option>
+                SUPER EPIC
+              </option>
+
+              <option>
+                LEGENDARY
+              </option>
+
+              <option>
+                ANCIENT
+              </option>
+
+              <option>
+                BEAST
+              </option>
+
+            </select>
+
+
+            <select id="ownedFilter">
+
+              <option value="OWNED">
+                Owned
+              </option>
+
+              <option value="ALL">
+                All
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div
+            id="cookieGrid"
+            class="cookie-grid"
+          ></div>
+
+        </section>
+
+      </main>
+
+    </section>
+
+
+
+    <!-- ======================================================
+         SUMMON
+    ======================================================= -->
+    <section
+      id="gachaScreen"
+      class="screen secondary-screen gacha-screen"
+    >
+
+      <div class="gacha-sky"></div>
+
+
+      <header class="scene-header transparent-header">
+
+        <button
+          class="back-button"
+          data-open="kingdomScreen"
+          type="button"
+        >
+          Back
+        </button>
+
+
+        <div>
+
+          <small>
+            TREE OF FORTUNE
+          </small>
+
+          <h1>
+            Summon
+          </h1>
+
+        </div>
+
+
+        <div class="ticket-pill">
+
+          <span class="ticket-shape"></span>
+
+          <b id="ticketValue">
+            25
+          </b>
+
+        </div>
+
+      </header>
+
+
+      <main class="gacha-layout">
+
+        <div class="fortune-tree-wrap">
+
+          <div class="magic-ring ring-one"></div>
+
+          <div class="magic-ring ring-two"></div>
+
+
+          <div class="fortune-tree">
+
+            <div class="tree-crown crown-left"></div>
+
+            <div class="tree-crown crown-mid"></div>
+
+            <div class="tree-crown crown-right"></div>
+
+            <div class="tree-trunk"></div>
+
+            <span class="tree-gem gem-one"></span>
+
+            <span class="tree-gem gem-two"></span>
+
+            <span class="tree-gem gem-three"></span>
+
+          </div>
+
+
+          <div class="summon-copy">
+
+            <span>
+              Make a wish beneath the Tree of Fortune.
+            </span>
+
+            <strong>
+              Every new friend makes Prospera brighter.
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="summonResult"
+          class="summon-result empty"
+        >
+
+          <span>
+            Your summon will appear here.
+          </span>
+
+        </div>
+
+
+        <div class="summon-actions">
+
+          <button
+            id="summonOne"
+            class="secondary-action"
+            type="button"
+          >
+
+            Summon ×1
+
+            <small>
+              1 Ticket
+            </small>
+
+          </button>
+
+
+          <button
+            id="summonTen"
+            class="primary-action"
+            type="button"
+          >
+
+            Summon ×10
+
+            <small>
+              10 Tickets
+            </small>
+
+          </button>
+
+        </div>
+
+      </main>
+
+    </section>
+
+
+
+    <!-- ======================================================
+         HOUSE WINDOW
+    ======================================================= -->
+    <div
+      id="homePanel"
+      class="modal-shell"
+      hidden
+    >
+
+      <div class="modal-card house-modal">
+
+        <button
+          class="modal-close"
+          data-close="homePanel"
+          type="button"
+        >
+          ×
+        </button>
+
+
+        <small>
+          COOKIE HOME
+        </small>
+
+        <h2 id="homeName">
+          Cookie House
+        </h2>
+
+
+        <div class="home-status">
+
+          <span>
+            Level
+            <b id="homeLevel">
+              1
+            </b>
+          </span>
+
+          <span>
+            Residents
+            <b id="homeCapacity">
+              0/4
+            </b>
+          </span>
+
+        </div>
+
+
+        <div
+          id="homeResidents"
+          class="home-residents"
+        ></div>
+
+
+        <button
+          id="upgradeHouseButton"
+          class="primary-action small"
+          type="button"
+        >
+          Upgrade House
         </button>
 
       </div>
 
-
-      <div
-        id="summonResults"
-        class="summon-results"
-      ></div>
-
-    </main>
-
-  </section>
+    </div>
 
 
-  <!-- =====================================================
-       HOUSE PANEL
-  ====================================================== -->
 
-  <div
-    id="homePanel"
-    class="modal-layer"
-  >
+    <!-- ======================================================
+         QUEST WINDOW
+    ======================================================= -->
+    <div
+      id="questPanel"
+      class="modal-shell"
+      hidden
+    >
 
-    <div class="modal-card house-modal-card">
+      <div class="modal-card quest-modal">
 
-      <button
-        id="closeHomePanel"
-        class="modal-close"
-      >
-        ✕
-      </button>
-
-
-      <h2 id="homePanelName">
-        Cookie House
-      </h2>
+        <button
+          class="modal-close"
+          data-close="questPanel"
+          type="button"
+        >
+          ×
+        </button>
 
 
-      <div class="home-summary">
+        <small>
+          PROSPERA GOALS
+        </small>
 
-        <span id="homePanelLevel">
-          Level 1
-        </span>
+        <h2>
+          Kingdom Quests
+        </h2>
 
-        <span id="homePanelCapacity">
-          Residents 0 / 4
-        </span>
+
+        <div class="quest-list">
+
+          <div class="quest-row">
+
+            <i></i>
+
+            <div>
+
+              <strong>
+                A Place to Call Home
+              </strong>
+
+              <span>
+                Build one new Cookie House.
+              </span>
+
+            </div>
+
+            <b>
+              0 / 1
+            </b>
+
+          </div>
+
+
+          <div class="quest-row">
+
+            <i></i>
+
+            <div>
+
+              <strong>
+                Meet the Neighbours
+              </strong>
+
+              <span>
+                Own eight Cookies.
+              </span>
+
+            </div>
+
+            <b id="questOwned">
+              0 / 8
+            </b>
+
+          </div>
+
+
+          <div class="quest-row">
+
+            <i></i>
+
+            <div>
+
+              <strong>
+                Into Frostpeak
+              </strong>
+
+              <span>
+                Clear Stage 1-3.
+              </span>
+
+            </div>
+
+            <b id="questStage">
+              0 / 1
+            </b>
+
+          </div>
+
+        </div>
 
       </div>
 
-
-      <div
-        id="homeResidentList"
-        class="home-resident-list"
-      ></div>
-
-
-      <button
-        id="upgradeHomeButton"
-        class="primary-action"
-      >
-        Upgrade House
-      </button>
-
     </div>
+
+
+    <div
+      id="toast"
+      class="toast"
+      hidden
+    ></div>
 
   </div>
 
-
-  <!-- =====================================================
-       QUEST PANEL
-  ====================================================== -->
-
-  <div
-    id="questPanel"
-    class="modal-layer"
-  >
-
-    <div class="modal-card">
-
-      <button
-        class="modal-close"
-        id="closeQuestPanel"
-      >
-        ✕
-      </button>
-
-
-      <h2>
-        QUEST JOURNAL
-      </h2>
-
-
-      <div class="quest-card">
-
-        <b>
-          A Penny Missing
-        </b>
-
-        <p>
-          Talk to Coin Cookie and investigate Prospera.
-        </p>
-
-        <span>
-          Reward: 🪙 300 • 🍬 EXP Candy
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- =====================================================
-       BUILD GHOST
-  ====================================================== -->
-
-  <div
-    id="buildGhost"
-    aria-hidden="true"
-  >
-
-    <div class="ghost-house">
-      🏠
-    </div>
-
-    <div id="ghostFootprint"></div>
-
-  </div>
-
-
-  <div id="toast"></div>
-
-</div>
-
-<script src="./script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
